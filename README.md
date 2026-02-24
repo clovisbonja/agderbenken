@@ -1,12 +1,11 @@
 # Agderbenken
-
-Enkel lokal demo-app for å utforske data og visualiseringer for Agderbenken.
+Data og visualiseringer for Agderbenken.
 
 ## Konsept
 
-Agderbenken er en enkel frontend-applikasjon som viser informasjon om temaer, partier og representanter i en region (Agder). Appen har flere sider:
+Agderbenken er en frontend-applikasjon som viser informasjon om temaer, partier og representanter i en region (Agder). Appen har flere sider:
 - Forside: oversikt og kortinfo
-- Parti: visning av partier (placeholder)
+- Parti: visning av partier
 - Representanter: liste over representanter
 - Om Agderbenken: informasjon om prosjektet
 
@@ -17,7 +16,7 @@ Appen har også en mørk/lys-tema bryter i toppbaren for å veksle mellom tema.
 1. Installer avhengigheter:
 
 ```bash
-cd my-app
+cd Finn en mappe
 npm install
 ```
 
@@ -36,11 +35,6 @@ npm run dev
 - Bruk tema-knappen øverst for å veksle mellom `lightmode` og `darkmode`.
 - Innholdet på sidene er foreløpig eksempler og kan utvides med faktadata og visualiseringer.
 
-## Bidra
-
-- Lag en feature-branch fra `main`.
-- Lag endringer, legg til tester hvis nødvendig.
-- Åpne en pull request mot `main`.
 
 ## Kontakt
 

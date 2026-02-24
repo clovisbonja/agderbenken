@@ -82,7 +82,7 @@ body{
 .page{max-width:1100px;margin:36px auto;padding:0 20px}
 .section{margin-top:28px}
 
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
+.card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
 .card{
   background:var(--card);
   border-radius:12px;
@@ -96,7 +96,66 @@ body{
 .card h3{margin:0 0 8px;font-size:15px}
 .card p{margin:0;color:var(--muted);font-size:13px}
 
+/* Visualization styles */
+.viz-section{padding:24px;min-height:320px}
+.viz-intro{font-size:15px;line-height:1.6;color:var(--muted);margin-bottom:20px}
+.viz-controls{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.viz-controls label{font-size:15px;color:var(--muted);font-weight:600}
+.viz-controls select{padding:10px 12px;border-radius:10px;border:1px solid var(--glass);background:transparent;font-size:15px}
+.viz-heading{margin:16px 0 12px 0;font-size:28px;font-weight:700;color:var(--text);text-align:center}
+.viz-container{min-height:260px}
+.viz{padding:14px}
+
+/* Podium layout */
+.podium-stage{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:18px}
+.podium-block{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:110px}
+.podium-block .block-top{width:100%;background:linear-gradient(180deg,#ffd27a,#c77f1a);border-radius:8px 8px 0 0;display:flex;align-items:flex-end;justify-content:center;transition:height .45s cubic-bezier(.22,.9,.33,1)}
+.podium-block .trophy{transform:translateY(6px);color:#fff}
+.podium-block .block-base{background:linear-gradient(180deg,#e6a07a,#b55b3e);width:100%;border-radius:6px;display:flex;flex-direction:column;align-items:center;padding:10px 6px;color:white}
+.podium-block .place{font-weight:800;font-size:20px}
+.podium-block .theme{font-weight:700;margin-top:6px}
+.podium-block .count{font-size:13px;color:rgba(255,255,255,0.9)}
+
+/* Rank-specific tweaks */
+.podium-block.rank-1 .block-top{background:linear-gradient(180deg,#ffd54a,#c58b12)}
+.podium-block.rank-1 .trophy{color:#b37b00}
+.podium-block.rank-2 .block-top{background:linear-gradient(180deg,#e6e6e6,#9b9b9b)}
+.podium-block.rank-2 .trophy{color:#7a7a7a}
+.podium-block.rank-3 .block-top{background:linear-gradient(180deg,#d9b58a,#a66f3a)}
+.podium-block.rank-3 .trophy{color:#7a4a12}
+.podium-block.rank-4 .block-top{background:linear-gradient(180deg,#c7e6c7,#6fa86f)}
+.podium-block.rank-4 .trophy{color:#2e7d32}
+
 @media (max-width:800px){
-  .card-grid{grid-template-columns:1fr}
+  .card-grid{grid-template-columns:repeat(2,1fr)}
+  .podium-stage{gap:12px}
+  .podium-block{min-width:70px}
+  .podium-block .place{font-size:16px}
+}
+
+.podium-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.podium-item{display:flex;gap:16px;align-items:center;padding:14px;border-radius:10px;background:var(--bg);border:1px solid var(--glass)}
+.podium-item .place{font-weight:800;width:40px;height:40px;border-radius:8px;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:16px}
+.podium-item .meta .theme{font-weight:700;font-size:16px}
+.podium-item .meta .count{font-size:14px;color:var(--muted)}
+
+.bar-row{display:flex;align-items:center;gap:16px;margin:10px 0}
+.bar-label{width:140px;color:var(--muted);font-size:15px}
+.bar-track{flex:1;background:var(--glass);height:18px;border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#60a5fa)}
+.bar-value{width:56px;text-align:right;color:var(--muted);font-size:14px}
+
+.scoreboard-table{width:100%;border-collapse:collapse}
+.scoreboard-table th,.scoreboard-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--glass);font-size:15px}
+
+.viz-tooltip{color:var(--muted);font-size:14px;margin-left:auto}
+
+.viz-description{margin-top:20px;padding-top:16px;border-top:1px solid var(--glass);font-size:14px;line-height:1.6;color:var(--muted)}
+
+@media (max-width:800px){
+  .card-grid{grid-template-columns:repeat(2,1fr)}
+  .podium-stage{gap:12px}
+  .podium-block{min-width:70px}
+  .podium-block .place{font-size:16px}
   .topbar-inner{padding:12px}
 }

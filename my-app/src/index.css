@@ -1,0 +1,14 @@
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+/* Use theme variables from App.css; provide sensible fallbacks */
+body {
+  background: var(--bg, #ffffff);
+  color: var(--text, #000000);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}

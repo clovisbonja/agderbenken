@@ -5,7 +5,7 @@ const partier = [
     farge: '#E30613', 
     tekstFarge: '#fff',
     logo: '/logo-images/aplogo.png',             
-    nettside: 'https://www.arbeiderpartiet.no',         
+    nettside: 'https://www.arbeiderpartiet.no/politikken/partiprogram/',         
   },
   { 
     navn: 'Høyre', 
@@ -13,7 +13,7 @@ const partier = [
     farge: '#2A6ABC', 
     tekstFarge: '#fff',
     logo: '/logo-images/Hlogo.png',
-    nettside: 'https://hoyre.no',
+    nettside: 'https://hoyre.no/politikk/partiprogram/',
   },
   { 
     navn: 'Fremskrittspartiet', 
@@ -21,7 +21,7 @@ const partier = [
     farge: '#003F7F', 
     tekstFarge: '#fff',
     logo: '/logo-images/frplogo.png',
-    nettside: 'https://www.frp.no',
+    nettside: 'https://www.frp.no/var-politikk/prinsipp-og-handlingsprogram',
   },
   { 
     navn: 'Senterpartiet', 
@@ -29,7 +29,7 @@ const partier = [
     farge: '#00693E', 
     tekstFarge: '#fff',
     logo: '/logo-images/splogo.png',
-    nettside: 'https://www.senterpartiet.no',
+    nettside: 'https://www.senterpartiet.no/politikk/senterpartiets-prinsipp-og-handlingsprogram-2025-2029',
   },
   { 
     navn: 'Sosialistisk Venstreparti', 
@@ -37,7 +37,7 @@ const partier = [
     farge: '#ffffff', 
     tekstFarge: '#fff',
     logo: '/logo-images/svlogo.png',
-    nettside: 'https://www.sv.no',
+    nettside: 'https://www.sv.no/partiet/program/',
   },
   { 
     navn: 'Venstre', 
@@ -45,7 +45,7 @@ const partier = [
     farge: '#00857B', 
     tekstFarge: '#fff',
     logo: '/logo-images/venstre.png',
-    nettside: 'https://www.venstre.no',
+    nettside: 'https://www.venstre.no/politikk/partiprogram/',
   },
   { 
     navn: 'Kristelig Folkeparti', 
@@ -53,7 +53,7 @@ const partier = [
     farge: '#FEEF32', 
     tekstFarge: '#000',
     logo: '/logo-images/krflogobildet.png',
-    nettside: 'https://www.krf.no',
+    nettside: 'https://krf.no/politikk/politisk-program/',
   },
   { 
     navn: 'Rødt', 
@@ -61,7 +61,7 @@ const partier = [
     farge: '#ffffff', 
     tekstFarge: '#fff',
     logo: '/logo-images/roedt.svg',
-    nettside: 'https://roedt.no',
+    nettside: 'https://roedt.no/politikk/arbeidsprogram',
   },
   { 
     navn: 'Miljøpartiet De Grønne', 
@@ -69,7 +69,7 @@ const partier = [
     farge: '#377E00', 
     tekstFarge: '#fff',
     logo: '/logo-images/mdglogo.png',
-    nettside: 'https://mdg.no',
+    nettside: 'https://mdg.no/politikk/',
   },
 ];
 
@@ -96,7 +96,7 @@ export default function Parti() {
               cursor: 'pointer',
             }}
           >
-            {/* Boksen - klikk går til partiets nettside */}
+            {/* Boksen - klikk går til partiprogram */}
             <a
               href={parti.nettside}
               target="_blank"
@@ -142,7 +142,7 @@ export default function Parti() {
               {parti.navn}
             </p>
 
-            {/* Lenke til nettside */}
+            {/* Lenke til partiprogram */}
             {parti.nettside && (
               <a 
                 href={parti.nettside} 
@@ -150,7 +150,7 @@ export default function Parti() {
                 rel="noopener noreferrer"
                 style={{ fontSize: '0.85rem', color: '#0065F1' }}
               >
-                Besøk nettsiden
+                Les partiprogram
               </a>
             )}
           </div>

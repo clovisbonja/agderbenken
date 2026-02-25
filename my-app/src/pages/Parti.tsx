@@ -21,7 +21,7 @@ const partier = [
     farge: '#003F7F', 
     tekstFarge: '#fff',
     logo: '/logo-images/frplogo.png',
-    nettside: 'https://www.frp.no/var-politikk/prinsipp-og-handlingsprogram',
+    nettside: 'https://www.frp.no/files/Program/2025/Program-2025-2029.pdf',
   },
   { 
     navn: 'Senterpartiet', 
@@ -29,7 +29,7 @@ const partier = [
     farge: '#00693E', 
     tekstFarge: '#fff',
     logo: '/logo-images/splogo.png',
-    nettside: 'https://www.senterpartiet.no/politikk/senterpartiets-prinsipp-og-handlingsprogram-2025-2029',
+    nettside: 'https://www.senterpartiet.no/politikk/program-uttaler/Nytt%20prinsipp-%20og%20handlingsprogram%202025-2029',
   },
   { 
     navn: 'Sosialistisk Venstreparti', 
@@ -61,7 +61,7 @@ const partier = [
     farge: '#ffffff', 
     tekstFarge: '#fff',
     logo: '/logo-images/roedt.svg',
-    nettside: 'https://roedt.no/politikk/arbeidsprogram',
+    nettside: 'https://roedt.no/arbeidsprogram',
   },
   { 
     navn: 'Miljøpartiet De Grønne', 

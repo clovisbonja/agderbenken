@@ -76,8 +76,8 @@ const partier = [
 export default function Parti() {
   return (
     <main className="page">
-      <h1>Partier</h1>
-      <p>Oversikt over alle partiene representert i Agderbenken.</p>
+      <h1>Partiprogrammer</h1>
+      <p>Oversikt over alle partiprogrammene representert i Agderbenken.</p>
 
       <div style={{
         display: 'grid',

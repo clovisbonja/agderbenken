@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-
 const partier = [
   { 
     navn: 'Arbeiderpartiet', 
@@ -7,7 +5,7 @@ const partier = [
     farge: '#E30613', 
     tekstFarge: '#fff',
     logo: '/logo-images/aplogo.png',             
-    nettside: 'https://www.arbeiderpartiet.no/om/',         
+    nettside: 'https://www.arbeiderpartiet.no',         
   },
   { 
     navn: 'Høyre', 
@@ -15,7 +13,7 @@ const partier = [
     farge: '#2A6ABC', 
     tekstFarge: '#fff',
     logo: '/logo-images/Hlogo.png',
-    nettside: '',
+    nettside: 'https://hoyre.no',
   },
   { 
     navn: 'Fremskrittspartiet', 
@@ -23,7 +21,7 @@ const partier = [
     farge: '#003F7F', 
     tekstFarge: '#fff',
     logo: '/logo-images/frplogo.png',
-    nettside: '',
+    nettside: 'https://www.frp.no',
   },
   { 
     navn: 'Senterpartiet', 
@@ -31,7 +29,7 @@ const partier = [
     farge: '#00693E', 
     tekstFarge: '#fff',
     logo: '/logo-images/splogo.png',
-    nettside: '',
+    nettside: 'https://www.senterpartiet.no',
   },
   { 
     navn: 'Sosialistisk Venstreparti', 
@@ -39,7 +37,7 @@ const partier = [
     farge: '#ffffff', 
     tekstFarge: '#fff',
     logo: '/logo-images/svlogo.png',
-    nettside: '',
+    nettside: 'https://www.sv.no',
   },
   { 
     navn: 'Venstre', 
@@ -47,7 +45,7 @@ const partier = [
     farge: '#00857B', 
     tekstFarge: '#fff',
     logo: '/logo-images/venstre.png',
-    nettside: '',
+    nettside: 'https://www.venstre.no',
   },
   { 
     navn: 'Kristelig Folkeparti', 
@@ -55,7 +53,7 @@ const partier = [
     farge: '#FEEF32', 
     tekstFarge: '#000',
     logo: '/logo-images/krflogobildet.png',
-    nettside: '',
+    nettside: 'https://www.krf.no',
   },
   { 
     navn: 'Rødt', 
@@ -63,7 +61,7 @@ const partier = [
     farge: '#ffffff', 
     tekstFarge: '#fff',
     logo: '/logo-images/roedt.svg',
-    nettside: 'https://www.arbeiderpartiet.no/om/',
+    nettside: 'https://roedt.no',
   },
   { 
     navn: 'Miljøpartiet De Grønne', 
@@ -71,13 +69,11 @@ const partier = [
     farge: '#377E00', 
     tekstFarge: '#fff',
     logo: '/logo-images/mdglogo.png',
-    nettside: '',
+    nettside: 'https://mdg.no',
   },
 ];
 
 export default function Parti() {
-  const navigate = useNavigate();
-
   return (
     <main className="page">
       <h1>Partier</h1>
@@ -100,9 +96,11 @@ export default function Parti() {
               cursor: 'pointer',
             }}
           >
-            {/* Boksen - klikk går til intern side */}
-            <div
-              onClick={() => navigate(`/parti/${parti.forkortelse.toLowerCase()}`)}
+            {/* Boksen - klikk går til partiets nettside */}
+            <a
+              href={parti.nettside}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 width: '100%',
                 aspectRatio: '4/3',
@@ -117,14 +115,15 @@ export default function Parti() {
                 border: '2px solid #ddd',
                 transition: 'transform 0.15s, box-shadow 0.15s',
                 overflow: 'hidden',
+                textDecoration: 'none',
               }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.04)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = 'scale(1.04)';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
               }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = 'scale(1)';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
               }}
             >
               {parti.logo ? (
@@ -136,7 +135,7 @@ export default function Parti() {
               ) : (
                 parti.forkortelse
               )}
-            </div>
+            </a>
 
             {/* Partinavn */}
             <p style={{ marginTop: '0.5rem', fontWeight: '500', textAlign: 'center' }}>

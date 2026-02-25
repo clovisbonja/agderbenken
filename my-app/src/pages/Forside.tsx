@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 type Version = "podium" | "bar" | "scoreboard";
 
@@ -8,11 +8,12 @@ function PodiumView({
   themesProp?: { name: string; count: number; desc?: string }[];
 }) {
   const defaultThemes = [
-    { name: "Samferdsel", count: 34, desc: "Veier, kollektiv og infrastruktur" },
-    { name: "Helse", count: 28, desc: "Sykehus og helsetjenester" },
-    { name: "Utdanning", count: 18, desc: "Skole og lærerutdanning" },
-    { name: "Miljø", count: 10, desc: "Natur, klima og utslipp" },
-  ];
+  { name: "Samferdsel", count: 34, desc: "Veier, kollektiv og infrastruktur" },
+  { name: "Energi", count: 28, desc: "Kraft, strømpriser og energisikkerhet" },
+  { name: "Levekår", count: 18, desc: "Folkehelse, arbeid og sosial trygghet" },
+  { name: "Klima og miljø", count: 10, desc: "Natur, klima og utslipp" },
+];
+
 
   // allow injecting live data later via props
   const themes = themesProp ?? defaultThemes;

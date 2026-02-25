@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 
 const API_URL =
   "https://data.stortinget.no/eksport/representanter?stortingsperiodeid=2005-2009"
+const CACHE_KEY = "representanter-2005-2009-cache-v1"
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 type Representative = {
   id: string
@@ -11,6 +13,34 @@ type Representative = {
   parti: string
   kommune: string
   fylke: string
+}
+
+type CachePayload = {
+  fetchedAt: number
+  data: Representative[]
+}
+
+function readCache(): CachePayload | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as CachePayload
+    if (
+      typeof parsed.fetchedAt !== "number" ||
+      !Array.isArray(parsed.data)
+    ) {
+      return null
+    }
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function writeCache(payload: CachePayload) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload))
+  } catch {}
 }
 
 function normalizeAgder(value: string): string {
@@ -98,6 +128,8 @@ export default function Representanter() {
   const [data, setData] = useState<Representative[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null)
+  const [selectedParty, setSelectedParty] = useState<string>("Alle")
 
   useEffect(() => {
     const controller = new AbortController()
@@ -106,16 +138,43 @@ export default function Representanter() {
       setLoading(true)
       setError(null)
 
+      const cached = readCache()
+      const now = Date.now()
+      const hasFreshCache =
+        cached !== null && now - cached.fetchedAt < ONE_WEEK_MS
+
+      if (cached) {
+        setData(cached.data)
+        setLastUpdated(cached.fetchedAt)
+      }
+
+      if (hasFreshCache) {
+        setLoading(false)
+        return
+      }
+
       try {
         const res = await fetch(API_URL, { signal: controller.signal })
         if (!res.ok) {
           throw new Error(`Klarte ikke hente data (${res.status})`)
         }
         const xml = await res.text()
-        setData(parseRepresentatives(xml))
+        const parsed = parseRepresentatives(xml)
+        const payload: CachePayload = { fetchedAt: Date.now(), data: parsed }
+        setData(parsed)
+        setLastUpdated(payload.fetchedAt)
+        writeCache(payload)
       } catch (e) {
         if (controller.signal.aborted) return
-        setError(e instanceof Error ? e.message : "Ukjent feil ved henting av data")
+        if (!cached) {
+          setError(
+            e instanceof Error ? e.message : "Ukjent feil ved henting av data"
+          )
+        } else {
+          setError(
+            "Klarte ikke hente nye data nå. Viser sist lagrede data."
+          )
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
@@ -129,12 +188,43 @@ export default function Representanter() {
     () => data.filter((r) => r.fylke === "Agder" || r.kommune === "Agder"),
     [data]
   )
+  const sortedRepresentanter = useMemo(
+    () =>
+      [...agderRepresentanter].sort((a, b) =>
+        `${a.etternavn} ${a.fornavn}`.localeCompare(
+          `${b.etternavn} ${b.fornavn}`,
+          "nb-NO"
+        )
+      ),
+    [agderRepresentanter]
+  )
+  const partyFilters = useMemo(
+    () => [
+      "Alle",
+      ...Array.from(new Set(sortedRepresentanter.map((rep) => rep.parti))).sort(
+        (a, b) => a.localeCompare(b, "nb-NO")
+      ),
+    ],
+    [sortedRepresentanter]
+  )
+  const visibleRepresentanter = useMemo(
+    () =>
+      selectedParty === "Alle"
+        ? sortedRepresentanter
+        : sortedRepresentanter.filter((rep) => rep.parti === selectedParty),
+    [selectedParty, sortedRepresentanter]
+  )
 
   return (
     <main className="page">
       <section className="section">
         <h1>Representanter</h1>
-        <p>Live data fra Stortinget-API for perioden 2005-2009.</p>
+        <p>Live data fra Stortinget-API. Oppdateres automatisk hver uke.</p>
+        {lastUpdated && (
+          <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+            Sist oppdatert: {new Date(lastUpdated).toLocaleString("nb-NO")}
+          </p>
+        )}
       </section>
 
       {loading && <p>Laster representanter...</p>}
@@ -142,32 +232,50 @@ export default function Representanter() {
 
       {!loading && !error && (
         <section className="section">
-          <h2>Agder ({agderRepresentanter.length})</h2>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "0.6rem" }}>Fornavn</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "0.6rem" }}>Etternavn</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "0.6rem" }}>Alder</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "0.6rem" }}>Parti</th>
-                  <th style={{ textAlign: "left", borderBottom: "1px solid #ddd", padding: "0.6rem" }}>Kommune</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agderRepresentanter.map((rep) => (
-                  <tr key={`${rep.id}-${rep.fornavn}-${rep.etternavn}`}>
-                    <td style={{ padding: "0.6rem", borderBottom: "1px solid #eee" }}>{rep.fornavn}</td>
-                    <td style={{ padding: "0.6rem", borderBottom: "1px solid #eee" }}>{rep.etternavn}</td>
-                    <td style={{ padding: "0.6rem", borderBottom: "1px solid #eee" }}>
-                      {rep.alder !== null ? rep.alder : "Ukjent"}
-                    </td>
-                    <td style={{ padding: "0.6rem", borderBottom: "1px solid #eee" }}>{rep.parti}</td>
-                    <td style={{ padding: "0.6rem", borderBottom: "1px solid #eee" }}>{rep.kommune}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="rep-header">
+            <h2>Agder</h2>
+            <span className="rep-count">{visibleRepresentanter.length} representanter</span>
+          </div>
+
+          <div className="rep-filter-wrap">
+            <label htmlFor="party-filter" className="rep-filter-label">
+              Filtrer parti
+            </label>
+            <select
+              id="party-filter"
+              className="rep-filter-select"
+              value={selectedParty}
+              onChange={(e) => setSelectedParty(e.target.value)}
+            >
+              {partyFilters.map((party) => (
+                <option key={party} value={party}>
+                  {party}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="rep-grid">
+            {visibleRepresentanter.map((rep) => (
+              <article
+                key={`${rep.id}-${rep.fornavn}-${rep.etternavn}`}
+                className="rep-card"
+              >
+                <div className="rep-top">
+                  <div>
+                    <h3 className="rep-name">
+                      {rep.fornavn} {rep.etternavn}
+                    </h3>
+                    <p className="rep-muted">{rep.alder !== null ? `${rep.alder} år` : "Alder ukjent"}</p>
+                  </div>
+                </div>
+
+                <div className="rep-chips">
+                  <span className="rep-chip rep-chip-party">{rep.parti}</span>
+                  <span className="rep-chip">{rep.kommune}</span>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       )}

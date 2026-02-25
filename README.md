@@ -16,7 +16,7 @@ Appen har også en mørk/lys-tema bryter i toppbaren for å veksle mellom tema.
 1. Installer avhengigheter:
 
 ```bash
-cd Finn en mappe
+cd my-app
 npm install
 ```
 

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
 
-const API_URL =
-  "https://data.stortinget.no/eksport/representanter?stortingsperiodeid=2005-2009"
-const CACHE_KEY = "representanter-2005-2009-cache-v1"
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
+// Live-endepunkt for "dagens representanter" fra Stortinget.
+const API_URL = "https://data.stortinget.no/eksport/dagensrepresentanter"
+const BIOGRAPHY_API_URL = "https://data.stortinget.no/eksport/kodetbiografi"
+
+// Fast label for "vis alle partier" i filteret.
+const ALL_PARTIES_OPTION = "Alle"
 
 type Representative = {
   id: string
@@ -15,179 +17,249 @@ type Representative = {
   fylke: string
 }
 
-type CachePayload = {
-  fetchedAt: number
-  data: Representative[]
+type BiographyItem = {
+  id: string
+  title: string
+  subtitle: string
+  period: string
 }
 
-function readCache(): CachePayload | null {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as CachePayload
-    if (
-      typeof parsed.fetchedAt !== "number" ||
-      !Array.isArray(parsed.data)
-    ) {
-      return null
-    }
-    return parsed
-  } catch {
-    return null
-  }
+const PERSON_IMAGE_BASE_URL = "https://data.stortinget.no/eksport/personbilde"
+
+// Lager en komplett bilde-lenke til Stortinget for én person.
+// Hvis person-id mangler bruker vi "X", slik at API-et kan returnere erstatningsbilde.
+function getRepresentativeImageUrl(personId: string, size: "stort" | "middels" | "lite" = "middels"): string {
+  const params = new URLSearchParams({
+    personid: personId || "X",
+    storrelse: size,
+    erstatningsbilde: "true",
+  })
+  return `${PERSON_IMAGE_BASE_URL}?${params.toString()}`
 }
 
-function writeCache(payload: CachePayload) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(payload))
-  } catch {}
-}
-
+// Krav fra deg: vis både Aust-Agder og Vest-Agder som "Agder".
 function normalizeAgder(value: string): string {
-  const v = value.trim().toLowerCase()
-  if (v === "aust-agder" || v === "vest-agder" || v === "agder") return "Agder"
+  const normalized = value.trim().toLowerCase()
+  if (
+    normalized === "aust-agder" ||
+    normalized === "vest-agder" ||
+    normalized === "agder"
+  ) {
+    return "Agder"
+  }
   return value.trim()
 }
 
+// Hent første treff på navn (localName) et sted inne i en node.
 function getTextByLocalName(node: Element, name: string): string {
   if (node.localName === name) return (node.textContent ?? "").trim()
-  const all = node.getElementsByTagName("*")
-  for (let i = 0; i < all.length; i += 1) {
-    const el = all[i]
+
+  const descendants = node.getElementsByTagName("*")
+  for (let i = 0; i < descendants.length; i += 1) {
+    const el = descendants[i]
     if (el.localName === name) return (el.textContent ?? "").trim()
+  }
+
+  return ""
+}
+
+// Finn første ikke-tomme feltverdi fra en liste av feltnavn.
+function pickFirstNonEmpty(node: Element, names: string[]): string {
+  for (const name of names) {
+    const value = getTextByLocalName(node, name)
+    if (value) return value
   }
   return ""
 }
 
+// Finn en "nested" node (f.eks. parti/fylke) via flere mulige navn.
+function findNestedByNames(node: Element, names: string[]): Element | null {
+  return (
+    Array.from(node.getElementsByTagName("*")).find((el) =>
+      names.includes(el.localName)
+    ) ?? null
+  )
+}
+
+// Beregn alder ut fra fødselsdato (ISO-format i API).
 function parseAge(isoDateTime: string): number | null {
   if (!isoDateTime) return null
+
   const birth = new Date(isoDateTime)
   if (Number.isNaN(birth.getTime())) return null
 
   const now = new Date()
   let age = now.getFullYear() - birth.getFullYear()
-  const beforeBirthday =
+  const hasNotHadBirthdayThisYear =
     now.getMonth() < birth.getMonth() ||
     (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
 
-  if (beforeBirthday) age -= 1
+  if (hasNotHadBirthdayThisYear) age -= 1
   return age
 }
 
+// Parse XML fra Stortinget til en enkel, stabil frontend-modell.
 function parseRepresentatives(xmlText: string): Representative[] {
-  const doc = new DOMParser().parseFromString(xmlText, "text/xml")
-  const reps = Array.from(doc.getElementsByTagName("*")).filter(
-    (el) => el.localName === "representant"
+  const documentXml = new DOMParser().parseFromString(xmlText, "text/xml")
+
+  // API kan variere mellom "representant" og "dagensrepresentant".
+  const representatives = Array.from(documentXml.getElementsByTagName("*")).filter(
+    (el) => el.localName === "dagensrepresentant" || el.localName === "representant"
   )
 
-  return reps
+  return representatives
     .map((rep): Representative => {
-      const fylkeElement = Array.from(rep.getElementsByTagName("*")).find(
-        (el) => el.localName === "fylke"
-      )
-      const partiElement = Array.from(rep.getElementsByTagName("*")).find(
-        (el) => el.localName === "parti"
-      )
-      const kommuneElement = Array.from(rep.getElementsByTagName("*")).find(
-        (el) => el.localName === "kommune" || el.localName === "hjemkommune"
-      )
+      const fylkeNode = findNestedByNames(rep, ["fylke", "hjemfylke", "valgdistrikt"])
+      const partiNode = findNestedByNames(rep, ["parti"])
+      const kommuneNode = findNestedByNames(rep, ["kommune", "hjemkommune", "hjemsted"])
 
-      const fylkeRaw = fylkeElement
-        ? getTextByLocalName(fylkeElement, "navn") ||
-          getTextByLocalName(fylkeElement, "id")
-        : ""
+      const fylkeRaw = fylkeNode ? pickFirstNonEmpty(fylkeNode, ["navn", "id"]) : ""
+      const partiRaw = partiNode ? pickFirstNonEmpty(partiNode, ["navn", "id"]) : ""
+      const kommuneRaw = kommuneNode ? pickFirstNonEmpty(kommuneNode, ["navn", "id"]) : ""
 
       const parti =
-        (partiElement &&
-          (getTextByLocalName(partiElement, "navn") ||
-            getTextByLocalName(partiElement, "id"))) ||
+        partiRaw ||
+        pickFirstNonEmpty(rep, ["partinavn", "parti_navn"]) ||
         "Ukjent parti"
 
-      const kommuneRaw = kommuneElement
-        ? getTextByLocalName(kommuneElement, "navn") ||
-          getTextByLocalName(kommuneElement, "id")
-        : ""
-
       const fylke = normalizeAgder(fylkeRaw || "Ukjent fylke")
-      const kommune = normalizeAgder(kommuneRaw || fylke)
+      const kommune = normalizeAgder(
+        kommuneRaw || pickFirstNonEmpty(rep, ["hjemkommune", "kommune"]) || fylke
+      )
 
       return {
-        id: getTextByLocalName(rep, "id"),
-        fornavn: getTextByLocalName(rep, "fornavn"),
-        etternavn: getTextByLocalName(rep, "etternavn"),
-        alder: parseAge(getTextByLocalName(rep, "foedselsdato")),
+        id: pickFirstNonEmpty(rep, ["id"]),
+        fornavn: pickFirstNonEmpty(rep, ["fornavn"]),
+        etternavn: pickFirstNonEmpty(rep, ["etternavn"]),
+        alder: parseAge(pickFirstNonEmpty(rep, ["foedselsdato"])),
         parti,
         kommune,
         fylke,
       }
     })
-    .filter((rep) => rep.fornavn && rep.etternavn)
+    // Vi viser bare rader med navn.
+    .filter((rep) => Boolean(rep.fornavn && rep.etternavn))
+}
+
+function getDirectFields(node: Element): Record<string, string> {
+  const fields: Record<string, string> = {}
+  Array.from(node.children).forEach((child) => {
+    const value = (child.textContent ?? "").trim()
+    if (!value) return
+    fields[child.localName] = value
+  })
+  return fields
+}
+
+function buildPeriod(fields: Record<string, string>): string {
+  const from = fields.fra || fields.fra_aar || fields.fom || ""
+  const to = fields.til || fields.til_aar || fields.tom || ""
+  if (from && to) return `${from} - ${to}`
+  if (from) return `Fra ${from}`
+  if (to) return `Til ${to}`
+  return ""
+}
+
+function parseBiography(xmlText: string): BiographyItem[] {
+  const documentXml = new DOMParser().parseFromString(xmlText, "text/xml")
+  const nodes = Array.from(documentXml.getElementsByTagName("*")).filter(
+    (el) => el.localName === "person_biografi_utdanning_yrke_kodet"
+  )
+
+  return nodes
+    .map((node, index): BiographyItem => {
+      const fields = getDirectFields(node)
+      const typeCode = fields.type || ""
+
+      const ignored = new Set([
+        "id",
+        "type",
+        "fra",
+        "til",
+        "fra_aar",
+        "til_aar",
+        "fom",
+        "tom",
+        "hovedaktivitet",
+        "hovedaktivitet_bool",
+      ])
+
+      const contentEntries = Object.entries(fields).filter(([key, value]) => {
+        if (ignored.has(key)) return false
+        const normalized = value.trim().toLowerCase()
+        if (!normalized) return false
+        if (normalized === "false" || normalized === "true") return false
+        return true
+      })
+      const title = contentEntries[0]?.[1] ?? "Detaljer ikke oppgitt"
+      const subtitle = contentEntries[1]?.[1] ?? ""
+
+      return {
+        id: fields.id || `${typeCode}-${index}`,
+        title,
+        subtitle,
+        period: buildPeriod(fields),
+      }
+    })
+    .filter((item) => item.title)
 }
 
 export default function Representanter() {
+  // Grunndata + tilstand som styrer hva brukeren ser.
   const [data, setData] = useState<Representative[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
-  const [selectedParty, setSelectedParty] = useState<string>("Alle")
+  const [biography, setBiography] = useState<BiographyItem[]>([])
+  const [biographyLoading, setBiographyLoading] = useState(false)
+  const [biographyError, setBiographyError] = useState<string | null>(null)
+  const [showBiography, setShowBiography] = useState(false)
+  // Valgt parti i filteret.
+  const [selectedParty, setSelectedParty] = useState<string>(ALL_PARTIES_OPTION)
+  // Hvilken representant som er "aktiv" (for stort profilbilde og markering i kort).
+  const [selectedRepresentativeId, setSelectedRepresentativeId] = useState<string | null>(
+    null
+  )
 
   useEffect(() => {
+    // AbortController gjør at vi kan avbryte hentingen hvis brukeren forlater siden.
     const controller = new AbortController()
 
-    async function load() {
+    async function loadRepresentatives() {
       setLoading(true)
       setError(null)
 
-      const cached = readCache()
-      const now = Date.now()
-      const hasFreshCache =
-        cached !== null && now - cached.fetchedAt < ONE_WEEK_MS
-
-      if (cached) {
-        setData(cached.data)
-        setLastUpdated(cached.fetchedAt)
-      }
-
-      if (hasFreshCache) {
-        setLoading(false)
-        return
-      }
-
+      // Henter alltid ferske data direkte fra API (ingen lokal cache).
       try {
-        const res = await fetch(API_URL, { signal: controller.signal })
-        if (!res.ok) {
-          throw new Error(`Klarte ikke hente data (${res.status})`)
+        const response = await fetch(API_URL, { signal: controller.signal })
+        if (!response.ok) {
+          throw new Error(`Klarte ikke hente data (${response.status})`)
         }
-        const xml = await res.text()
-        const parsed = parseRepresentatives(xml)
-        const payload: CachePayload = { fetchedAt: Date.now(), data: parsed }
+
+        const xmlText = await response.text()
+        const parsed = parseRepresentatives(xmlText)
+
         setData(parsed)
-        setLastUpdated(payload.fetchedAt)
-        writeCache(payload)
+        setLastUpdated(Date.now())
       } catch (e) {
         if (controller.signal.aborted) return
-        if (!cached) {
-          setError(
-            e instanceof Error ? e.message : "Ukjent feil ved henting av data"
-          )
-        } else {
-          setError(
-            "Klarte ikke hente nye data nå. Viser sist lagrede data."
-          )
-        }
+        setError(e instanceof Error ? e.message : "Ukjent feil ved henting av data")
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
     }
 
-    load()
+    loadRepresentatives()
     return () => controller.abort()
   }, [])
 
+  // Vis bare representanter fra Agder (inkludert normaliserte varianter).
   const agderRepresentanter = useMemo(
-    () => data.filter((r) => r.fylke === "Agder" || r.kommune === "Agder"),
+    () => data.filter((rep) => rep.fylke === "Agder" || rep.kommune === "Agder"),
     [data]
   )
+
+  // Stabil sortering for forutsigbar visning.
   const sortedRepresentanter = useMemo(
     () =>
       [...agderRepresentanter].sort((a, b) =>
@@ -198,28 +270,100 @@ export default function Representanter() {
       ),
     [agderRepresentanter]
   )
+
+  // Partiliste bygges dynamisk fra data (ingen hardkoding av partier).
   const partyFilters = useMemo(
     () => [
-      "Alle",
-      ...Array.from(new Set(sortedRepresentanter.map((rep) => rep.parti))).sort(
-        (a, b) => a.localeCompare(b, "nb-NO")
+      ALL_PARTIES_OPTION,
+      ...Array.from(new Set(sortedRepresentanter.map((rep) => rep.parti))).sort((a, b) =>
+        a.localeCompare(b, "nb-NO")
       ),
     ],
     [sortedRepresentanter]
   )
+
+  // Endelig datasett etter valgt filter i dropdown.
   const visibleRepresentanter = useMemo(
     () =>
-      selectedParty === "Alle"
+      selectedParty === ALL_PARTIES_OPTION
         ? sortedRepresentanter
         : sortedRepresentanter.filter((rep) => rep.parti === selectedParty),
     [selectedParty, sortedRepresentanter]
   )
 
+  const selectedRepresentative = useMemo(
+    () => visibleRepresentanter.find((rep) => rep.id === selectedRepresentativeId) ?? null,
+    [selectedRepresentativeId, visibleRepresentanter]
+  )
+
+  useEffect(() => {
+    const selectedPersonId = selectedRepresentative?.id
+    if (!selectedPersonId) {
+      setBiography([])
+      setBiographyError(null)
+      setBiographyLoading(false)
+      setShowBiography(false)
+      return
+    }
+    const personId = selectedPersonId
+
+    const controller = new AbortController()
+
+    async function loadBiography() {
+      setBiographyLoading(true)
+      setBiographyError(null)
+
+      try {
+        const params = new URLSearchParams({ personid: personId })
+        const response = await fetch(`${BIOGRAPHY_API_URL}?${params.toString()}`, {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Klarte ikke hente biografi (${response.status})`)
+        }
+
+        const xmlText = await response.text()
+        setBiography(parseBiography(xmlText))
+        setShowBiography(false)
+      } catch (e) {
+        if (controller.signal.aborted) return
+        setBiography([])
+        setBiographyError(e instanceof Error ? e.message : "Ukjent feil ved henting av biografi")
+        setShowBiography(false)
+      } finally {
+        if (!controller.signal.aborted) setBiographyLoading(false)
+      }
+    }
+
+    loadBiography()
+    return () => controller.abort()
+  }, [selectedRepresentative])
+
+  useEffect(() => {
+    // Sørger for at vi alltid har en gyldig valgt representant i gjeldende filter.
+    // Hvis filteret endres og den gamle ikke finnes, velges første i lista.
+    if (visibleRepresentanter.length === 0) {
+      setSelectedRepresentativeId(null)
+      return
+    }
+
+    if (
+      selectedRepresentativeId &&
+      visibleRepresentanter.some((rep) => rep.id === selectedRepresentativeId)
+    ) {
+      return
+    }
+
+    setSelectedRepresentativeId(visibleRepresentanter[0]?.id ?? null)
+  }, [selectedRepresentativeId, visibleRepresentanter])
+
   return (
     <main className="page">
       <section className="section">
         <h1>Representanter</h1>
-        <p>Live data fra Stortinget-API. Oppdateres automatisk hver uke.</p>
+        {/* Denne teksten forklarer at listen er basert på levende data fra Stortinget. */}
+        <p>Live data fra Stortinget-API (dagens representanter). Hentes direkte ved hver sidevisning.</p>
         {lastUpdated && (
           <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
             Sist oppdatert: {new Date(lastUpdated).toLocaleString("nb-NO")}
@@ -238,6 +382,8 @@ export default function Representanter() {
           </div>
 
           <div className="rep-filter-wrap">
+            {/* Brukeren klikker et kort under for å bytte hvem som vises i profilpanelet. */}
+            <p className="rep-filter-hint">Trykk på en representant for å se bilde.</p>
             <label htmlFor="party-filter" className="rep-filter-label">
               Filtrer parti
             </label>
@@ -245,6 +391,7 @@ export default function Representanter() {
               id="party-filter"
               className="rep-filter-select"
               value={selectedParty}
+              // Når parti endres, filtreres listen automatisk.
               onChange={(e) => setSelectedParty(e.target.value)}
             >
               {partyFilters.map((party) => (
@@ -255,18 +402,100 @@ export default function Representanter() {
             </select>
           </div>
 
+          {selectedRepresentative && (
+            // Eget panel som viser valgt representant med større bilde.
+            <article className="rep-profile" aria-live="polite">
+              <img
+                className="rep-profile-image"
+                src={getRepresentativeImageUrl(selectedRepresentative.id)}
+                alt={`${selectedRepresentative.fornavn} ${selectedRepresentative.etternavn}`}
+                loading="lazy"
+              />
+              <div className="rep-profile-content">
+                <h3 className="rep-profile-name">
+                  {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
+                </h3>
+                <p className="rep-muted">
+                  {selectedRepresentative.alder !== null
+                    ? `${selectedRepresentative.alder} år`
+                    : "Alder ukjent"}
+                </p>
+                <div className="rep-chips">
+                  <span className="rep-chip rep-chip-party">{selectedRepresentative.parti}</span>
+                  <span className="rep-chip">{selectedRepresentative.kommune}</span>
+                </div>
+
+                <section className="rep-bio">
+                  <h4 className="rep-bio-heading">Personlig biografi</h4>
+                  {biographyLoading && <p className="rep-bio-status">Laster biografi...</p>}
+                  {biographyError && (
+                    <p className="rep-bio-status rep-bio-status-error">{biographyError}</p>
+                  )}
+                  {!biographyLoading && !biographyError && biography.length === 0 && (
+                    <p className="rep-bio-status">Ingen biografi funnet for denne representanten.</p>
+                  )}
+
+                  {!biographyLoading && !biographyError && biography.length > 0 && (
+                    <>
+                      <button
+                        type="button"
+                        className="rep-bio-toggle"
+                        aria-expanded={showBiography}
+                        onClick={() => setShowBiography((current) => !current)}
+                      >
+                        {showBiography ? "Skjul detaljer" : "Vis biografi"}
+                      </button>
+
+                      {showBiography && (
+                        <ul className="rep-bio-list">
+                          {biography.map((item) => (
+                            <li key={item.id} className="rep-bio-row">
+                              <p className="rep-bio-title">{item.title}</p>
+                              {item.subtitle && <p className="rep-bio-subtitle">{item.subtitle}</p>}
+                              {item.period && <p className="rep-bio-period">{item.period}</p>}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </section>
+              </div>
+            </article>
+          )}
+
           <div className="rep-grid">
             {visibleRepresentanter.map((rep) => (
               <article
                 key={`${rep.id}-${rep.fornavn}-${rep.etternavn}`}
-                className="rep-card"
+                className={`rep-card${selectedRepresentativeId === rep.id ? " rep-card-selected" : ""}`}
+                role="button"
+                tabIndex={0}
+                // Klikk oppdaterer valgt representant.
+                onClick={() => setSelectedRepresentativeId(rep.id)}
+                onKeyDown={(event) => {
+                  // Tastaturstøtte: Enter/Mellomrom gjør samme som klikk.
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    setSelectedRepresentativeId(rep.id)
+                  }
+                }}
               >
                 <div className="rep-top">
+                  <img
+                    className="rep-thumb"
+                    // Lite profilbilde i hvert kort.
+                    src={getRepresentativeImageUrl(rep.id, "lite")}
+                    alt={`${rep.fornavn} ${rep.etternavn}`}
+                    loading="lazy"
+                  />
                   <div>
                     <h3 className="rep-name">
                       {rep.fornavn} {rep.etternavn}
                     </h3>
-                    <p className="rep-muted">{rep.alder !== null ? `${rep.alder} år` : "Alder ukjent"}</p>
+                    <p className="rep-muted">
+                      {rep.alder !== null ? `${rep.alder} år` : "Alder ukjent"}
+                    </p>
                   </div>
                 </div>
 
@@ -277,6 +506,12 @@ export default function Representanter() {
               </article>
             ))}
           </div>
+
+          {visibleRepresentanter.length === 0 && (
+            <p style={{ marginTop: "0.8rem", color: "var(--muted)" }}>
+              Ingen representanter funnet for valgt parti.
+            </p>
+          )}
         </section>
       )}
     </main>

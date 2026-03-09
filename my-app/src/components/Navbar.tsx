@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom"
 // Menypunkter for toppnavigasjonen.
 const links = [
   { to: "/", label: "Forside" },
-  { to: "/parti", label: "Parti" },
+  { to: "/parti", label: "Partiprogrammer" },
   { to: "/representanter", label: "Representanter" },
   { to: "/om", label: "Om Agderbenken" },
 ]

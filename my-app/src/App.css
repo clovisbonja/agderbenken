@@ -164,7 +164,7 @@ body{
 }
 .rep-count{
   font-size:13px;
-  color:var(--muted);
+  color:white;
   background:var(--glass);
   border:1px solid var(--glass);
   border-radius:999px;
@@ -180,12 +180,12 @@ body{
 .rep-filter-hint{
   margin:0;
   font-size:13px;
-  color:var(--muted);
+  color:white;
 }
 .rep-filter-label{
   font-size:13px;
   font-weight:600;
-  color:var(--muted);
+  color:white;
 }
 .rep-filter-select{
   appearance:none;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 
 // Live-endepunkt for "dagens representanter" fra Stortinget.
 const API_URL = "https://data.stortinget.no/eksport/dagensrepresentanter"
@@ -204,6 +204,98 @@ function parseBiography(xmlText: string): BiographyItem[] {
     .filter((item) => item.title)
 }
 
+function FlickeringGrid() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    let w = window.innerWidth
+    let h = window.innerHeight
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    const CELL = 22
+    const GAP = 2
+    let COLS = Math.ceil(w / CELL)
+    let ROWS = Math.ceil(h / CELL)
+
+    let opacities = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.3)
+    let targets = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.35)
+    let speeds = Array.from({ length: COLS * ROWS }, () => 0.003 + Math.random() * 0.015)
+
+    const flickerInterval = setInterval(() => {
+      const n = Math.floor(Math.random() * 12) + 3
+      for (let i = 0; i < n; i++) {
+        const idx = Math.floor(Math.random() * opacities.length)
+        targets[idx] = 0.05 + Math.random() * 0.65
+      }
+    }, 80)
+
+    let animId: number
+
+    function draw() {
+      animId = requestAnimationFrame(draw)
+      if (!ctx) return
+      ctx.fillStyle = "#04090f"
+      ctx.fillRect(0, 0, w, h)
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const i = r * COLS + c
+          opacities[i] += (targets[i] - opacities[i]) * speeds[i]
+          if (Math.abs(opacities[i] - targets[i]) < 0.005) targets[i] = Math.random() * 0.25
+          ctx.fillStyle = `rgba(80, 150, 255, ${opacities[i]})`
+          ctx.beginPath()
+          ctx.roundRect(c * CELL + GAP, r * CELL + GAP, CELL - GAP * 2, CELL - GAP * 2, 3)
+          ctx.fill()
+        }
+      }
+      const grad = ctx.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, h * 0.8)
+      grad.addColorStop(0, "rgba(4,9,15,0)")
+      grad.addColorStop(1, "rgba(4,9,15,0.85)")
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, w, h)
+    }
+
+    draw()
+
+    const handleResize = () => {
+      w = window.innerWidth
+      h = window.innerHeight
+      canvas.width = w
+      canvas.height = h
+      COLS = Math.ceil(w / CELL)
+      ROWS = Math.ceil(h / CELL)
+      opacities = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.3)
+      targets = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.35)
+      speeds = Array.from({ length: COLS * ROWS }, () => 0.003 + Math.random() * 0.015)
+    }
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      cancelAnimationFrame(animId)
+      clearInterval(flickerInterval)
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: "fixed", inset: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
+    />
+  )
+}
+
+// Hvit tekst-stil for innhold direkte mot bakgrunnen (utenfor kortene)
+const overBgStyle: React.CSSProperties = {
+  color: "white",
+  textShadow: "0 1px 8px rgba(0,0,0,0.7)",
+}
+
 export default function Representanter() {
   // Grunndata + tilstand som styrer hva brukeren ser.
   const [data, setData] = useState<Representative[]>([])
@@ -359,161 +451,172 @@ export default function Representanter() {
   }, [selectedRepresentativeId, visibleRepresentanter])
 
   return (
-    <main className="page">
-      <section className="section">
-        <h1>Representanter</h1>
-        {/* Denne teksten forklarer at listen er basert på levende data fra Stortinget. */}
-        <p>Live data fra Stortinget-API (dagens representanter). Hentes direkte ved hver sidevisning.</p>
-        {lastUpdated && (
-          <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-            Sist oppdatert: {new Date(lastUpdated).toLocaleString("nb-NO")}
-          </p>
-        )}
-      </section>
+    <>
+      <FlickeringGrid />
+      <main className="page">
 
-      {loading && <p>Laster representanter...</p>}
-      {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
-
-      {!loading && !error && (
-        <section className="section">
-          <div className="rep-header">
-            <h2>Agder</h2>
-            <span className="rep-count">{visibleRepresentanter.length} representanter</span>
-          </div>
-
-          <div className="rep-filter-wrap">
-            {/* Brukeren klikker et kort under for å bytte hvem som vises i profilpanelet. */}
-            <p className="rep-filter-hint">Trykk på en representant for å se bilde.</p>
-            <label htmlFor="party-filter" className="rep-filter-label">
-              Filtrer parti
-            </label>
-            <select
-              id="party-filter"
-              className="rep-filter-select"
-              value={selectedParty}
-              // Når parti endres, filtreres listen automatisk.
-              onChange={(e) => setSelectedParty(e.target.value)}
-            >
-              {partyFilters.map((party) => (
-                <option key={party} value={party}>
-                  {party}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {selectedRepresentative && (
-            // Eget panel som viser valgt representant med større bilde.
-            <article className="rep-profile" aria-live="polite">
-              <img
-                className="rep-profile-image"
-                src={getRepresentativeImageUrl(selectedRepresentative.id)}
-                alt={`${selectedRepresentative.fornavn} ${selectedRepresentative.etternavn}`}
-                loading="lazy"
-              />
-              <div className="rep-profile-content">
-                <h3 className="rep-profile-name">
-                  {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
-                </h3>
-                <p className="rep-muted">
-                  {selectedRepresentative.alder !== null
-                    ? `${selectedRepresentative.alder} år`
-                    : "Alder ukjent"}
-                </p>
-                <div className="rep-chips">
-                  <span className="rep-chip rep-chip-party">{selectedRepresentative.parti}</span>
-                  <span className="rep-chip">{selectedRepresentative.kommune}</span>
-                </div>
-
-                <section className="rep-bio">
-                  <h4 className="rep-bio-heading">Personlig biografi</h4>
-                  {biographyLoading && <p className="rep-bio-status">Laster biografi...</p>}
-                  {biographyError && (
-                    <p className="rep-bio-status rep-bio-status-error">{biographyError}</p>
-                  )}
-                  {!biographyLoading && !biographyError && biography.length === 0 && (
-                    <p className="rep-bio-status">Ingen biografi funnet for denne representanten.</p>
-                  )}
-
-                  {!biographyLoading && !biographyError && biography.length > 0 && (
-                    <>
-                      <button
-                        type="button"
-                        className="rep-bio-toggle"
-                        aria-expanded={showBiography}
-                        onClick={() => setShowBiography((current) => !current)}
-                      >
-                        {showBiography ? "Skjul detaljer" : "Vis biografi"}
-                      </button>
-
-                      {showBiography && (
-                        <ul className="rep-bio-list">
-                          {biography.map((item) => (
-                            <li key={item.id} className="rep-bio-row">
-                              <p className="rep-bio-title">{item.title}</p>
-                              {item.subtitle && <p className="rep-bio-subtitle">{item.subtitle}</p>}
-                              {item.period && <p className="rep-bio-period">{item.period}</p>}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </>
-                  )}
-                </section>
-              </div>
-            </article>
-          )}
-
-          <div className="rep-grid">
-            {visibleRepresentanter.map((rep) => (
-              <article
-                key={`${rep.id}-${rep.fornavn}-${rep.etternavn}`}
-                className={`rep-card${selectedRepresentativeId === rep.id ? " rep-card-selected" : ""}`}
-                role="button"
-                tabIndex={0}
-                // Klikk oppdaterer valgt representant.
-                onClick={() => setSelectedRepresentativeId(rep.id)}
-                onKeyDown={(event) => {
-                  // Tastaturstøtte: Enter/Mellomrom gjør samme som klikk.
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault()
-                    setSelectedRepresentativeId(rep.id)
-                  }
-                }}
-              >
-                <div className="rep-top">
-                  <img
-                    className="rep-thumb"
-                    // Lite profilbilde i hvert kort.
-                    src={getRepresentativeImageUrl(rep.id, "lite")}
-                    alt={`${rep.fornavn} ${rep.etternavn}`}
-                    loading="lazy"
-                  />
-                  <div>
-                    <h3 className="rep-name">
-                      {rep.fornavn} {rep.etternavn}
-                    </h3>
-                    <p className="rep-muted">
-                      {rep.alder !== null ? `${rep.alder} år` : "Alder ukjent"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rep-chips">
-                  <span className="rep-chip rep-chip-party">{rep.parti}</span>
-                  <span className="rep-chip">{rep.kommune}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {visibleRepresentanter.length === 0 && (
-            <p style={{ marginTop: "0.8rem", color: "var(--muted)" }}>
-              Ingen representanter funnet for valgt parti.
+        {/* Hvit tekst direkte mot den mørke bakgrunnen */}
+        <section className="section" style={overBgStyle}>
+          <h1>Representanter</h1>
+          {/* Denne teksten forklarer at listen er basert på levende data fra Stortinget. */}
+          <p>Live data fra Stortinget-API (dagens representanter). Hentes direkte ved hver sidevisning.</p>
+          {lastUpdated && (
+            <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+              Sist oppdatert: {new Date(lastUpdated).toLocaleString("nb-NO")}
             </p>
           )}
         </section>
-      )}
-    </main>
+
+        {loading && <p style={overBgStyle}>Laster representanter...</p>}
+        {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+
+        {!loading && !error && (
+          <section className="section">
+
+            {/* Hvit tekst mot bakgrunnen for overskrift og filter */}
+            <div style={overBgStyle}>
+              <div className="rep-header">
+                <h2>Agder</h2>
+                <span className="rep-count">{visibleRepresentanter.length} representanter</span>
+              </div>
+
+              <div className="rep-filter-wrap">
+                {/* Brukeren klikker et kort under for å bytte hvem som vises i profilpanelet. */}
+                <p className="rep-filter-hint">Trykk på en representant for å se bilde.</p>
+                <label htmlFor="party-filter" className="rep-filter-label">
+                  Filtrer parti
+                </label>
+                <select
+                  id="party-filter"
+                  className="rep-filter-select"
+                  value={selectedParty}
+                  // Når parti endres, filtreres listen automatisk.
+                  onChange={(e) => setSelectedParty(e.target.value)}
+                >
+                  {partyFilters.map((party) => (
+                    <option key={party} value={party}>
+                      {party}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {selectedRepresentative && (
+              // Eget panel som viser valgt representant med større bilde.
+              // Kortet har sin egen bakgrunn (var(--card)), bruker var(--text) fra CSS.
+              <article className="rep-profile" aria-live="polite">
+                <img
+                  className="rep-profile-image"
+                  src={getRepresentativeImageUrl(selectedRepresentative.id)}
+                  alt={`${selectedRepresentative.fornavn} ${selectedRepresentative.etternavn}`}
+                  loading="lazy"
+                />
+                <div className="rep-profile-content">
+                  <h3 className="rep-profile-name">
+                    {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
+                  </h3>
+                  <p className="rep-muted">
+                    {selectedRepresentative.alder !== null
+                      ? `${selectedRepresentative.alder} år`
+                      : "Alder ukjent"}
+                  </p>
+                  <div className="rep-chips">
+                    <span className="rep-chip rep-chip-party">{selectedRepresentative.parti}</span>
+                    <span className="rep-chip">{selectedRepresentative.kommune}</span>
+                  </div>
+
+                  <section className="rep-bio">
+                    <h4 className="rep-bio-heading">Personlig biografi</h4>
+                    {biographyLoading && <p className="rep-bio-status">Laster biografi...</p>}
+                    {biographyError && (
+                      <p className="rep-bio-status rep-bio-status-error">{biographyError}</p>
+                    )}
+                    {!biographyLoading && !biographyError && biography.length === 0 && (
+                      <p className="rep-bio-status">Ingen biografi funnet for denne representanten.</p>
+                    )}
+
+                    {!biographyLoading && !biographyError && biography.length > 0 && (
+                      <>
+                        <button
+                          type="button"
+                          className="rep-bio-toggle"
+                          aria-expanded={showBiography}
+                          onClick={() => setShowBiography((current) => !current)}
+                        >
+                          {showBiography ? "Skjul detaljer" : "Vis biografi"}
+                        </button>
+
+                        {showBiography && (
+                          <ul className="rep-bio-list">
+                            {biography.map((item) => (
+                              <li key={item.id} className="rep-bio-row">
+                                <p className="rep-bio-title">{item.title}</p>
+                                {item.subtitle && <p className="rep-bio-subtitle">{item.subtitle}</p>}
+                                {item.period && <p className="rep-bio-period">{item.period}</p>}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
+                  </section>
+                </div>
+              </article>
+            )}
+
+            <div className="rep-grid">
+              {visibleRepresentanter.map((rep) => (
+                <article
+                  key={`${rep.id}-${rep.fornavn}-${rep.etternavn}`}
+                  className={`rep-card${selectedRepresentativeId === rep.id ? " rep-card-selected" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  // Klikk oppdaterer valgt representant.
+                  onClick={() => setSelectedRepresentativeId(rep.id)}
+                  onKeyDown={(event) => {
+                    // Tastaturstøtte: Enter/Mellomrom gjør samme som klikk.
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault()
+                      setSelectedRepresentativeId(rep.id)
+                    }
+                  }}
+                >
+                  <div className="rep-top">
+                    <img
+                      className="rep-thumb"
+                      // Lite profilbilde i hvert kort.
+                      src={getRepresentativeImageUrl(rep.id, "lite")}
+                      alt={`${rep.fornavn} ${rep.etternavn}`}
+                      loading="lazy"
+                    />
+                    <div>
+                      <h3 className="rep-name">
+                        {rep.fornavn} {rep.etternavn}
+                      </h3>
+                      <p className="rep-muted">
+                        {rep.alder !== null ? `${rep.alder} år` : "Alder ukjent"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rep-chips">
+                    <span className="rep-chip rep-chip-party">{rep.parti}</span>
+                    <span className="rep-chip">{rep.kommune}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {visibleRepresentanter.length === 0 && (
+              <p style={{ marginTop: "0.8rem", ...overBgStyle }}>
+                Ingen representanter funnet for valgt parti.
+              </p>
+            )}
+          </section>
+        )}
+      </main>
+    </>
   )
 }
+

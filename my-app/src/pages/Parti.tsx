@@ -1,8 +1,10 @@
+import type { CSSProperties } from "react"
+type Lang = "no" | "en"
+
 type Party = {
   navn: string
   forkortelse: string
   farge: string
-  tekstFarge: string
   logo: string
   nettside: string
 }
@@ -14,7 +16,6 @@ const partier: Party[] = [
     navn: "Arbeiderpartiet",
     forkortelse: "Ap",
     farge: "#E30613",
-    tekstFarge: "#fff",
     logo: "/logo-images/aplogo.png",
     nettside: "https://www.arbeiderpartiet.no/politikken/partiprogram/",
   },
@@ -22,7 +23,6 @@ const partier: Party[] = [
     navn: "Høyre",
     forkortelse: "H",
     farge: "#2A6ABC",
-    tekstFarge: "#fff",
     logo: "/logo-images/Hlogo.png",
     nettside: "https://hoyre.no/politikk/partiprogram/",
   },
@@ -30,7 +30,6 @@ const partier: Party[] = [
     navn: "Fremskrittspartiet",
     forkortelse: "FrP",
     farge: "#003F7F",
-    tekstFarge: "#fff",
     logo: "/logo-images/frplogo.png",
     nettside: "https://www.frp.no/files/Program/2025/Program-2025-2029.pdf",
   },
@@ -38,7 +37,6 @@ const partier: Party[] = [
     navn: "Senterpartiet",
     forkortelse: "Sp",
     farge: "#00693E",
-    tekstFarge: "#fff",
     logo: "/logo-images/splogo.png",
     nettside:
       "https://www.senterpartiet.no/politikk/program-uttaler/Nytt%20prinsipp-%20og%20handlingsprogram%202025-2029",
@@ -47,7 +45,6 @@ const partier: Party[] = [
     navn: "Sosialistisk Venstreparti",
     forkortelse: "SV",
     farge: "#ffffff",
-    tekstFarge: "#fff",
     logo: "/logo-images/svlogo.png",
     nettside: "https://www.sv.no/partiet/program/",
   },
@@ -55,7 +52,6 @@ const partier: Party[] = [
     navn: "Venstre",
     forkortelse: "V",
     farge: "#00857B",
-    tekstFarge: "#fff",
     logo: "/logo-images/venstre.png",
     nettside: "https://www.venstre.no/politikk/partiprogram/",
   },
@@ -63,7 +59,6 @@ const partier: Party[] = [
     navn: "Kristelig Folkeparti",
     forkortelse: "KrF",
     farge: "#FEEF32",
-    tekstFarge: "#000",
     logo: "/logo-images/krflogobildet.png",
     nettside: "https://krf.no/politikk/politisk-program/",
   },
@@ -71,7 +66,6 @@ const partier: Party[] = [
     navn: "Rødt",
     forkortelse: "R",
     farge: "#ffffff",
-    tekstFarge: "#fff",
     logo: "/logo-images/roedt.svg",
     nettside: "https://roedt.no/arbeidsprogram",
   },
@@ -79,97 +73,66 @@ const partier: Party[] = [
     navn: "Miljøpartiet De Grønne",
     forkortelse: "MDG",
     farge: "#377E00",
-    tekstFarge: "#fff",
     logo: "/logo-images/mdglogo.png",
     nettside: "https://mdg.no/politikk/",
   },
 ]
 
-export default function Parti() {
+type PartiProps = { lang: Lang }
+
+export default function Parti({ lang }: PartiProps) {
+  const t =
+    lang === "no"
+      ? {
+          title: "Partiprogrammer",
+          subtitle: "Oversikt over partienes programmer med direkte lenke til originalkildene.",
+          open: "Åpne program",
+          read: "Les partiprogram",
+        }
+      : {
+          title: "Party Programs",
+          subtitle: "Overview of party programs with direct links to the original sources.",
+          open: "Open program",
+          read: "Read party program",
+        }
+
   return (
-    <main className="page">
-      <h1>Partiprogrammer</h1>
-      <p>Oversikt over alle partiprogrammene representert i Agderbenken.</p>
+    <main className="page parti-page">
+      <section className="parti-hero">
+        <h1>{t.title}</h1>
+        <p>{t.subtitle}</p>
+      </section>
 
-      {/* 3-kolonne grid med partikort.
-          React går gjennom listen "partier" og bygger ett kort per parti. */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "2rem",
-          marginTop: "2rem",
-          maxWidth: "900px",
-        }}
-      >
+      <section className="parti-grid">
         {partier.map((parti) => (
-          <div
+          <article
             key={parti.navn}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              cursor: "pointer",
-            }}
+            className="parti-card"
+            style={{ "--party-color": parti.farge } as CSSProperties}
           >
-            {/* Hele boksen er en lenke til partiets eksterne programside.
-                target="_blank" betyr at lenken åpnes i ny fane. */}
             <a
+              className="parti-link"
               href={parti.nettside}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                width: "100%",
-                aspectRatio: "4/3",
-                backgroundColor: parti.farge,
-                borderRadius: "12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "2.5rem",
-                fontWeight: "bold",
-                color: parti.tekstFarge,
-                border: "2px solid #ddd",
-                transition: "transform 0.15s, box-shadow 0.15s",
-                overflow: "hidden",
-                textDecoration: "none",
-              }}
-              onMouseEnter={(e) => {
-                // Liten visuell effekt når musen går over kortet.
-                const target = e.currentTarget as HTMLAnchorElement
-                target.style.transform = "scale(1.04)"
-                target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15)"
-              }}
-              onMouseLeave={(e) => {
-                // Nullstill effekten når musen flyttes bort.
-                const target = e.currentTarget as HTMLAnchorElement
-                target.style.transform = "scale(1)"
-                target.style.boxShadow = "none"
-              }}
             >
-              <img
-                src={parti.logo}
-                alt={parti.navn}
-                style={{ width: "70%", height: "70%", objectFit: "contain" }}
-              />
-            </a>
+              <header className="parti-card-head">
+                <span className="parti-pill">{parti.forkortelse}</span>
+                <span className="parti-open">{t.open}</span>
+              </header>
 
-            <p style={{ marginTop: "0.5rem", fontWeight: "500", textAlign: "center" }}>
-              {parti.navn}
-            </p>
+              <div className="parti-logo-wrap">
+                <img src={parti.logo} alt={parti.navn} className="parti-logo" />
+              </div>
 
-            <a
-              href={parti.nettside}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: "0.85rem", color: "#0065F1" }}
-            >
-              {/* Ekstra tekstlenke under kortet, peker til samme sted */}
-              Les partiprogram
+              <footer className="parti-card-foot">
+                <strong>{parti.navn}</strong>
+                <small>{t.read}</small>
+              </footer>
             </a>
-          </div>
+          </article>
         ))}
-      </div>
+      </section>
     </main>
   )
 }

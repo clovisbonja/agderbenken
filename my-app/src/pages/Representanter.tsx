@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 // Live-endepunkt for "dagens representanter" fra Stortinget.
 const API_URL = "https://data.stortinget.no/eksport/dagensrepresentanter"
@@ -25,6 +25,8 @@ type BiographyItem = {
 }
 
 const PERSON_IMAGE_BASE_URL = "https://data.stortinget.no/eksport/personbilde"
+
+type Lang = "no" | "en"
 
 // Lager en komplett bilde-lenke til Stortinget for én person.
 // Hvis person-id mangler bruker vi "X", slik at API-et kan returnere erstatningsbilde.
@@ -204,99 +206,56 @@ function parseBiography(xmlText: string): BiographyItem[] {
     .filter((item) => item.title)
 }
 
-function FlickeringGrid() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+type RepresentanterProps = { lang: Lang }
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    let w = window.innerWidth
-    let h = window.innerHeight
-    canvas.width = w
-    canvas.height = h
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    const CELL = 22
-    const GAP = 2
-    let COLS = Math.ceil(w / CELL)
-    let ROWS = Math.ceil(h / CELL)
-
-    let opacities = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.3)
-    let targets = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.35)
-    let speeds = Array.from({ length: COLS * ROWS }, () => 0.003 + Math.random() * 0.015)
-
-    const flickerInterval = setInterval(() => {
-      const n = Math.floor(Math.random() * 12) + 3
-      for (let i = 0; i < n; i++) {
-        const idx = Math.floor(Math.random() * opacities.length)
-        targets[idx] = 0.05 + Math.random() * 0.65
-      }
-    }, 80)
-
-    let animId: number
-
-    function draw() {
-      animId = requestAnimationFrame(draw)
-      if (!ctx) return
-      ctx.fillStyle = "#04090f"
-      ctx.fillRect(0, 0, w, h)
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const i = r * COLS + c
-          opacities[i] += (targets[i] - opacities[i]) * speeds[i]
-          if (Math.abs(opacities[i] - targets[i]) < 0.005) targets[i] = Math.random() * 0.25
-          ctx.fillStyle = `rgba(80, 150, 255, ${opacities[i]})`
-          ctx.beginPath()
-          ctx.roundRect(c * CELL + GAP, r * CELL + GAP, CELL - GAP * 2, CELL - GAP * 2, 3)
-          ctx.fill()
+export default function Representanter({ lang }: RepresentanterProps) {
+  const t =
+    lang === "no"
+      ? {
+          title: "Representanter",
+          intro: "Live data fra Stortinget API (dagens representanter). Hentes direkte ved hver sidevisning.",
+          updated: "Sist oppdatert",
+          loading: "Laster representanter...",
+          fetchError: "Klarte ikke hente data",
+          unknownFetchError: "Ukjent feil ved henting av data",
+          agder: "Agder",
+          representatives: "representanter",
+          tapHint: "Trykk på en representant for å se detaljer.",
+          filterParty: "Filtrer parti",
+          ageUnknown: "Alder ukjent",
+          biography: "Personlig biografi",
+          loadingBio: "Laster biografi...",
+          noBio: "Fant ingen biografi for denne representanten.",
+          hideDetails: "Skjul detaljer",
+          showBio: "Vis biografi",
+          bioError: "Ukjent feil ved henting av biografi",
+          noForParty: "Ingen representanter funnet for valgt parti.",
+          years: "år",
+          bioFetchError: "Klarte ikke hente biografi",
         }
-      }
-      const grad = ctx.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, h * 0.8)
-      grad.addColorStop(0, "rgba(4,9,15,0)")
-      grad.addColorStop(1, "rgba(4,9,15,0.85)")
-      ctx.fillStyle = grad
-      ctx.fillRect(0, 0, w, h)
-    }
+      : {
+          title: "Representatives",
+          intro: "Live data from the Storting API (current representatives). Fetched directly on each page view.",
+          updated: "Last updated",
+          loading: "Loading representatives...",
+          fetchError: "Could not fetch data",
+          unknownFetchError: "Unknown error while fetching data",
+          agder: "Agder",
+          representatives: "representatives",
+          tapHint: "Click a representative to view details.",
+          filterParty: "Filter party",
+          ageUnknown: "Age unknown",
+          biography: "Personal biography",
+          loadingBio: "Loading biography...",
+          noBio: "No biography found for this representative.",
+          hideDetails: "Hide details",
+          showBio: "Show biography",
+          bioError: "Unknown error while fetching biography",
+          noForParty: "No representatives found for selected party.",
+          years: "years",
+          bioFetchError: "Could not fetch biography",
+        }
 
-    draw()
-
-    const handleResize = () => {
-      w = window.innerWidth
-      h = window.innerHeight
-      canvas.width = w
-      canvas.height = h
-      COLS = Math.ceil(w / CELL)
-      ROWS = Math.ceil(h / CELL)
-      opacities = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.3)
-      targets = Array.from({ length: COLS * ROWS }, () => Math.random() * 0.35)
-      speeds = Array.from({ length: COLS * ROWS }, () => 0.003 + Math.random() * 0.015)
-    }
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      cancelAnimationFrame(animId)
-      clearInterval(flickerInterval)
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: "fixed", inset: 0, width: "100%", height: "100%", zIndex: -1, pointerEvents: "none" }}
-    />
-  )
-}
-
-// Hvit tekst-stil for innhold direkte mot bakgrunnen (utenfor kortene)
-const overBgStyle: React.CSSProperties = {
-  color: "white",
-  textShadow: "0 1px 8px rgba(0,0,0,0.7)",
-}
-
-export default function Representanter() {
   // Grunndata + tilstand som styrer hva brukeren ser.
   const [data, setData] = useState<Representative[]>([])
   const [loading, setLoading] = useState(true)
@@ -325,7 +284,7 @@ export default function Representanter() {
       try {
         const response = await fetch(API_URL, { signal: controller.signal })
         if (!response.ok) {
-          throw new Error(`Klarte ikke hente data (${response.status})`)
+          throw new Error(`${t.fetchError} (${response.status})`)
         }
 
         const xmlText = await response.text()
@@ -335,7 +294,7 @@ export default function Representanter() {
         setLastUpdated(Date.now())
       } catch (e) {
         if (controller.signal.aborted) return
-        setError(e instanceof Error ? e.message : "Ukjent feil ved henting av data")
+        setError(e instanceof Error ? e.message : t.unknownFetchError)
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
@@ -412,7 +371,7 @@ export default function Representanter() {
         })
 
         if (!response.ok) {
-          throw new Error(`Klarte ikke hente biografi (${response.status})`)
+          throw new Error(`${t.bioFetchError} (${response.status})`)
         }
 
         const xmlText = await response.text()
@@ -421,7 +380,7 @@ export default function Representanter() {
       } catch (e) {
         if (controller.signal.aborted) return
         setBiography([])
-        setBiographyError(e instanceof Error ? e.message : "Ukjent feil ved henting av biografi")
+        setBiographyError(e instanceof Error ? e.message : t.bioError)
         setShowBiography(false)
       } finally {
         if (!controller.signal.aborted) setBiographyLoading(false)
@@ -451,40 +410,40 @@ export default function Representanter() {
   }, [selectedRepresentativeId, visibleRepresentanter])
 
   return (
-    <>
-      <FlickeringGrid />
-      <main className="page">
+    <main className="page rep-page">
+      <div className="rep-page-bg" aria-hidden />
+      <div className="rep-page-content">
 
         {/* Hvit tekst direkte mot den mørke bakgrunnen */}
-        <section className="section" style={overBgStyle}>
-          <h1>Representanter</h1>
+        <section className="section">
+          <h1>{t.title}</h1>
           {/* Denne teksten forklarer at listen er basert på levende data fra Stortinget. */}
-          <p>Live data fra Stortinget-API (dagens representanter). Hentes direkte ved hver sidevisning.</p>
+          <p>{t.intro}</p>
           {lastUpdated && (
             <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-              Sist oppdatert: {new Date(lastUpdated).toLocaleString("nb-NO")}
+              {t.updated}: {new Date(lastUpdated).toLocaleString(lang === "no" ? "nb-NO" : "en-GB")}
             </p>
           )}
         </section>
 
-        {loading && <p style={overBgStyle}>Laster representanter...</p>}
+        {loading && <p>{t.loading}</p>}
         {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
 
         {!loading && !error && (
           <section className="section">
 
             {/* Hvit tekst mot bakgrunnen for overskrift og filter */}
-            <div style={overBgStyle}>
+            <div>
               <div className="rep-header">
-                <h2>Agder</h2>
-                <span className="rep-count">{visibleRepresentanter.length} representanter</span>
+                <h2>{t.agder}</h2>
+                <span className="rep-count">{visibleRepresentanter.length} {t.representatives}</span>
               </div>
 
               <div className="rep-filter-wrap">
                 {/* Brukeren klikker et kort under for å bytte hvem som vises i profilpanelet. */}
-                <p className="rep-filter-hint">Trykk på en representant for å se bilde.</p>
+                <p className="rep-filter-hint">{t.tapHint}</p>
                 <label htmlFor="party-filter" className="rep-filter-label">
-                  Filtrer parti
+                  {t.filterParty}
                 </label>
                 <select
                   id="party-filter"
@@ -518,8 +477,8 @@ export default function Representanter() {
                   </h3>
                   <p className="rep-muted">
                     {selectedRepresentative.alder !== null
-                      ? `${selectedRepresentative.alder} år`
-                      : "Alder ukjent"}
+                      ? `${selectedRepresentative.alder} ${t.years}`
+                      : t.ageUnknown}
                   </p>
                   <div className="rep-chips">
                     <span className="rep-chip rep-chip-party">{selectedRepresentative.parti}</span>
@@ -527,13 +486,13 @@ export default function Representanter() {
                   </div>
 
                   <section className="rep-bio">
-                    <h4 className="rep-bio-heading">Personlig biografi</h4>
-                    {biographyLoading && <p className="rep-bio-status">Laster biografi...</p>}
+                    <h4 className="rep-bio-heading">{t.biography}</h4>
+                    {biographyLoading && <p className="rep-bio-status">{t.loadingBio}</p>}
                     {biographyError && (
                       <p className="rep-bio-status rep-bio-status-error">{biographyError}</p>
                     )}
                     {!biographyLoading && !biographyError && biography.length === 0 && (
-                      <p className="rep-bio-status">Ingen biografi funnet for denne representanten.</p>
+                      <p className="rep-bio-status">{t.noBio}</p>
                     )}
 
                     {!biographyLoading && !biographyError && biography.length > 0 && (
@@ -544,7 +503,7 @@ export default function Representanter() {
                           aria-expanded={showBiography}
                           onClick={() => setShowBiography((current) => !current)}
                         >
-                          {showBiography ? "Skjul detaljer" : "Vis biografi"}
+                          {showBiography ? t.hideDetails : t.showBio}
                         </button>
 
                         {showBiography && (
@@ -595,7 +554,7 @@ export default function Representanter() {
                         {rep.fornavn} {rep.etternavn}
                       </h3>
                       <p className="rep-muted">
-                        {rep.alder !== null ? `${rep.alder} år` : "Alder ukjent"}
+                        {rep.alder !== null ? `${rep.alder} ${t.years}` : t.ageUnknown}
                       </p>
                     </div>
                   </div>
@@ -609,14 +568,14 @@ export default function Representanter() {
             </div>
 
             {visibleRepresentanter.length === 0 && (
-              <p style={{ marginTop: "0.8rem", ...overBgStyle }}>
-                Ingen representanter funnet for valgt parti.
+              <p style={{ marginTop: "0.8rem" }}>
+                {t.noForParty}
               </p>
             )}
           </section>
         )}
-      </main>
-    </>
+      </div>
+    </main>
   )
 }
 

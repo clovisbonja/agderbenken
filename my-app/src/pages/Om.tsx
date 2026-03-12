@@ -1,4 +1,19 @@
-const partners = [
+type Lang = "no" | "en"
+
+type OmProps = {
+  lang: Lang
+}
+
+type Partner = {
+  name: string
+  short: string
+  bg: string
+  textColor: string
+  url: string
+  img: string
+}
+
+const partners: Partner[] = [
   { name: "Digin", short: "Digin", bg: "#1a1a2e", textColor: "white", url: "https://digin.no", img: "/logo-images/digin-blaa-2x.png" },
   { name: "Bølgen Bærekraft", short: "Bølgen\nBærekraft", bg: "#ffffff", textColor: "white", url: "https://bolgenbarekraft.no", img: "/logo-images/bolgenlogo.jpg" },
   { name: "Fædrelandsvennen", short: "FVN", bg: "#ffffff", textColor: "#333", url: "https://www.fvn.no", img: "/logo-images/fvnlogo.png" },
@@ -6,109 +21,118 @@ const partners = [
   { name: "Ki Nå", short: "Ki Nå", bg: "#f5f5f5", textColor: "#333", url: "#", img: "/logo-images/kinaalogo.webp" },
 ]
 
-const values = [
-  { title: "Innovasjon", desc: "Vi søker nye løsninger på Agders utfordringer." },
-  { title: "Åpenhet", desc: "Vi er åpne om vårt arbeid og hvilke prosesser vi prioriterer." },
-  { title: "Nøytralitet", desc: "Vi legger partipolitikken til side for regionens beste." },
-];
-
-function HeroSection() {
-  return (
-    <section className="om-hero">
-      <h1>Om Agderbenken</h1>
-      <div className="om-underline" />
-      <p className="om-intro">
-        Agderbenken består av stortingsrepresentantene som er valgt inn fra Agder fylke.
-        De representerer ulike politiske partier, men har et felles ansvar for å ivareta
-        interessene til innbyggerne i regionen. I saker som er spesielt viktige for Agder,
-        samarbeider de på tvers av partigrenser. Agderbenken spiller derfor en sentral rolle
-        i å løfte regionale utfordringer og muligheter opp på nasjonalt nivå.
-      </p>
-    </section>
-  );
+const TEXT: Record<Lang, Record<string, string>> = {
+  no: {
+    title: "Om Agderbenken",
+    intro:
+      "Agderbenken består av stortingsrepresentantene valgt fra Agder. De kommer fra ulike partier, men samarbeider når saker er viktige for regionen. Målet er å løfte Agders behov og muligheter i nasjonal politikk.",
+    valuesHeading1: "Innovasjon",
+    valuesDesc1: "Vi søker nye løsninger på Agders utfordringer.",
+    valuesHeading2: "Åpenhet",
+    valuesDesc2: "Vi er åpne om arbeidet vårt og prioriteringene vi gjør.",
+    valuesHeading3: "Nøytralitet",
+    valuesDesc3: "Vi legger partipolitikk til side når regionens beste står i sentrum.",
+    projectTitle: "Om prosjektet",
+    projectP1:
+      "Prosjektet er utviklet som en bacheloroppgave i samarbeid med Digin. Målet er en digital løsning som viser hvordan Sørblikket leverer for regionen med bruk av åpne data, KI og visualisering.",
+    projectP2:
+      "Løsningen viser stemmemønstre, prioriteringer og forholdet mellom løfter og handling. Dette skal gjøre politikken mer forståelig for innbyggere, unge velgere, journalister og regionale aktører.",
+    projectP3:
+      "Data hentes fra Stortingets åpne API, Valgdirektoratet, partiprogrammer og andre offentlige kilder.",
+    partnersTitle: "Våre samarbeidspartnere",
+    visitSite: "Besøk nettside",
+  },
+  en: {
+    title: "About Agderbenken",
+    intro:
+      "Sørblikket consists of members of parliament elected from Agder. They represent different parties, but collaborate when matters are important for the region. The goal is to bring Agder's needs and opportunities into national politics.",
+    valuesHeading1: "Innovation",
+    valuesDesc1: "We seek new solutions to Agder's challenges.",
+    valuesHeading2: "Openness",
+    valuesDesc2: "We are transparent about our work and priorities.",
+    valuesHeading3: "Neutrality",
+    valuesDesc3: "We put party politics aside when the region's best interests come first.",
+    projectTitle: "About the project",
+    projectP1:
+      "This project was developed as a bachelor thesis in collaboration with Digin. The goal is a digital solution showing how Sørblikket delivers for the region using open data, AI, and visualization.",
+    projectP2:
+      "The solution highlights voting patterns, priorities, and the relationship between promises and actions. This helps make politics easier to understand for citizens, young voters, journalists, and regional stakeholders.",
+    projectP3:
+      "Data is sourced from Stortinget open API, the Norwegian Election Directorate, party programs, and other public sources.",
+    partnersTitle: "Our partners",
+    visitSite: "Visit website",
+  },
 }
 
-function ValuesSection() {
-  return (
-    <section className="section">
-      <div className="om-values">
-        {values.map((v) => (
-          <div className="om-card" key={v.title}>
-            <h3>{v.title}</h3>
-            <p>{v.desc}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
+export default function Om({ lang }: OmProps) {
+  const t = TEXT[lang]
 
-function ProjectSection() {
-  return (
-    <section className="section project-section">
-  <h2>Om prosjektet</h2>
-      <p>
-        Dette prosjektet er utviklet som en bacheloroppgave i samarbeid med <strong>Digin</strong> –
-        landets største IT- og digitaliseringsklynge. Målet er å lage en digital løsning som viser
-        hvordan Agderbenken leverer for regionen, ved hjelp av åpen data, KI og datavisualisering.
-      </p>
-      <p>
-        Løsningen belyser stemmemønstre, politiske prioriteringer og forholdet mellom politiske løfter
-        og faktisk handling. Vi ønsker å gjøre politikken mer gjennomsiktig og forståelig for unge
-        velgere, innbyggere i Agder, journalister og regionale aktører.
-      </p>
-      <p>
-        Dataene hentes fra Stortingets åpne API, Valgdirektoratet, partiprogrammer og andre offentlige
-        kilder. KI-analyse og visualiseringer gir nye muligheter for innsikt i hva Agderbenken faktisk gjør.
-      </p>
-    </section>
-  );
-}
+  const values = [
+    { title: t.valuesHeading1, desc: t.valuesDesc1 },
+    { title: t.valuesHeading2, desc: t.valuesDesc2 },
+    { title: t.valuesHeading3, desc: t.valuesDesc3 },
+  ]
 
-function PartnersSection() {
-  return (
-    <footer className="om-partners">
-      <h3>Våre Samarbeidspartnere</h3>
-      <div className="om-partners-underline" />
-      <div className="om-partners-grid">
-        {partners.map((p) => (
-          <a href={p.url} target="_blank" rel="noreferrer" className="partner-card" key={p.name}>
-            <div className="partner-logo-box" style={{ background: p.bg }}>
-              {p.img ? (
-                <img
-                  src={p.img}
-                  alt={p.name}
-                  style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain" }}
-                />
-              ) : (
-                <span style={{
-                  color: p.textColor,
-                  fontSize: "1.4rem",
-                  fontWeight: 700,
-                  textAlign: "center",
-                  padding: "0 0.75rem",
-                  whiteSpace: "pre-line",
-                }}>
-                  {p.short}
-                </span>
-              )}
-            </div>
-            <span className="partner-name">{p.name}</span>
-            <span className="partner-link">Besøk nettside</span>
-          </a>
-        ))}
-      </div>
-    </footer>
-  );
-}
-
-export default function Om() {
   return (
     <main className="page om-page">
-      <HeroSection />
-      <ValuesSection />
-      <ProjectSection />
-      <PartnersSection />
+      <section className="om-hero">
+        <h1>{t.title}</h1>
+        <div className="om-underline" />
+        <p className="om-intro">{t.intro}</p>
+      </section>
+
+      <section className="section">
+        <div className="om-values">
+          {values.map((v) => (
+            <article className="om-card" key={v.title}>
+              <h3>{v.title}</h3>
+              <p>{v.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section project-section">
+        <h2>{t.projectTitle}</h2>
+        <p>{t.projectP1}</p>
+        <p>{t.projectP2}</p>
+        <p>{t.projectP3}</p>
+      </section>
+
+      <footer className="om-partners">
+        <h3>{t.partnersTitle}</h3>
+        <div className="om-partners-underline" />
+        <div className="om-partners-grid">
+          {partners.map((p) => (
+            <a href={p.url} target="_blank" rel="noreferrer" className="partner-card" key={p.name}>
+              <div className="partner-logo-box" style={{ background: p.bg }}>
+                {p.img ? (
+                  <img
+                    src={p.img}
+                    alt={p.name}
+                    style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain" }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      color: p.textColor,
+                      fontSize: "1.4rem",
+                      fontWeight: 700,
+                      textAlign: "center",
+                      padding: "0 0.75rem",
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {p.short}
+                  </span>
+                )}
+              </div>
+              <span className="partner-name">{p.name}</span>
+              <span className="partner-link">{t.visitSite}</span>
+            </a>
+          ))}
+        </div>
+      </footer>
 
       <style>{`
         .om-page {
@@ -119,8 +143,8 @@ export default function Om() {
         }
         .om-hero {
           text-align: center;
-          padding: 3rem 2rem 2rem;
-          max-width: 780px;
+          padding: 2.5rem 1.5rem 1.5rem;
+          max-width: 820px;
         }
         .om-hero h1 {
           font-size: 2rem;
@@ -131,47 +155,48 @@ export default function Om() {
           width: 80px;
           height: 3px;
           background: #3b82f6;
-          margin: 0 auto 1.5rem;
+          margin: 0 auto 1.2rem;
           border-radius: 2px;
         }
         .om-intro {
           font-size: 1rem;
           line-height: 1.7;
-          color: #333;
+          color: var(--muted);
         }
         .om-values {
           display: flex;
-          gap: 1.5rem;
+          gap: 1rem;
           flex-wrap: wrap;
           justify-content: center;
         }
         .om-card {
-          background: #60a5fa;
           border-radius: 12px;
-          padding: 2rem 1.5rem;
+          padding: 1.4rem 1.2rem;
           flex: 1 1 220px;
           max-width: 280px;
-          min-height: 180px;
+          min-height: 170px;
           display: flex;
           flex-direction: column;
           gap: 0.4rem;
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
-          cursor: default;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
           text-align: center;
+          border: 1px solid var(--glass);
+          background: color-mix(in srgb, var(--card) 88%, #60a5fa 12%);
         }
         .om-card:hover {
-          transform: scale(1.05);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
-        .om-card h3 { font-size: 1.3rem; font-weight: 700; color: #000; }
-        .om-card p  { font-size: 0.95rem; color: #000; line-height: 1.5; }
+        .om-card h3 { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+        .om-card p  { font-size: 0.95rem; color: var(--muted); line-height: 1.5; }
+
         .project-section {
           text-align: center;
-          max-width: 780px;
-          padding: 2rem;
+          max-width: 860px;
+          padding: 1.6rem;
         }
         .project-section h2 {
-          font-size: 2rem;
+          font-size: 1.9rem;
           font-weight: 700;
           margin-bottom: 0.5rem;
           display: inline-block;
@@ -182,22 +207,24 @@ export default function Om() {
           height: 3px;
           background: #3b82f6;
           border-radius: 2px;
-          margin-top: 0.5rem;
+          margin-top: 0.45rem;
           width: 100%;
         }
         .project-section p {
           font-size: 1rem;
           line-height: 1.7;
-          color: #333;
+          color: var(--muted);
           margin-bottom: 1rem;
         }
+
         .om-partners {
           width: 100%;
-          border-top: 1px solid #e5e7eb;
-          margin-top: 2rem;
-          padding: 2.5rem 2rem 3rem;
+          border-top: 1px solid var(--glass);
+          margin-top: 1.4rem;
+          padding: 2.2rem 1.2rem 2.6rem;
           text-align: center;
-          background: #fff;
+          background: var(--card);
+          border-radius: 16px;
         }
         .om-partners h3 {
           font-size: 1.5rem;
@@ -208,26 +235,25 @@ export default function Om() {
           width: 80px;
           height: 3px;
           background: #3b82f6;
-          margin: 0 auto 2rem;
+          margin: 0 auto 1.5rem;
           border-radius: 2px;
         }
         .om-partners-grid {
           display: grid;
-          grid-template-columns: repeat(3, 200px);
-          gap: 2rem;
+          grid-template-columns: repeat(3, minmax(0, 200px));
+          gap: 1.4rem;
           justify-content: center;
           justify-items: center;
           max-width: 1100px;
           margin: 0 auto;
         }
-       .om-partners-grid .partner-card:nth-child(4) {
-  grid-column: 1;
-  grid-row: 2;
-}
-.om-partners-grid .partner-card:nth-child(5) {
-  grid-column: 2;
-  grid-row: 2;
-
+        .om-partners-grid .partner-card:nth-child(4) {
+          grid-column: 1;
+          grid-row: 2;
+        }
+        .om-partners-grid .partner-card:nth-child(5) {
+          grid-column: 2;
+          grid-row: 2;
         }
         .partner-card {
           display: flex;
@@ -235,7 +261,7 @@ export default function Om() {
           align-items: center;
           gap: 0.75rem;
           text-decoration: none;
-          color: #111;
+          color: var(--text);
           width: 200px;
         }
         .partner-logo-box {
@@ -245,15 +271,37 @@ export default function Om() {
           display: flex;
           align-items: center;
           justify-content: center;
+          border: 1px solid var(--glass);
           transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .partner-card:hover .partner-logo-box {
-          transform: scale(1.05);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+          transform: scale(1.03);
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
         }
         .partner-name { font-weight: 700; font-size: 1rem; }
         .partner-link { color: #3b82f6; font-size: 0.9rem; text-decoration: underline; }
+
+        @media (max-width: 900px) {
+          .om-partners-grid {
+            grid-template-columns: repeat(2, minmax(0, 180px));
+          }
+          .om-partners-grid .partner-card:nth-child(4),
+          .om-partners-grid .partner-card:nth-child(5) {
+            grid-column: auto;
+            grid-row: auto;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .om-partners-grid {
+            grid-template-columns: 1fr;
+          }
+          .partner-card, .partner-logo-box {
+            width: 100%;
+            max-width: 280px;
+          }
+        }
       `}</style>
     </main>
-  );
+  )
 }

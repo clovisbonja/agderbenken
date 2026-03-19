@@ -11,11 +11,11 @@ type Partner = {
 }
 
 const partners: Partner[] = [
-  { name: "Digin", short: "Digin", bg: "#1a1a2e", textColor: "white", url: "https://digin.no", img: "/logo-images/digin-blaa-2x.png" },
-  { name: "Bølgen Bærekraft", short: "Bølgen\nBærekraft", bg: "#ffffff", textColor: "white", url: "https://bolgenbarekraft.no", img: "/logo-images/bolgenlogo.jpg" },
+  { name: "Digin", short: "Digin", bg: "#ffffff", textColor: "white", url: "https://digin.no", img: "/logo-images/digin-blaa-2x.png" },
+  { name: "Bølgen Bærekraft", short: "Bølgen\nBærekraft", bg: "#ffffff", textColor: "white", url: "https://bolgenbks.no/", img: "/logo-images/bolgenlogo.jpg" },
   { name: "Fædrelandsvennen", short: "FVN", bg: "#ffffff", textColor: "#333", url: "https://www.fvn.no", img: "/logo-images/fvnlogo.png" },
   { name: "Universitetet i Agder", short: "UiA", bg: "#ffffff", textColor: "white", url: "https://www.uia.no", img: "/logo-images/uialogo.jpg" },
-  { name: "Ki Nå", short: "Ki Nå", bg: "#f5f5f5", textColor: "#333", url: "#", img: "/logo-images/kinaalogo.webp" },
+  { name: "Ki Nå", short: "Ki Nå", bg: "#ffffff", textColor: "#333", url: "https://www.kinaa.no/", img: "/logo-images/kinaalogo.webp" },
 ]
 
 const T: Record<Lang, Record<string, string>> = {

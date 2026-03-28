@@ -206,6 +206,21 @@ function parseBiography(xmlText: string): BiographyItem[] {
     .filter((item) => item.title)
 }
 
+const PARTY_COLORS_RP: Record<string, string> = {
+  "Arbeiderpartiet": "#EF3340",
+  "Høyre": "#0066CC",
+  "Fremskrittspartiet": "#003087",
+  "Senterpartiet": "#009B3A",
+  "Sosialistisk Venstreparti": "#EF3C96",
+  "Venstre": "#00843D",
+  "Kristelig Folkeparti": "#d97706",
+  "Miljøpartiet De Grønne": "#5E9732",
+  "Rødt": "#E30613",
+}
+function getPartyColor(parti: string): string {
+  return PARTY_COLORS_RP[parti] || "#6b7280"
+}
+
 type RepresentanterProps = { lang: Lang }
 
 export default function Representanter({ lang }: RepresentanterProps) {
@@ -391,6 +406,12 @@ export default function Representanter({ lang }: RepresentanterProps) {
     return () => controller.abort()
   }, [selectedRepresentative])
 
+  const partyCount = useMemo(() => {
+    const map: Record<string, number> = {}
+    sortedRepresentanter.forEach((r) => { map[r.parti] = (map[r.parti] ?? 0) + 1 })
+    return map
+  }, [sortedRepresentanter])
+
   useEffect(() => {
     // Sørger for at vi alltid har en gyldig valgt representant i gjeldende filter.
     // Hvis filteret endres og den gamle ikke finnes, velges første i lista.
@@ -410,172 +431,200 @@ export default function Representanter({ lang }: RepresentanterProps) {
   }, [selectedRepresentativeId, visibleRepresentanter])
 
   return (
-    <main className="page rep-page">
-      <div className="rep-page-bg" aria-hidden />
-      <div className="rep-page-content">
+    <div className="rp-page">
 
-        {/* Hvit tekst direkte mot den mørke bakgrunnen */}
-        <section className="section">
-          <h1>{t.title}</h1>
-          {/* Denne teksten forklarer at listen er basert på levende data fra Stortinget. */}
-          <p>{t.intro}</p>
-          {lastUpdated && (
-            <p style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-              {t.updated}: {new Date(lastUpdated).toLocaleString(lang === "no" ? "nb-NO" : "en-GB")}
+      {/* ── HERO ── */}
+      <section className="ed-page-hero">
+        <div className="ed-page-hero-content">
+          <p className="ed-page-hero-kicker">Stortinget · Agder</p>
+          <h1 className="ed-page-hero-heading">{lang === "no" ? "Representanter" : "Representatives"}</h1>
+          <p className="ed-page-hero-lead">
+            {lang === "no"
+              ? "Agderbenkens representanter på Stortinget — hvem de er og hva de gjør."
+              : "Agder's representatives in the Storting — who they are and what they do."}
+          </p>
+          {!loading && !error && (
+            <p className="ed-page-hero-meta">
+              {sortedRepresentanter.length} {lang === "no" ? "representanter fra Agder" : "representatives from Agder"} · {lang === "no" ? "Hentet live fra Stortingets API" : "Fetched live from the Storting API"}
             </p>
           )}
-        </section>
+        </div>
+        <div className="ed-page-hero-panel" aria-hidden />
+      </section>
+      <div className="rp-hero" style={{display:"none"}}>
+        <div className="rp-hero-inner">
+          <div className="rp-hero-left">
+          </div>
+          {!loading && !error && (
+            <div className="rp-hero-stat">
+              <span className="rp-hero-stat-num">{sortedRepresentanter.length}</span>
+              <span className="rp-hero-stat-lbl">{lang === "no" ? "representanter" : "representatives"}</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-        {loading && <p>{t.loading}</p>}
-        {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+      {/* ── BODY ── */}
+      <div className="rp-body">
+        {loading && (
+          <div className="rp-status">
+            <span className="vsl-spinner" aria-hidden />
+            <span>{t.loading}</span>
+          </div>
+        )}
+        {error && <div className="rp-status rp-status-error">{error}</div>}
 
         {!loading && !error && (
-          <section className="section">
-
-            {/* Hvit tekst mot bakgrunnen for overskrift og filter */}
-            <div>
-              <div className="rep-header">
-                <h2>{t.agder}</h2>
-                <span className="rep-count">{visibleRepresentanter.length} {t.representatives}</span>
-              </div>
-
-              <div className="rep-filter-wrap">
-                {/* Brukeren klikker et kort under for å bytte hvem som vises i profilpanelet. */}
-                <p className="rep-filter-hint">{t.tapHint}</p>
-                <label htmlFor="party-filter" className="rep-filter-label">
-                  {t.filterParty}
-                </label>
-                <select
-                  id="party-filter"
-                  className="rep-filter-select"
-                  value={selectedParty}
-                  // Når parti endres, filtreres listen automatisk.
-                  onChange={(e) => setSelectedParty(e.target.value)}
-                >
-                  {partyFilters.map((party) => (
-                    <option key={party} value={party}>
-                      {party}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <>
+            {/* Party filter chips */}
+            <div className="rp-filters">
+              {partyFilters.map((party) => {
+                const isActive = selectedParty === party
+                const color = getPartyColor(party)
+                const count = party === ALL_PARTIES_OPTION
+                  ? sortedRepresentanter.length
+                  : (partyCount[party] ?? 0)
+                return (
+                  <button
+                    key={party}
+                    className={`rp-chip${isActive ? " rp-chip-active" : ""}`}
+                    style={party !== ALL_PARTIES_OPTION ? { "--rp-party-color": color } as React.CSSProperties : {}}
+                    onClick={() => { setSelectedParty(party); setSelectedRepresentativeId(null) }}
+                  >
+                    {party !== ALL_PARTIES_OPTION && (
+                      <span className="rp-chip-dot" style={{ background: color }} />
+                    )}
+                    <span className="rp-chip-label">{party}</span>
+                    <span className="rp-chip-count">{count}</span>
+                  </button>
+                )
+              })}
             </div>
 
+            {/* Detail panel — above the grid so it's visible immediately */}
             {selectedRepresentative && (
-              // Eget panel som viser valgt representant med større bilde.
-              // Kortet har sin egen bakgrunn (var(--card)), bruker var(--text) fra CSS.
-              <article className="rep-profile" aria-live="polite">
-                <img
-                  className="rep-profile-image"
-                  src={getRepresentativeImageUrl(selectedRepresentative.id)}
-                  alt={`${selectedRepresentative.fornavn} ${selectedRepresentative.etternavn}`}
-                  loading="lazy"
-                />
-                <div className="rep-profile-content">
-                  <h3 className="rep-profile-name">
-                    {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
-                  </h3>
-                  <p className="rep-muted">
-                    {selectedRepresentative.alder !== null
-                      ? `${selectedRepresentative.alder} ${t.years}`
-                      : t.ageUnknown}
-                  </p>
-                  <div className="rep-chips">
-                    <span className="rep-chip rep-chip-party">{selectedRepresentative.parti}</span>
-                    <span className="rep-chip">{selectedRepresentative.kommune}</span>
-                  </div>
-
-                  <section className="rep-bio">
-                    <h4 className="rep-bio-heading">{t.biography}</h4>
-                    {biographyLoading && <p className="rep-bio-status">{t.loadingBio}</p>}
-                    {biographyError && (
-                      <p className="rep-bio-status rep-bio-status-error">{biographyError}</p>
-                    )}
-                    {!biographyLoading && !biographyError && biography.length === 0 && (
-                      <p className="rep-bio-status">{t.noBio}</p>
-                    )}
-
-                    {!biographyLoading && !biographyError && biography.length > 0 && (
-                      <>
-                        <button
-                          type="button"
-                          className="rep-bio-toggle"
-                          aria-expanded={showBiography}
-                          onClick={() => setShowBiography((current) => !current)}
-                        >
-                          {showBiography ? t.hideDetails : t.showBio}
-                        </button>
-
-                        {showBiography && (
-                          <ul className="rep-bio-list">
-                            {biography.map((item) => (
-                              <li key={item.id} className="rep-bio-row">
-                                <p className="rep-bio-title">{item.title}</p>
-                                {item.subtitle && <p className="rep-bio-subtitle">{item.subtitle}</p>}
-                                {item.period && <p className="rep-bio-period">{item.period}</p>}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </>
-                    )}
-                  </section>
-                </div>
-              </article>
-            )}
-
-            <div className="rep-grid">
-              {visibleRepresentanter.map((rep) => (
-                <article
-                  key={`${rep.id}-${rep.fornavn}-${rep.etternavn}`}
-                  className={`rep-card${selectedRepresentativeId === rep.id ? " rep-card-selected" : ""}`}
-                  role="button"
-                  tabIndex={0}
-                  // Klikk oppdaterer valgt representant.
-                  onClick={() => setSelectedRepresentativeId(rep.id)}
-                  onKeyDown={(event) => {
-                    // Tastaturstøtte: Enter/Mellomrom gjør samme som klikk.
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault()
-                      setSelectedRepresentativeId(rep.id)
-                    }
-                  }}
-                >
-                  <div className="rep-top">
+              <div className="rp-detail" aria-live="polite">
+                <div className="rp-detail-inner">
+                  <div className="rp-detail-photo-col">
                     <img
-                      className="rep-thumb"
-                      // Lite profilbilde i hvert kort.
-                      src={getRepresentativeImageUrl(rep.id, "lite")}
-                      alt={`${rep.fornavn} ${rep.etternavn}`}
+                      className="rp-detail-photo"
+                      src={getRepresentativeImageUrl(selectedRepresentative.id, "stort")}
+                      alt={`${selectedRepresentative.fornavn} ${selectedRepresentative.etternavn}`}
                       loading="lazy"
                     />
-                    <div>
-                      <h3 className="rep-name">
-                        {rep.fornavn} {rep.etternavn}
-                      </h3>
-                      <p className="rep-muted">
-                        {rep.alder !== null ? `${rep.alder} ${t.years}` : t.ageUnknown}
-                      </p>
+                  </div>
+                  <div className="rp-detail-info-col">
+                    <div className="rp-detail-meta">
+                      <span
+                        className="rp-detail-party"
+                        style={{
+                          background: getPartyColor(selectedRepresentative.parti) + "1a",
+                          color: getPartyColor(selectedRepresentative.parti),
+                          borderColor: getPartyColor(selectedRepresentative.parti) + "55",
+                        }}
+                      >
+                        {selectedRepresentative.parti}
+                      </span>
+                      <span className="rp-detail-fylke">{selectedRepresentative.fylke}</span>
+                    </div>
+                    <h2 className="rp-detail-name">
+                      {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
+                    </h2>
+                    <p className="rp-detail-age">
+                      {selectedRepresentative.alder !== null
+                        ? `${selectedRepresentative.alder} ${t.years}`
+                        : t.ageUnknown}
+                    </p>
+                    <div className="rp-bio">
+                      <p className="rp-bio-heading">{t.biography}</p>
+                      {biographyLoading && <p className="rp-bio-status">{t.loadingBio}</p>}
+                      {biographyError && (
+                        <p className="rp-bio-status rp-bio-status-error">{biographyError}</p>
+                      )}
+                      {!biographyLoading && !biographyError && biography.length === 0 && (
+                        <p className="rp-bio-status">{t.noBio}</p>
+                      )}
+                      {!biographyLoading && !biographyError && biography.length > 0 && (
+                        <>
+                          <button
+                            type="button"
+                            className="rp-bio-toggle"
+                            aria-expanded={showBiography}
+                            onClick={() => setShowBiography((c) => !c)}
+                          >
+                            {showBiography ? t.hideDetails : t.showBio}
+                          </button>
+                          {showBiography && (
+                            <ul className="rp-bio-list">
+                              {biography.map((item) => (
+                                <li key={item.id} className="rp-bio-row">
+                                  <p className="rp-bio-title">{item.title}</p>
+                                  {item.subtitle && <p className="rp-bio-subtitle">{item.subtitle}</p>}
+                                  {item.period && <p className="rp-bio-period">{item.period}</p>}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
-
-                  <div className="rep-chips">
-                    <span className="rep-chip rep-chip-party">{rep.parti}</span>
-                    <span className="rep-chip">{rep.kommune}</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            {visibleRepresentanter.length === 0 && (
-              <p style={{ marginTop: "0.8rem" }}>
-                {t.noForParty}
-              </p>
+                </div>
+              </div>
             )}
-          </section>
+
+            {/* Rep grid */}
+            {visibleRepresentanter.length === 0 ? (
+              <p className="rp-empty">{t.noForParty}</p>
+            ) : (
+              <div className="rp-grid">
+                {visibleRepresentanter.map((rep) => {
+                  const isSelected = selectedRepresentativeId === rep.id
+                  const partyColor = getPartyColor(rep.parti)
+                  return (
+                    <article
+                      key={`${rep.id}-${rep.fornavn}`}
+                      className={`rp-card${isSelected ? " rp-card-active" : ""}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setSelectedRepresentativeId(isSelected ? null : rep.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault()
+                          setSelectedRepresentativeId(isSelected ? null : rep.id)
+                        }
+                      }}
+                    >
+                      <div className="rp-card-img-wrap" style={{ "--party-color": partyColor } as React.CSSProperties}>
+                        <img
+                          className="rp-card-img"
+                          src={getRepresentativeImageUrl(rep.id, "stort")}
+                          alt={`${rep.fornavn} ${rep.etternavn}`}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="rp-card-info">
+                        <h3 className="rp-card-name">{rep.fornavn} {rep.etternavn}</h3>
+                        <p className="rp-card-age">
+                          {rep.alder !== null ? `${rep.alder} ${t.years}` : t.ageUnknown}
+                        </p>
+                        <span
+                          className="rp-card-party"
+                          style={{ background: partyColor + "1a", color: partyColor, borderColor: partyColor + "44" }}
+                        >
+                          {rep.parti}
+                        </span>
+                      </div>
+                      {isSelected && <span className="rp-card-tick" aria-hidden>✓</span>}
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+
+          </>
         )}
       </div>
-    </main>
+    </div>
   )
 }
-

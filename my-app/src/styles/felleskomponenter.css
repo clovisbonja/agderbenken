@@ -1,0 +1,297 @@
+/* ── Felleskomponenter — ed-page-hero, footer, explorer ─────────── */
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+.site-footer{
+  margin-top:auto;
+  border-top: 3px solid var(--accent);
+  background: var(--card);
+}
+.site-footer::before{ display: none; }
+.site-footer-inner{
+  max-width:1100px;
+  margin:0 auto;
+  padding:40px 24px 32px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:32px;
+}
+.site-footer-brand{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.site-footer-logo{
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  color: var(--text);
+  -webkit-text-fill-color: unset;
+  background: none;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+}
+.site-footer-tagline{
+  margin:0;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.65;
+  max-width:240px;
+}
+.site-footer-nav,
+.site-footer-meta{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.site-footer-nav-label{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:4px;
+  opacity:.7;
+}
+.site-footer-link{
+  font-size:13px;
+  color:var(--muted);
+  text-decoration:none;
+  transition:color .15s;
+  width:fit-content;
+}
+.site-footer-link:hover,
+.site-footer-link.active{
+  color:var(--accent);
+}
+.site-footer-bottom{
+  max-width:1100px;
+  margin:0 auto;
+  padding:14px 24px;
+  border-top:1px solid var(--glass);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  font-size:12px;
+  color:var(--muted);
+  opacity:.7;
+  flex-wrap:wrap;
+}
+@media(max-width:760px){
+  .site-footer-inner{
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  .site-footer-brand{
+    grid-column:1 / -1;
+  }
+  .site-footer-bottom{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+  }
+}
+@media(max-width:480px){
+  .site-footer-inner{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ── Universal editorial page hero ──────────────────────────────────── */
+.ed-page-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--hero-bg);
+  color: #e8e8e8;
+  padding: 44px 32px 40px;
+  margin: 0 0 28px;
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  align-items: center;
+  min-height: 180px;
+}
+/* Break out of .page padding (0 20px) to reach full width */
+.page .ed-page-hero {
+  margin-left: -20px;
+  margin-right: -20px;
+}
+.ed-page-hero-panel {
+  display: none;
+}
+.ed-page-hero-content { position: relative; z-index: 1; }
+.ed-page-hero-kicker {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.48);
+}
+.ed-page-hero-heading {
+  margin: 0 0 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.04;
+  color: #fff;
+}
+.ed-page-hero-lead {
+  margin: 0;
+  font-size: .97rem;
+  line-height: 1.58;
+  color: rgba(255,255,255,.58);
+  max-width: 60ch;
+}
+@media (max-width: 700px) {
+  .ed-page-hero { padding: 32px 20px; min-height: 140px; grid-template-columns: 1fr; }
+  .ed-page-hero-panel { display: none; }
+}/* ── Ed page hero — bigger, more dramatic ───────────────────────────── */
+.ed-page-hero {
+  padding: 52px 36px 48px;
+  min-height: 200px;
+  grid-template-columns: 1fr 140px;
+}
+.ed-page-hero-heading {
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  letter-spacing: -.025em;
+}
+.ed-page-hero-lead { font-size: 1rem; color: rgba(255,255,255,.6); }
+
+/* ── Footer — editorial ─────────────────────────────────────────────── */
+.site-footer {
+  border-top: 2px solid var(--text) !important;
+}
+.ed-page-hero { margin-bottom: 0 !important; }
+
+/* ── Ed page hero: consistent height ────────────────────────────────────*/
+.ed-page-hero { min-height: 180px !important; }
+
+/* ── Ed page hero — maroon bottom border ─────────────────────────── */
+.ed-page-hero {
+  border-bottom: 3px solid var(--maroon) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE HERO — Konsekvent overskriftsdesign for alle sider
+   ═══════════════════════════════════════════════════════════════ */
+.ed-page-hero-meta {
+  font-size: 0.82rem !important;
+  color: rgba(255,255,255,.55) !important;
+  margin-top: 10px !important;
+  font-weight: 400 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE HERO — Uniform overskriftstørrelse på tvers av alle sider
+   ═══════════════════════════════════════════════════════════════ */
+.ed-page-hero-heading {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: clamp(2.4rem, 5vw, 3.4rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.04 !important;
+  color: #fff !important;
+  margin: 0 0 10px !important;
+  letter-spacing: -.025em !important;
+}
+.ed-page-hero-kicker {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  color: rgba(255,255,255,.5) !important;
+  margin: 0 0 10px !important;
+}
+.ed-page-hero-lead {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  color: rgba(255,255,255,.62) !important;
+  margin: 0 !important;
+  max-width: 56ch !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   STATISTIKK — ed-page-hero meta chips + stats column
+   ═══════════════════════════════════════════════════════════════ */
+/* Chips row below the lead text */
+.ed-page-hero-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.ed-page-hero-chip {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 13px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Right-side stat column inside the hero */
+.ed-page-hero-stats-col {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.09);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 2;
+}
+.ed-page-hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 3px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 12px;
+}
+.ed-page-hero-stat:last-child {
+  border-bottom: none;
+}
+.ed-page-hero-stat strong {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.ed-page-hero-stat span {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+@media (max-width: 700px) {
+  .ed-page-hero-stats-col { display: none; }
+  .ed-page-hero-meta-row { margin-top: 12px; }
+}
+
+/* ── Hero howto-knapp ── */
+.ed-page-hero-howto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.82);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  backdrop-filter: blur(4px);
+}
+.ed-page-hero-howto-btn:hover {
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+}
+.ed-page-hero-howto-btn svg { opacity: 0.8; }

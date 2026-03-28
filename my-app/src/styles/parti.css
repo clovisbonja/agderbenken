@@ -1,0 +1,925 @@
+/* ── Parti — partiprogrammer og løfter (parti-*, lofte-*) ─────── */
+
+.parti-page{padding-bottom:36px}
+.parti-hero{
+  max-width:860px;
+  margin-bottom:22px;
+}
+.parti-hero h1{
+  margin:0;
+  font-size:clamp(1.8rem,2.8vw,2.5rem);
+}
+.parti-hero p{
+  margin:10px 0 0;
+  color:var(--muted);
+  line-height:1.55;
+}
+.parti-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+.parti-card{
+  border:1px solid var(--glass);
+  border-radius:18px;
+  overflow:hidden;
+  background:var(--card);
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.parti-card:hover{
+  transform:translateY(-3px);
+  border-color:color-mix(in srgb, var(--party-color) 42%, var(--glass));
+  box-shadow:0 16px 30px rgba(2,6,23,.12);
+}
+.parti-link{
+  display:flex;
+  flex-direction:column;
+  text-decoration:none;
+  color:inherit;
+  min-height:330px;
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--party-color) 24%, transparent), transparent 42%),
+    var(--card);
+}
+.parti-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 14px 0;
+}
+.parti-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:38px;
+  height:26px;
+  border-radius:999px;
+  padding:0 10px;
+  font-size:12px;
+  font-weight:800;
+  color:color-mix(in srgb, var(--party-color) 72%, #0f172a);
+  background:color-mix(in srgb, var(--party-color) 18%, transparent);
+}
+[data-theme="dark"] .parti-pill{
+  color:#e2e8f0;
+  background:color-mix(in srgb, var(--party-color) 24%, transparent);
+}
+.parti-open{
+  font-size:12px;
+  font-weight:700;
+  opacity:.72;
+}
+.parti-logo-wrap{
+  flex:1;
+  margin:12px 14px;
+  border-radius:14px;
+  border:1px solid color-mix(in srgb, var(--party-color) 25%, var(--glass));
+  background:
+    linear-gradient(180deg,color-mix(in srgb, var(--party-color) 10%, #ffffff), color-mix(in srgb, var(--party-color) 18%, #f8fafc));
+  display:grid;
+  place-items:center;
+  min-height:170px;
+  padding:18px;
+}
+[data-theme="dark"] .parti-logo-wrap{
+  background:
+    linear-gradient(180deg,color-mix(in srgb, var(--party-color) 16%, #0f1724), color-mix(in srgb, var(--party-color) 8%, #0b1220));
+}
+.parti-logo{
+  max-width:78%;
+  max-height:108px;
+  object-fit:contain;
+}
+.parti-card-foot{
+  padding:0 14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.parti-card-foot strong{
+  font-size:1rem;
+  line-height:1.3;
+}
+.parti-card-foot small{
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* ── Parti tabs ─────────────────────────────────────────────────────── */
+.parti-tabs{
+  display:flex;
+  gap:4px;
+  margin-bottom:28px;
+  background:var(--glass);
+  border-radius:14px;
+  padding:4px;
+  width:fit-content;
+}
+.parti-tab{
+  padding:8px 20px;
+  border-radius:10px;
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .15s, color .15s;
+}
+.parti-tab-active{
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 1px 6px rgba(0,0,0,.08);
+}
+
+/* ── Løfter vs. handling ────────────────────────────────────────────── */
+.lofter-section{ max-width:900px }
+.lofter-intro{
+  font-size:15px;
+  color:var(--muted);
+  margin:0 0 20px;
+  line-height:1.6;
+}
+.lofter-party-filter{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:28px;
+}
+.lofter-party-btn{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 14px;
+  border-radius:12px;
+  border:1.5px solid var(--glass);
+  background:var(--card);
+  color:var(--text);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.lofter-party-btn:hover{ background:var(--glass) }
+.lofter-party-active{ font-weight:700 }
+.lofter-party-logo{
+  width:22px;
+  height:22px;
+  object-fit:contain;
+  border-radius:4px;
+}
+.lofter-select-hint{
+  color:var(--muted);
+  font-size:14px;
+  padding:40px 0;
+  text-align:center;
+}
+.lofter-status{
+  color:var(--muted);
+  font-size:14px;
+  padding:20px 0;
+}
+.lofter-error{ color:#b91c1c }
+
+/* Løfter list */
+.lofter-list{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.lofter-party-heading{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:8px;
+  font-size:18px;
+  font-weight:700;
+}
+.lofter-heading-logo{
+  width:32px;
+  height:32px;
+  object-fit:contain;
+}
+.lofter-count{
+  font-size:13px;
+  font-weight:500;
+  color:var(--muted);
+  margin-left:4px;
+}
+.lofter-card{
+  background:var(--card);
+  border:1px solid var(--glass);
+  border-left:4px solid var(--lofter-accent, var(--glass));
+  border-radius:18px;
+  padding:20px 24px;
+  box-shadow:0 2px 12px rgba(0,0,0,.05);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.lofter-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.09);
+}
+.lofter-card--fulfilled{ --lofter-accent:#16a34a }
+.lofter-card--broken{    --lofter-accent:#dc2626 }
+.lofter-card--partial{   --lofter-accent:#f59e0b }
+.lofter-card--pending{   --lofter-accent:#94a3b8 }
+
+.lofter-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+.lofter-category{
+  display:inline-flex;
+  align-items:center;
+  font-size:11px;
+  font-weight:700;
+  border-radius:999px;
+  padding:3px 11px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.lofter-dominant-badge{
+  font-size:11px;
+  font-weight:700;
+  border-radius:999px;
+  padding:3px 10px;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  background:var(--dom-bg, rgba(148,163,184,.12));
+  color:var(--dom-color, var(--muted));
+}
+.lofter-text{
+  font-size:15px;
+  line-height:1.68;
+  margin:0 0 18px;
+  color:var(--text);
+  font-style:italic;
+  padding-left:14px;
+  border-left:3px solid var(--lofter-accent, var(--glass));
+  opacity:.92;
+}
+.lofter-cases{
+  border-top:1px solid var(--glass);
+  padding-top:14px;
+}
+.lofter-cases-label{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--muted);
+  display:block;
+  margin-bottom:10px;
+}
+.lofter-no-cases{
+  font-size:13px;
+  color:var(--muted);
+  font-style:italic;
+}
+.lofter-cases-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.lofter-case-item{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:var(--glass);
+}
+.lofter-case-status{
+  font-size:10px;
+  font-weight:800;
+  border-radius:999px;
+  padding:2px 9px;
+  white-space:nowrap;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  border:none;
+  background:var(--s-bg, rgba(148,163,184,.18));
+  color:var(--s-color, var(--muted));
+}
+.lofter-case-tittel{
+  font-weight:600;
+  color:var(--text);
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.lofter-case-dato{
+  color:var(--muted);
+  font-size:12px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.lofter-case-note{
+  width:100%;
+  color:var(--muted);
+  font-size:12px;
+  font-style:italic;
+  padding-left:4px;
+}
+
+/* ── Editorial card overrides ─────────────────────────────────────────── */
+/* Make all existing cards use editorial variables */
+.card, .rep-card, .lofter-card, .parti-card {
+  border-radius: 4px !important;
+}
+
+/* Parti page — editorial tabs */
+.parti-tabs {
+  background: transparent;
+  border-radius: 0;
+  border-bottom: 2px solid var(--line);
+  padding: 0;
+  gap: 0;
+}
+.parti-tab {
+  border-radius: 0;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -2px;
+  padding: 10px 18px;
+  font-weight: 600;
+}
+.parti-tab-active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* Parti headings */
+.parti-hero h1, .parti-hero h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Lofter cards — editorial left-border style */
+.lofter-card {
+  border-radius: 0;
+  border-right: none;
+  border-top: none;
+  border-bottom: 1px solid var(--line);
+  box-shadow: none;
+}
+.lofter-card:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--surface);
+}
+
+/* ── Parti page cards — refined ─────────────────────────────────────── */
+.parti-card { border-radius: var(--radius-card) !important; border-color: var(--line) !important; }
+.parti-card:hover { border-color: var(--accent) !important; }
+.parti-logo-wrap { border-radius: 2px !important; }
+
+/* ── Lofter cards ────────────────────────────────────────────────── */
+.lofter-card { border-radius: 0 !important; border-left-width: 3px !important; }
+.lofter-category { border-radius: 0 !important; font-size: 9px !important; letter-spacing: .08em !important; }
+
+/* ── Parti tabs: cleaner active state ──────────────────────────────── */
+.parti-tab { color: var(--muted); font-size: 13px; }
+.parti-tab-active { color: var(--text); }
+
+/* ── 2. Parti cards: strip party-color tints → pure editorial blue ───── */
+.parti-link { background: var(--card) !important; }
+.parti-logo-wrap {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  border-radius: 4px !important;
+}
+[data-theme="dark"] .parti-logo-wrap {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+.parti-pill {
+  background: rgba(0,65,194,.09) !important;
+  color: var(--accent) !important;
+  border-radius: 2px !important;
+  font-size: 11px !important;
+  letter-spacing: .04em !important;
+}
+[data-theme="dark"] .parti-pill {
+  background: rgba(77,145,255,.14) !important;
+  color: #7db4ff !important;
+}
+.parti-card:hover .parti-logo-wrap { border-color: var(--accent) !important; }
+.parti-card-head { border-bottom: 1px solid var(--line); }
+
+/* ── 7. Løfter party filter: blue active state ───────────────────────── */
+.lofter-party-btn {
+  border-radius: 2px !important;
+}
+.lofter-party-btn.lofter-party-active {
+  border-color: var(--accent) !important;
+  background: rgba(0,65,194,.08) !important;
+}
+[data-theme="dark"] .lofter-party-btn.lofter-party-active {
+  border-color: rgba(77,145,255,.5) !important;
+  background: rgba(77,145,255,.12) !important;
+}
+
+/* ── 8. Section headings: consistent editorial style ─────────────────── */
+.rep-page-content h2,
+.votering-content h2,
+.parti-page h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -.02em;
+}
+
+/* ── 9. Parti page: tab underlines editorial ─────────────────────────── */
+.parti-tabs { border-bottom: 2px solid var(--line) !important; }
+.parti-tab {
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  letter-spacing: .03em !important;
+  padding-bottom: 10px !important;
+}
+.parti-tab-active {
+  border-bottom: 2px solid var(--text) !important;
+  color: var(--text) !important;
+}
+
+/* ── 10. Mobile tweaks ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .rep-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .parti-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── Parti page: card head always visible ────────────────────────────── */
+.parti-card-head {
+  padding: 12px 14px 8px !important;
+}
+.parti-open { font-size: 11px !important; color: var(--muted) !important; font-weight: 600 !important; }
+
+/* ── Parti page: taller cards ────────────────────────────────────────── */
+.parti-link { min-height: 260px !important; }
+.parti-logo-wrap { min-height: 160px !important; padding: 24px !important; }
+.parti-card-foot { padding: 0 18px 18px !important; }
+.parti-card-foot strong { font-size: 1.05rem !important; }
+
+/* ── Løfter vs handling — full redesign ──────────────────────────── */
+.lofte-filter-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.lofte-filter-btn {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color .12s, color .12s, background .12s;
+}
+.lofte-filter-btn:hover { border-color: var(--maroon); color: var(--maroon); }
+.lofte-filter-btn.active { border-color: var(--maroon); background: var(--maroon); color: #fff; }
+
+.lofte-item {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line2);
+}
+.lofte-item:last-child { border-bottom: none; }
+.lofte-item-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.lofte-dot {
+  font-size: 12px;
+  line-height: 1;
+}
+.lofte-dot--fulfilled { color: var(--status-fulfilled); }
+.lofte-dot--broken    { color: var(--status-broken); }
+.lofte-dot--partial   { color: var(--status-partial); }
+.lofte-dot--pending   { color: var(--status-pending); }
+.lofte-status-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.lofte-status--fulfilled { color: var(--status-fulfilled); }
+.lofte-status--broken    { color: var(--status-broken); }
+.lofte-status--partial   { color: var(--status-partial); }
+.lofte-status--pending   { color: var(--status-pending); }
+.lofte-kategori {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: var(--maroon-s);
+  color: var(--maroon);
+  border: 1px solid var(--maroon-t);
+}
+.lofte-tekst {
+  margin: 0 0 10px;
+  font-size: .97rem;
+  line-height: 1.65;
+  color: var(--text);
+  max-width: 72ch;
+}
+.lofte-saker-details {
+  margin-top: 6px;
+}
+.lofte-saker-details summary {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: .03em;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lofte-saker-details summary::-webkit-details-marker { display: none; }
+.lofte-saker-details summary::before {
+  content: '▸';
+  font-size: 10px;
+  transition: transform .15s;
+}
+.lofte-saker-details[open] summary::before { transform: rotate(90deg); }
+.lofte-saker-list {
+  margin: 10px 0 0;
+  padding: 0 0 0 20px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lofte-sak-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+}
+.lofte-sak-tittel { color: var(--text2); line-height: 1.4; flex: 1; }
+.lofte-sak-dato { color: var(--muted); font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+
+/* container for the promise list */
+.lofter-list {
+  margin-top: 28px;
+}
+.lofter-party-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 20px;
+  border-bottom: 3px solid var(--text);
+  margin-bottom: 0;
+}
+.lofter-heading-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.lofter-party-heading > span:nth-child(2) {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 900;
+  flex: 1;
+}
+.lofter-count {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+/* ── Parti cards — maroon left border hover ──────────────────────── */
+.parti-tab-active {
+  border-bottom-color: var(--maroon) !important;
+  color: var(--maroon) !important;
+}
+
+/* ── Dark mode adjustments ───────────────────────────────────────── */
+[data-theme="dark"] .lofte-kategori { background: var(--accent-s) !important; color: var(--accent) !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PARTI PAGE — Tab-navigasjon og parti-velger
+   ═══════════════════════════════════════════════════════════════ */
+.parti-hero { display: none !important; }
+
+.parti-tab-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 32px 24px 8px !important;
+  gap: 10px !important;
+}
+.parti-tabs {
+  display: flex !important;
+  background: var(--surface) !important;
+  border: 1.5px solid var(--line) !important;
+  border-radius: 14px !important;
+  padding: 5px !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06) !important;
+}
+.parti-tab {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 12px 28px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  cursor: pointer !important;
+  transition: all .2s ease !important;
+  letter-spacing: .01em !important;
+  white-space: nowrap !important;
+}
+.parti-tab:hover {
+  color: var(--text) !important;
+  background: var(--card) !important;
+}
+.parti-tab-active {
+  background: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12) !important;
+}
+.parti-tab-hint {
+  font-size: 0.82rem !important;
+  color: var(--muted) !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LØFTER — Parti-velger grid (ny design)
+   ═══════════════════════════════════════════════════════════════ */
+.lofter-intro { text-align: center !important; color: var(--muted) !important; margin-bottom: 20px !important; }
+
+.lofter-party-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 32px !important;
+}
+.lofter-party-card {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 14px 16px !important;
+  background: var(--card) !important;
+  border: 1.5px solid var(--line) !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: all .2s ease !important;
+  text-align: left !important;
+}
+.lofter-party-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1) !important;
+}
+.lofter-party-card-logo {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+  padding: 6px !important;
+}
+.lofter-party-card-logo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+.lofter-party-card-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+.lofter-party-card-info strong {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+}
+.lofter-party-card-info span {
+  font-size: 0.75rem !important;
+  color: var(--muted) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.lofter-party-card-check {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+}
+
+/* Parti heading redesign */
+.lofter-party-heading {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  padding: 20px 24px !important;
+  background: var(--surface) !important;
+  border-radius: 14px !important;
+  margin-bottom: 20px !important;
+  border: 1px solid var(--line) !important;
+  flex-wrap: wrap !important;
+}
+.lofter-heading-logo {
+  width: 52px !important;
+  height: 52px !important;
+  object-fit: contain !important;
+  border-radius: 10px !important;
+  background: var(--card) !important;
+  padding: 6px !important;
+  flex-shrink: 0 !important;
+}
+.lofter-heading-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  flex: 1 !important;
+}
+.lofter-heading-text strong {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+}
+.lofter-count {
+  font-size: 0.82rem !important;
+  color: var(--muted) !important;
+}
+.lofter-heading-stats {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+.lofter-stat-pill {
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+.lofter-stat-pill--fulfilled { background: rgba(22,163,74,.12) !important; color: #16a34a !important; }
+.lofter-stat-pill--partial { background: rgba(245,158,11,.12) !important; color: #d97706 !important; }
+.lofter-stat-pill--broken { background: rgba(220,38,38,.1) !important; color: #dc2626 !important; }
+.lofter-stat-pill--pending { background: var(--surface) !important; color: var(--muted) !important; border: 1px solid var(--line) !important; }
+
+/* Løfte item redesign */
+.lofte-item {
+  border: 1.5px solid var(--line) !important;
+  border-radius: 14px !important;
+  padding: 20px !important;
+  margin-bottom: 14px !important;
+  background: var(--card) !important;
+  transition: box-shadow .2s !important;
+}
+.lofte-item--fulfilled { border-left: 4px solid #16a34a !important; }
+.lofte-item--partial { border-left: 4px solid #f59e0b !important; }
+.lofte-item--broken { border-left: 4px solid #dc2626 !important; }
+.lofte-item--pending { border-left: 4px solid var(--line) !important; }
+
+.lofte-item-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+  flex-wrap: wrap !important;
+}
+.lofte-item-status {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.lofte-status-badge {
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+.lofte-status-badge--fulfilled { background: rgba(22,163,74,.12) !important; color: #16a34a !important; }
+.lofte-status-badge--partial { background: rgba(245,158,11,.12) !important; color: #d97706 !important; }
+.lofte-status-badge--broken { background: rgba(220,38,38,.1) !important; color: #dc2626 !important; }
+.lofte-status-badge--pending { background: var(--surface) !important; color: var(--muted) !important; border: 1px solid var(--line) !important; }
+
+.lofte-matched-indicator {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 0.76rem !important;
+  color: var(--accent) !important;
+  font-weight: 600 !important;
+  margin-left: auto !important;
+}
+.lofte-tekst {
+  font-size: 0.92rem !important;
+  line-height: 1.6 !important;
+  color: var(--text) !important;
+  margin: 0 0 14px !important;
+}
+.lofte-kategori {
+  padding: 2px 8px !important;
+  border-radius: 20px !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  border: 1px solid var(--line) !important;
+}
+
+/* Saker linked to promise */
+.lofte-saker-section { margin-top: 10px !important; }
+.lofte-saker-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: var(--muted) !important;
+  text-transform: uppercase !important;
+  letter-spacing: .06em !important;
+  margin-bottom: 10px !important;
+}
+.lofte-saker-cards { display: flex !important; flex-direction: column !important; gap: 8px !important; }
+.lofte-sak-card {
+  padding: 14px 16px !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+}
+.lofte-sak-card--fulfilled { border-left: 3px solid #16a34a !important; }
+.lofte-sak-card--partial { border-left: 3px solid #f59e0b !important; }
+.lofte-sak-card--broken { border-left: 3px solid #dc2626 !important; }
+.lofte-sak-card-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+}
+.lofte-sak-badge {
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  padding: 2px 8px !important;
+  border-radius: 20px !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+}
+.lofte-sak-badge--fulfilled { background: rgba(22,163,74,.12) !important; color: #16a34a !important; }
+.lofte-sak-badge--partial { background: rgba(245,158,11,.12) !important; color: #d97706 !important; }
+.lofte-sak-badge--broken { background: rgba(220,38,38,.1) !important; color: #dc2626 !important; }
+.lofte-sak-badge--pending { background: var(--surface) !important; color: var(--muted) !important; }
+.lofte-sak-card-date { font-size: 0.75rem !important; color: var(--muted) !important; margin-left: auto !important; }
+.lofte-sak-card-title { font-size: 0.85rem !important; font-weight: 500 !important; color: var(--text) !important; margin: 0 0 6px !important; line-height: 1.5 !important; }
+.lofte-sak-card-note { font-size: 0.8rem !important; color: var(--muted) !important; font-style: italic !important; margin: 0 0 8px !important; }
+.lofte-sak-card-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: var(--accent) !important;
+  text-decoration: none !important;
+}
+.lofte-sak-card-link:hover { text-decoration: underline !important; }
+
+/* Parti — ed-page-hero fullbredde (utenfor .page wrapper) */
+.parti-page .parti-tab-wrapper,
+.parti-page .parti-grid,
+.parti-page .lofter-section {
+  /* indre innhold beholder .page sin padding */
+}

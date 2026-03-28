@@ -79,6 +79,14 @@ export default function Om({ lang }: OmProps) {
 
   return (
     <main className="om">
+      <section className="ed-page-hero">
+        <div className="ed-page-hero-content">
+          <p className="ed-page-hero-kicker">Fædrelandsvennen × Digin</p>
+          <h1 className="ed-page-hero-heading">{lang === "no" ? "Om Sørblikket" : "About Sørblikket"}</h1>
+          <p className="ed-page-hero-lead">{lang === "no" ? "Et samarbeidsprosjekt mellom Fædrelandsvennen og Digin — åpen innsikt i Agders politiske representasjon." : "A collaboration between Fædrelandsvennen and Digin — open insight into Agder's political representation."}</p>
+        </div>
+        <div className="ed-page-hero-panel" aria-hidden />
+      </section>
 
       {/* ─── HERO BANNER ─── */}
       <section className="om-hero" style={{ backgroundImage: `url(${heroImage})` }}>

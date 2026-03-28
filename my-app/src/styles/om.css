@@ -1,0 +1,21 @@
+/* ── Om — om-siden (om-*) ───────────────────────────────────────── */
+
+/* Om page headings */
+.om-page h1, .om-page h2, .om-page h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN POLISH v3 — monochromatic blue, editorial structure
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Om page: remove duplicate heading inside photo banner ────────── */
+.om-hero-h1 { display: none !important; }
+.om-hero-text { padding-top: 52px; }
+
+/* ── Om: photo hero fills nicely ─────────────────────────────────────── */
+.om-hero { min-height: 280px !important; }
+
+/* ── Theme tabs: more generous spacing ───────────────────────────────── */
+/* ── Om page: more section breathing room ────────────────────────────── */
+.om-section { padding: 48px 0 !important; }

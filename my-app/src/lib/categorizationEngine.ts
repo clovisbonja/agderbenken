@@ -1,96 +1,81 @@
-export type ThemeKey = "klima" | "energi" | "samferdsel" | "levekår"
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * KATEGORISERINGSMOTOR — src/lib/categorizationEngine.ts
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * AI-basert (fuzzy) tekstklassifisering av stortingssaker til temaer.
+ * Bruker nøkkelord fra src/config/temaer.ts til å finne riktig tema.
+ *
+ * ──────────────────────────────────────────────────────────────────────────
+ * SLIK FUNGERER KATEGORISERINGEN:
+ * ──────────────────────────────────────────────────────────────────────────
+ *   1. For hver sak slår vi sammen tittel + kortittel + komité til én tekst
+ *   2. Hvert tema i TEMA_KONFIG har en liste med nøkkelord
+ *   3. Vi beregner en fuzzy-match-score for hvert nøkkelord mot teksten
+ *   4. Temaet med høyest total score vinner og saken plasseres der
+ *
+ * ──────────────────────────────────────────────────────────────────────────
+ * FOR Å ENDRE TEMAER ELLER NØKKELORD:
+ * ──────────────────────────────────────────────────────────────────────────
+ *   → Rediger src/config/temaer.ts
+ *   Denne filen trenger ikke endres.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 
-export type CaseItem = {
-  id: string
-  title: string
-  shortTitle: string
-  type: string
-  status: string
-  date: string
-  committee: string
-  category?: ThemeKey
-  score?: number
-  matches?: string[]
-  relevanceScore?: number
-}
+import type { TemaKey, CaseItem } from "../types/sak"
+import { TEMA_KONFIG } from "../config/temaer"
 
-type ThemeDef = {
-  icon: string
-  name: string
-  color: string
-  accentColor: string
-  keywords: string[]
-}
+// ── Intern hjelpefunksjon ─────────────────────────────────────────────────────
 
-const THEME_DEFINITIONS: Record<ThemeKey, ThemeDef> = {
-  klima: {
-    icon: "🌍",
-    name: "Klima og Miljø",
-    color: "linear-gradient(135deg,#16a34a,#10b981)",
-    accentColor: "#10b981",
-    keywords: [
-      "klima", "miljø", "miljo", "utslipp", "co2", "fornybar", "grønn", "gronn", "fossil", "natur", "biodiversitet", "omstilling",
-    ],
-  },
-  energi: {
-    icon: "⚡",
-    name: "Energi og Kraft",
-    color: "linear-gradient(135deg,#f59e0b,#f97316)",
-    accentColor: "#f59e0b",
-    keywords: [
-      "energi", "kraft", "strøm", "strom", "vannkraft", "vindkraft", "solenergi", "krafteksport", "gass", "olje", "energieffektivitet",
-    ],
-  },
-  samferdsel: {
-    icon: "🚗",
-    name: "Samferdsel og Transport",
-    color: "linear-gradient(135deg,#0284c7,#06b6d4)",
-    accentColor: "#0ea5e9",
-    keywords: [
-      "transport", "samferdsel", "vei", "jernbane", "tog", "buss", "kollektiv", "ferje", "bro", "tunnel",
-    ],
-  },
-  levekår: {
-    icon: "❤️",
-    name: "Levekår og Velferd",
-    color: "linear-gradient(135deg,#e11d48,#ec4899)",
-    accentColor: "#ef4444",
-    keywords: [
-      "helse", "arbeid", "sosial", "trygd", "pensjon", "skole", "utdanning", "sykehus", "nav", "barnehage",
-    ],
-  },
-}
-
-function safeText(input: string | undefined | null): string {
+/** Gjør om streng til lavcase og sikrer at den aldri er null/undefined. */
+function sikkerTekst(input: string | undefined | null): string {
   return String(input ?? "").toLowerCase()
 }
 
+// ── Fuzzy-matching ────────────────────────────────────────────────────────────
+
+/**
+ * Beregner likhet mellom to strenger med Levenshtein-distanse.
+ * Returnerer en verdi mellom 0 (ingen likhet) og 1 (identiske).
+ */
 export function levenshteinDistance(str1: string, str2: string): number {
   if (!str1 && !str2) return 1
   if (!str1 || !str2) return 0
 
-  const matrix: number[][] = []
-  for (let i = 0; i <= str2.length; i += 1) matrix[i] = [i]
-  for (let j = 0; j <= str1.length; j += 1) matrix[0][j] = j
+  const matrise: number[][] = []
+  for (let i = 0; i <= str2.length; i += 1) matrise[i] = [i]
+  for (let j = 0; j <= str1.length; j += 1) matrise[0][j] = j
 
   for (let i = 1; i <= str2.length; i += 1) {
     for (let j = 1; j <= str1.length; j += 1) {
       if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1]
+        matrise[i][j] = matrise[i - 1][j - 1]
       } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+        matrise[i][j] = Math.min(
+          matrise[i - 1][j - 1] + 1,
+          matrise[i][j - 1] + 1,
+          matrise[i - 1][j] + 1
+        )
       }
     }
   }
 
-  const maxLen = Math.max(str1.length, str2.length)
-  if (maxLen === 0) return 1
-  return 1 - matrix[str2.length][str1.length] / maxLen
+  const maksLengde = Math.max(str1.length, str2.length)
+  if (maksLengde === 0) return 1
+  return 1 - matrise[str2.length][str1.length] / maksLengde
 }
 
-export function fuzzyMatch(text: string, keyword: string): number {
-  const t = safeText(text)
-  const k = safeText(keyword)
+/**
+ * Gir en match-score (0–100) for et nøkkelord mot en tekst.
+ *   100 = direkte treff (nøkkelordet finnes i teksten)
+ *    80 = nær fuzzy-match (>70 % Levenshtein-likhet)
+ *    60 = treff på første 4 tegn
+ *     0 = ingen match
+ */
+export function fuzzyMatch(tekst: string, nøkkelord: string): number {
+  const t = sikkerTekst(tekst)
+  const k = sikkerTekst(nøkkelord)
   if (!t || !k) return 0
 
   if (t.includes(k)) return 100
@@ -99,123 +84,197 @@ export function fuzzyMatch(text: string, keyword: string): number {
   return 0
 }
 
-export function categorizeSak(caseObj: CaseItem): {
-  primary: ThemeKey
+// ── Kategorisering av saker ───────────────────────────────────────────────────
+
+/**
+ * Kategoriserer én stortingssak til det best-matchende temaet.
+ * Returnerer temaet, score og hvilke nøkkelord som utløste treffet.
+ */
+export function categorizeSak(sak: CaseItem): {
+  primary: TemaKey
   score: number
   matches: string[]
 } {
-  const fullText = `${caseObj.title} ${caseObj.shortTitle} ${caseObj.committee || ""}`
-  const scores: Record<ThemeKey, { score: number; matches: string[] }> = {
-    klima: { score: 0, matches: [] },
-    energi: { score: 0, matches: [] },
+  const fullTekst = `${sak.title} ${sak.shortTitle} ${sak.committee || ""}`
+
+  // Initialiser score-register for alle temaer
+  const poengsummer: Record<TemaKey, { score: number; matches: string[] }> = {
+    klima:      { score: 0, matches: [] },
+    helse:      { score: 0, matches: [] },
+    utdanning:  { score: 0, matches: [] },
+    økonomi:    { score: 0, matches: [] },
     samferdsel: { score: 0, matches: [] },
-    levekår: { score: 0, matches: [] },
+    justis:     { score: 0, matches: [] },
+    distrikt:   { score: 0, matches: [] },
   }
 
-  ;(Object.entries(THEME_DEFINITIONS) as [ThemeKey, ThemeDef][]).forEach(([theme, def]) => {
-    def.keywords.forEach((keyword) => {
-      const match = fuzzyMatch(fullText, keyword)
-      if (match > 0) {
-        scores[theme].score += match / def.keywords.length
-        if (scores[theme].matches.length < 3) scores[theme].matches.push(keyword)
-      }
-    })
+  // Beregn score for hvert tema basert på nøkkelord fra TEMA_KONFIG
+  ;(Object.entries(TEMA_KONFIG) as [TemaKey, typeof TEMA_KONFIG[TemaKey]][]).forEach(
+    ([temaKey, temaDef]) => {
+      temaDef.nøkkelord.forEach((nøkkelord) => {
+        const treff = fuzzyMatch(fullTekst, nøkkelord)
+        if (treff > 0) {
+          poengsummer[temaKey].score += treff / temaDef.nøkkelord.length
+          if (poengsummer[temaKey].matches.length < 3) {
+            poengsummer[temaKey].matches.push(nøkkelord)
+          }
+        }
+      })
+      poengsummer[temaKey].score = Math.min(100, poengsummer[temaKey].score)
+    }
+  )
 
-    scores[theme].score = Math.min(100, scores[theme].score)
-  })
-
-  const sorted = (Object.entries(scores) as [ThemeKey, { score: number; matches: string[] }][])
-    .sort((a, b) => b[1].score - a[1].score)
+  // Finn temaet med høyest total score
+  const sortert = (
+    Object.entries(poengsummer) as [TemaKey, { score: number; matches: string[] }][]
+  ).sort((a, b) => b[1].score - a[1].score)
 
   return {
-    primary: sorted[0][0],
-    score: sorted[0][1].score,
-    matches: sorted[0][1].matches,
+    primary: sortert[0][0],
+    score:   sortert[0][1].score,
+    matches: sortert[0][1].matches,
   }
 }
 
-export function categorizeCases(casesArray: CaseItem[]): Record<ThemeKey, CaseItem[]> {
-  const categorized: Record<ThemeKey, CaseItem[]> = {
-    klima: [],
-    energi: [],
-    samferdsel: [],
-    levekår: [],
+/**
+ * Kategoriserer en liste saker og grupperer dem per tema.
+ * Returnerer et objekt med tema-nøkkel → liste av saker.
+ */
+export function categorizeCases(saker: CaseItem[]): Record<TemaKey, CaseItem[]> {
+  const kategorisert: Record<TemaKey, CaseItem[]> = {
+    klima: [], helse: [], utdanning: [], økonomi: [],
+    samferdsel: [], justis: [], distrikt: [],
   }
 
-  casesArray.forEach((item) => {
-    const categorization = categorizeSak(item)
-    categorized[categorization.primary].push({
-      ...item,
-      category: categorization.primary,
-      score: categorization.score,
-      matches: categorization.matches,
+  saker.forEach((sak) => {
+    const resultat = categorizeSak(sak)
+    kategorisert[resultat.primary].push({
+      ...sak,
+      category: resultat.primary,
+      score:    resultat.score,
+      matches:  resultat.matches,
     })
   })
 
-  ;(Object.keys(categorized) as ThemeKey[]).forEach((key) => {
-    categorized[key].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+  // Sorter saker innen hvert tema etter score — høyest relevans øverst
+  ;(Object.keys(kategorisert) as TemaKey[]).forEach((nøkkel) => {
+    kategorisert[nøkkel].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
   })
 
-  return categorized
+  return kategorisert
 }
 
-export function searchCases(casesArray: CaseItem[], searchTerm: string): CaseItem[] {
-  if (!searchTerm || searchTerm.trim().length === 0) return casesArray
+/**
+ * Fritekst-søk i en liste med saker.
+ * Bruker fuzzy-matching og returnerer treff sortert etter relevans.
+ */
+export function searchCases(saker: CaseItem[], søkeord: string): CaseItem[] {
+  if (!søkeord || søkeord.trim().length === 0) return saker
 
-  const term = searchTerm.toLowerCase()
-  const terms = term.split(/\s+/).filter(Boolean)
+  const term = søkeord.toLowerCase()
+  const termDeler = term.split(/\s+/).filter(Boolean)
 
-  return casesArray
-    .map((item) => {
-      let relevanceScore = 0
-      const joined = `${item.shortTitle} ${item.title} ${item.committee} ${item.status} ${item.type} ${item.id}`.toLowerCase()
+  return saker
+    .map((sak) => {
+      let relevans = 0
+      const samlet = `${sak.shortTitle} ${sak.title} ${sak.committee} ${sak.status} ${sak.type} ${sak.id}`.toLowerCase()
 
-      const titleMatch = fuzzyMatch(item.shortTitle, term)
-      if (titleMatch > 0) relevanceScore += titleMatch * 3
+      // Kortittel veier tyngst (× 3), fulltittel noe mindre (× 2)
+      const kortTittelTreff = fuzzyMatch(sak.shortTitle, term)
+      if (kortTittelTreff > 0) relevans += kortTittelTreff * 3
 
-      const fullTitleMatch = fuzzyMatch(item.title, term)
-      if (fullTitleMatch > 0) relevanceScore += fullTitleMatch * 2
+      const fullTittelTreff = fuzzyMatch(sak.title, term)
+      if (fullTittelTreff > 0) relevans += fullTittelTreff * 2
 
-      if (item.committee?.toLowerCase().includes(term)) relevanceScore += 50
-      if (item.id?.toLowerCase().includes(term)) relevanceScore += 120
-      if (item.type?.toLowerCase().includes(term)) relevanceScore += 40
-      if (item.status?.toLowerCase().includes(term)) relevanceScore += 35
-      if (terms.every((t) => joined.includes(t))) relevanceScore += 70
+      if (sak.committee?.toLowerCase().includes(term)) relevans += 50
+      if (sak.id?.toLowerCase().includes(term))        relevans += 120
+      if (sak.type?.toLowerCase().includes(term))      relevans += 40
+      if (sak.status?.toLowerCase().includes(term))    relevans += 35
+      if (termDeler.every((t) => samlet.includes(t)))  relevans += 70
 
-      return { ...item, relevanceScore }
+      return { ...sak, relevanceScore: relevans }
     })
-    .filter((result) => (result.relevanceScore ?? 0) > 0)
+    .filter((resultat) => (resultat.relevanceScore ?? 0) > 0)
     .sort((a, b) => (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0))
 }
 
-export function getAllThemes(): Record<ThemeKey, ThemeDef> {
-  return THEME_DEFINITIONS
-}
+// ── Tema-statistikk ───────────────────────────────────────────────────────────
 
-export function getTheme(theme: ThemeKey): ThemeDef {
-  return THEME_DEFINITIONS[theme]
-}
+/**
+ * Beregner statusfordeling for saker innenfor ett bestemt tema.
+ * Returnerer totalt antall og antall per status-nøkkel.
+ */
+export function getThemeStats(
+  saker: CaseItem[],
+  tema: TemaKey
+): { total: number; statusCounts: Record<string, number> } {
+  const temaSaker = saker.filter((s) => s.category === tema)
 
-export function getThemeStats(cases: CaseItem[], theme: ThemeKey): {
-  total: number
-  statusCounts: Record<string, number>
-} {
-  const themeCases = cases.filter((c) => c.category === theme)
-  const statusCounts: Record<string, number> = {
-    varslet: 0,
-    behandlet: 0,
-    til_behandling: 0,
-    mottatt: 0,
-    trukket: 0,
-    bortfalt: 0,
-    ukjent: 0,
+  const statusFordeling: Record<string, number> = {
+    varslet: 0, behandlet: 0, til_behandling: 0,
+    mottatt: 0, trukket:  0, bortfalt:       0, ukjent: 0,
   }
 
-  themeCases.forEach((c) => {
-    const key = String(c.status || "ukjent").toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_")
-    if (Object.prototype.hasOwnProperty.call(statusCounts, key)) statusCounts[key] += 1
-    else statusCounts.ukjent += 1
+  temaSaker.forEach((s) => {
+    const nøkkel = String(s.status || "ukjent")
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/-/g, "_")
+
+    if (Object.prototype.hasOwnProperty.call(statusFordeling, nøkkel)) {
+      statusFordeling[nøkkel] += 1
+    } else {
+      statusFordeling.ukjent += 1
+    }
   })
 
-  return { total: themeCases.length, statusCounts }
+  return { total: temaSaker.length, statusCounts: statusFordeling }
+}
+
+// ── Bakoverkompatible eksporter ───────────────────────────────────────────────
+// Eldre kode som importerer ThemeKey/CaseItem herfra vil fortsette å fungere.
+
+/** @deprecated Bruk TemaKey fra src/types/sak.ts direkte. */
+export type { TemaKey as ThemeKey }
+
+/** @deprecated Bruk CaseItem fra src/types/sak.ts direkte. */
+export type { CaseItem }
+
+/**
+ * @deprecated Bruk TEMA_KONFIG fra src/config/temaer.ts direkte.
+ * Returnerer tema-konfig i gammelt format for bakoverkompatibilitet.
+ */
+export function getAllThemes(): Record<
+  TemaKey,
+  { icon: string; name: string; color: string; accentColor: string; keywords: string[] }
+> {
+  return Object.fromEntries(
+    Object.entries(TEMA_KONFIG).map(([key, def]) => [
+      key,
+      {
+        icon:        def.ikon,
+        name:        def.navn,
+        color:       def.farge,
+        accentColor: def.aksentFarge,
+        keywords:    def.nøkkelord,
+      },
+    ])
+  ) as Record<TemaKey, { icon: string; name: string; color: string; accentColor: string; keywords: string[] }>
+}
+
+/**
+ * @deprecated Bruk hentTema() fra src/config/temaer.ts direkte.
+ * Returnerer ett tema i gammelt format for bakoverkompatibilitet.
+ */
+export function getTheme(tema: TemaKey): {
+  icon: string; name: string; color: string; accentColor: string; keywords: string[]
+} {
+  const def = TEMA_KONFIG[tema]
+  return {
+    icon:        def.ikon,
+    name:        def.navn,
+    color:       def.farge,
+    accentColor: def.aksentFarge,
+    keywords:    def.nøkkelord,
+  }
 }

@@ -1,6 +1,26 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * NAVBAR — src/components/Navbar.tsx
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Toppnavigasjonen som vises på alle sider. Inneholder:
+ *   - Logo/brand-lenke til forsiden
+ *   - Menylenker til alle sider (aktiv side understreket)
+ *   - Tema-knapp: bytt mellom Dag (lys) og Natt (mørk)
+ *   - Språk-knapp: bytt mellom NO og EN
+ *
+ * Tema og språk styres av App.tsx via props og callbacks.
+ * ══════════════════════════════════════════════════════════════════════════
+ */
+
 import { NavLink } from "react-router-dom"
 
-type NavIconName = "home" | "stats" | "representatives" | "programs" | "about"
+// ── Ikontyper ─────────────────────────────────────────────────────────────────
+
+type NavIconName = "home" | "stats" | "representatives" | "programs" | "about" | "voting"
+
+// ── SVG-ikoner for menylenker ─────────────────────────────────────────────────
+// Returnerer riktig ikon basert på navn. Alle ikoner er 16×16 px og arver farge.
 
 function NavIcon({ name }: { name: NavIconName }) {
   if (name === "home") {
@@ -39,6 +59,16 @@ function NavIcon({ name }: { name: NavIconName }) {
       </svg>
     )
   }
+  if (name === "voting") {
+    return (
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden fill="none">
+        <circle cx="7" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+        <circle cx="17" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+        <path d="M7 9.5V5M17 9.5V5M7 14.5V19M17 14.5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    )
+  }
+  // Fallback: info-ikon (brukes for "Om"-siden)
   return (
     <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden>
       <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -47,141 +77,133 @@ function NavIcon({ name }: { name: NavIconName }) {
   )
 }
 
-// Menypunkter for toppnavigasjonen.
-const links = [
-  { to: "/", label: "Forside", icon: "home" as NavIconName },
-  { to: "/statistikk", label: "Statistikk", icon: "stats" as NavIconName },
-  { to: "/representanter", label: "Representanter", icon: "representatives" as NavIconName },
-  { to: "/parti", label: "Partiprogrammer", icon: "programs" as NavIconName },
-  { to: "/om", label: "Om Agderbenken", icon: "about" as NavIconName },
+// ── Menylenker ────────────────────────────────────────────────────────────────
+// Rekkefølgen bestemmer visningsrekkefølgen i menyen.
+// Labels oversettes i Navbar-komponenten basert på valgt språk.
+
+const lenker = [
+  { to: "/",                label: "Forside",         icon: "home"            as NavIconName },
+  { to: "/statistikk",     label: "Statistikk",      icon: "stats"           as NavIconName },
+  { to: "/votering",       label: "Stemmegivning",   icon: "voting"          as NavIconName },
+  { to: "/representanter", label: "Representanter",  icon: "representatives" as NavIconName },
+  { to: "/parti",          label: "Partiprogrammer", icon: "programs"        as NavIconName },
+  { to: "/om",             label: "Om Agderbenken",  icon: "about"           as NavIconName },
 ]
 
+// ── Props ─────────────────────────────────────────────────────────────────────
+
 type NavbarProps = {
+  /** Gjeldende tema — styrer tema-ikonet og label */
   theme: "light" | "dark"
+  /** Gjeldende språk — styrer alle tekststrenger */
   lang: "no" | "en"
+  /** Kalles når brukeren trykker tema-knappen */
   onToggleTheme: () => void
+  /** Kalles når brukeren trykker språk-knappen */
   onToggleLanguage: () => void
 }
 
+// ── Komponent ─────────────────────────────────────────────────────────────────
+
 export default function Navbar({ theme, lang, onToggleTheme, onToggleLanguage }: NavbarProps) {
-  const text =
+
+  // Alle tekststrenger på valgt språk
+  const tekst =
     lang === "no"
       ? {
           home: "Forside",
           stats: "Statistikk",
+          voting: "Stemmegivning",
           reps: "Representanter",
           programs: "Partiprogrammer",
           about: "Om Agderbenken",
-          themeLabel: "Bytt tema",
-          languageLabel: "Bytt språk",
+          temaLabel: "Bytt tema",
+          språkLabel: "Bytt språk",
         }
       : {
           home: "Home",
           stats: "Statistics",
+          voting: "Voting",
           reps: "Representatives",
           programs: "Party Programs",
           about: "About Agderbenken",
-          themeLabel: "Toggle theme",
-          languageLabel: "Toggle language",
+          temaLabel: "Toggle theme",
+          språkLabel: "Toggle language",
         }
 
-  const localizedLinks = [
-    { ...links[0], label: text.home },
-    { ...links[1], label: text.stats },
-    { ...links[2], label: text.reps },
-    { ...links[3], label: text.programs },
-    { ...links[4], label: text.about },
+  // Kobler oversatte tekster til lenkene
+  const oversatteLenker = [
+    { ...lenker[0], label: tekst.home },
+    { ...lenker[1], label: tekst.stats },
+    { ...lenker[2], label: tekst.voting },
+    { ...lenker[3], label: tekst.reps },
+    { ...lenker[4], label: tekst.programs },
+    { ...lenker[5], label: tekst.about },
   ]
 
   return (
     <header className="topbar">
       <div className="topbar-inner">
-        {/* Klikk på logoen sender alltid brukeren til forsiden ("/"). */}
+
+        {/* Logo — lenker alltid til forsiden */}
         <NavLink to="/" className="brand">
           <strong>Sørblikket</strong>
+          <span className="brand-divider" aria-hidden>|</span>
+          <span className="brand-sub">Regionens øye på Stortinget</span>
         </NavLink>
 
+        {/* Menylenker — aktiv lenke får "active"-klassen via NavLink */}
         <nav className="nav">
-          {/* Navigasjonslenker:
-              "to" er adressen siden åpnes på, og aktiv side får ekstra CSS-klasse. */}
           <div className="nav-links">
-            {localizedLinks.map((link) => (
+            {oversatteLenker.map((lenke) => (
               <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === "/"}
-                className={({ isActive }) => `nav-btn ${isActive ? "active" : ""}`}
+                key={lenke.to}
+                to={lenke.to}
+                end={lenke.to === "/"}  // "end" hindrer at "/" alltid matcher alle under-URLer
+                className={({ isActive }) => `nav-btn${isActive ? " active" : ""}`}
               >
-                <span className="nav-icon" aria-hidden><NavIcon name={link.icon} /></span>
-                <span>{link.label}</span>
+                {lenke.label}
               </NavLink>
             ))}
           </div>
-
-          <div className="nav-tools">
-            {/* Enkel toggle for light/dark mode */}
-            <button
-              aria-label={text.themeLabel}
-              className="theme-toggle"
-              onClick={onToggleTheme}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: "0 4px",
-              }}
-            >
-              <div
-                style={{
-                  position: "relative",
-                  width: "48px",
-                  height: "26px",
-                  background:
-                    theme === "dark"
-                      ? "linear-gradient(135deg, #1e3a5f, #0d1b4b)"
-                      : "linear-gradient(135deg, #f0c040, #f97316)",
-                  borderRadius: "999px",
-                  border:
-                    theme === "dark"
-                      ? "1px solid rgba(255,255,255,0.12)"
-                      : "1px solid rgba(0,0,0,0.1)",
-                  transition: "background 0.4s ease",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "3px",
-                    left: theme === "dark" ? "23px" : "3px",
-                    width: "18px",
-                    height: "18px",
-                    borderRadius: "50%",
-                    background:
-                      theme === "dark"
-                        ? "radial-gradient(circle at 35% 35%, #c8d8f8, #7aa7e8)"
-                        : "radial-gradient(circle at 35% 35%, #fff8e0, #fde68a)",
-                    transition: "left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "10px",
-                  }}
-                >
-                  {theme === "dark" ? "🌙" : "☀️"}
-                </div>
-              </div>
-            </button>
-
-            <button
-              aria-label={text.languageLabel}
-              className="theme-box"
-              onClick={onToggleLanguage}
-              style={{ cursor: "pointer" }}
-            >
-              {lang === "no" ? "English" : "Norsk"}
-            </button>
-          </div>
         </nav>
+
+        {/* Verktøyknapper: tema og språk */}
+        <div className="nav-tools">
+
+          {/* Tema-knapp — viser sol i mørk modus, måne i lys modus */}
+          <button
+            aria-label={tekst.temaLabel}
+            className="theme-toggle"
+            onClick={onToggleTheme}
+          >
+            {theme === "dark" ? (
+              <>
+                <svg viewBox="0 0 20 20" width="13" height="13" fill="none" aria-hidden>
+                  <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+                Dag
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 20 20" width="13" height="13" fill="none" aria-hidden>
+                  <path d="M17 11.5A7 7 0 1 1 8.5 3c-.5 2.5.5 6 4.5 7.5 2 .7 3.5.5 4 1z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Natt
+              </>
+            )}
+          </button>
+
+          {/* Språk-knapp — viser neste tilgjengelige språk */}
+          <button
+            aria-label={tekst.språkLabel}
+            className="theme-box"
+            onClick={onToggleLanguage}
+          >
+            {lang === "no" ? "EN" : "NO"}
+          </button>
+        </div>
       </div>
     </header>
   )

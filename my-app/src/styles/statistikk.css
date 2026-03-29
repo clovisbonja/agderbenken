@@ -2579,3 +2579,87 @@ p.home-section-note + .home-grid { margin-top: 8px !important; }
   .cookie-banner-actions { width: 100%; }
   .cookie-btn { flex: 1; text-align: center; }
 }
+
+/* ── Mobiloptimalisering for statistikk-dashboardet ─────────────────────── */
+
+@media (max-width: 768px) {
+  /* Dashboard-wrapper: tettere padding på mobil */
+  .sig-dashboard {
+    padding: 0 16px;
+    margin-bottom: 24px;
+  }
+
+  /* KPI-kort: 2 kolonner på mellomstørrelse */
+  .sig-kpi-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Hero-kort tar full bredde */
+  .sig-kpi--hero {
+    grid-column: 1 / -1;
+  }
+
+  .sig-kpi--hero .sig-kpi-value {
+    font-size: 3rem;
+  }
+
+  /* Bunnrad: én kolonne */
+  .sig-bottom-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Datakvalitet: 3 kolonner → 2 */
+  .sig-quality-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Stats-rad: 1 kolonne */
+  .sig-stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Extended-seksjon: smalere padding */
+  .sig-extended {
+    padding: 0 16px;
+    margin-bottom: 24px;
+  }
+
+  /* Månedsgraf-søyler: kortere på liten skjerm */
+  .sig-monthly-bar {
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* KPI-kort: 1 kolonne på veldig smal skjerm */
+  .sig-kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sig-kpi--hero .sig-kpi-value {
+    font-size: 2.5rem;
+  }
+
+  /* Datakvalitet: 1 kolonne */
+  .sig-quality-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sig-quality-cell {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    margin-right: 0;
+    padding: 10px 0;
+  }
+
+  .sig-quality-cell:last-child {
+    border-bottom: none;
+  }
+
+  /* Nøkkeltall-grid: 2 kolonner */
+  .sig-facts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

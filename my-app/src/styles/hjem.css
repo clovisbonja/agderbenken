@@ -667,4 +667,13 @@
   .fp-hero-meta-item { padding-right: 0; margin-right: 0; }
   .fp-topics-row { grid-template-columns: repeat(4, 1fr); }
   .fp-topic-pill { padding: 14px 6px 12px; gap: 7px; }
+  .landing-definition-list li { grid-template-columns: 1fr; gap: 4px; }
+  .fp-about-grid { border-top-width: 2px; }
+}
+
+@media (max-width: 400px) {
+  /* På de aller smaleste skjermene: temaknapper 2+2 */
+  .fp-topics-row { grid-template-columns: repeat(3, 1fr); }
+  .fp-topic-pill { padding: 10px 4px 8px; gap: 5px; }
+  .fp-topic-pill span:last-child { font-size: 9px; }
 }

@@ -923,3 +923,381 @@
 .parti-page .lofter-section {
   /* indre innhold beholder .page sin padding */
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LØFTER VS. HANDLING — Ny design
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Intro-banner */
+.lofter-banner {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--card) 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+}
+.lofter-banner-text { flex: 1; }
+.lofter-banner-text h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+.lofter-banner-text p {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.65;
+  max-width: 55ch;
+}
+.lofter-banner-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+.lofter-legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text2);
+}
+.lofter-legend-dot { margin-top: 5px; }
+.lofter-legend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lofter-legend-text strong {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.lofter-legend-text span {
+  font-size: 0.73rem;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 22ch;
+}
+.lofter-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.lofter-legend-dot--fulfilled { background: #16a34a; }
+.lofter-legend-dot--partial   { background: #f59e0b; }
+.lofter-legend-dot--broken    { background: #dc2626; }
+.lofter-legend-dot--pending   { background: #94a3b8; }
+
+/* Select hint */
+.lofter-select-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+/* Loading spinner */
+.lofter-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.lofter-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: lofter-spin 0.7s linear infinite;
+}
+@keyframes lofter-spin { to { transform: rotate(360deg); } }
+
+/* Error box */
+.lofter-error-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(220,38,38,.06);
+  border: 1px solid rgba(220,38,38,.2);
+  border-radius: 12px;
+  color: #b91c1c;
+  font-size: 14px;
+}
+.lofter-error-box p { margin: 0; }
+
+/* Scorekort */
+.lofter-scorekort {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.lofter-scorekort-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.lofter-scorekort-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 6px;
+  flex-shrink: 0;
+}
+.lofter-scorekort-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lofter-scorekort-info strong {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.lofter-scorekort-info span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.lofter-scorekort-pct {
+  text-align: right;
+  flex-shrink: 0;
+}
+.lofter-score-num {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+.lofter-score-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* Fremdriftsbar */
+.lofter-progress-bar {
+  height: 8px;
+  border-radius: 100px;
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 16px;
+}
+.lofter-progress-seg {
+  height: 100%;
+  transition: width 0.6s ease;
+}
+.lofter-progress-seg--fulfilled { background: #16a34a; }
+.lofter-progress-seg--partial   { background: #f59e0b; }
+.lofter-progress-seg--broken    { background: #dc2626; }
+.lofter-progress-seg--pending   { background: #e2e8f0; }
+
+.lofter-scorekort-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lofter-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px !important;
+  border-radius: 100px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+}
+.lofter-stat-num {
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+/* Løfte-liste wrapper */
+.lofte-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Løfte-item: hvert løfte */
+.lofte-item {
+  padding: 22px 0 !important;
+  border-bottom: 1px solid var(--line2) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border-left: none !important;
+  margin-bottom: 0 !important;
+  position: relative;
+}
+.lofte-item:first-child { border-top: 1px solid var(--line2); }
+.lofte-item--fulfilled { border-left: none !important; }
+.lofte-item--partial   { border-left: none !important; }
+.lofte-item--broken    { border-left: none !important; }
+.lofte-item--pending   { border-left: none !important; }
+
+/* Nummerbadge + statuspill */
+.lofte-item-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Periode-tag */
+.lofte-periode {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 2px 9px;
+  margin-left: auto;
+}
+
+/* Topprad med nummer, kategori, periode */
+.lofte-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+/* To-kolonne layout */
+.lofte-tokolonne {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.lofte-kolonne {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lofte-kolonne--lofte {
+  background: var(--card);
+  border-right: 1.5px solid var(--line);
+}
+
+.lofte-kolonne--resultat {
+  background: var(--surface);
+}
+
+/* Svak farge-tint på resultatsiden basert på status */
+.lofte-kolonne--fulfilled { background: rgba(22,163,74,.05); }
+.lofte-kolonne--partial   { background: rgba(245,158,11,.05); }
+.lofte-kolonne--broken    { background: rgba(220,38,38,.04); }
+.lofte-kolonne--pending   { background: var(--surface); }
+
+.lofte-kolonne-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Forklaring i resultatkolonnen */
+.lofte-resultat-forklaring {
+  font-size: 0.8rem;
+  color: var(--text2);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.lofte-tekst {
+  font-size: 0.92rem !important;
+  line-height: 1.7 !important;
+  color: var(--text) !important;
+  margin: 0 !important;
+  font-style: italic;
+}
+
+/* Dato i sak-card */
+.lofte-sak-card-date {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 0.75rem !important;
+  color: var(--muted) !important;
+  margin-left: auto !important;
+}
+
+/* Notat med ikon */
+.lofte-sak-card-note {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  font-size: 0.8rem !important;
+  color: var(--muted) !important;
+  font-style: italic !important;
+  margin: 0 0 8px !important;
+}
+
+/* Kilde-note nederst */
+.lofter-kilde-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 32px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Mobiltilpasning */
+@media (max-width: 640px) {
+  .lofter-banner { flex-direction: column; gap: 20px; padding: 20px; }
+  .lofter-banner-legend { flex-direction: row; flex-wrap: wrap; gap: 12px; }
+  .lofter-scorekort-top { flex-wrap: wrap; }
+  .lofter-scorekort-pct { text-align: left; width: 100%; }
+  .lofte-periode { display: none; }
+  .lofte-tokolonne { grid-template-columns: 1fr; }
+  .lofte-kolonne--lofte { border-right: none; border-bottom: 1.5px solid var(--line); }
+}

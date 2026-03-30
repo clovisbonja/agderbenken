@@ -67,11 +67,30 @@ const KATEGORI_COLORS: Record<string, { bg: string; text: string }> = {
   Næring:      { bg: "rgba(245,158,11,.1)",  text: "#b45309" },
 }
 
-const STATUS_META: Record<LofteSak["status"], { label: string; labelEn: string; color: string }> = {
-  pending:   { label: "Ikke behandlet", labelEn: "Pending",    color: "#6b7280" },
-  fulfilled: { label: "Holdt",          labelEn: "Fulfilled",  color: "#16a34a" },
-  broken:    { label: "Ikke holdt",     labelEn: "Not kept",   color: "#374151" },
-  partial:   { label: "Delvis holdt",   labelEn: "Partial",    color: "#f59e0b" },
+const STATUS_META: Record<LofteSak["status"], {
+  label: string; labelEn: string; color: string
+  forklaring: string; forklaringEn: string
+}> = {
+  fulfilled: {
+    label: "Holdt", labelEn: "Fulfilled", color: "#16a34a",
+    forklaring: "Partiet har fremmet eller stemt for tiltak som oppfyller dette løftet i Stortinget.",
+    forklaringEn: "The party has proposed or voted for measures fulfilling this pledge in the Storting.",
+  },
+  partial: {
+    label: "Delvis holdt", labelEn: "Partially kept", color: "#f59e0b",
+    forklaring: "Partiet har gjort fremskritt, men løftet er ikke fullt ut oppfylt. Det kan mangle finansiering, gjennomføring eller lovvedtak.",
+    forklaringEn: "The party has made progress, but the pledge has not been fully fulfilled. Funding, implementation or legislation may still be missing.",
+  },
+  broken: {
+    label: "Ikke holdt", labelEn: "Not kept", color: "#dc2626",
+    forklaring: "Partiet har ikke fulgt opp dette løftet, eller har stemt mot tiltak som ville oppfylt det.",
+    forklaringEn: "The party has not followed up on this pledge, or has voted against measures that would have fulfilled it.",
+  },
+  pending: {
+    label: "Ikke behandlet", labelEn: "Pending", color: "#6b7280",
+    forklaring: "Ingen Stortingssak er ennå koblet til dette løftet. Det kan være under behandling eller ikke fremmet ennå.",
+    forklaringEn: "No Storting case has been linked to this pledge yet. It may be under consideration or not yet introduced.",
+  },
 }
 
 // ── Komponent ─────────────────────────────────────────────────────────────────
@@ -239,9 +258,27 @@ export default function Parti({ lang }: PartiProps) {
       {/* Tab: Løfter vs. handling */}
       {tab === "promises" && (
         <section className="lofter-section">
-          <p className="lofter-intro">{t.promisesIntro}</p>
 
-          {/* Parti-velger — forbedret grid */}
+          {/* Intro-banner */}
+          <div className="lofter-banner">
+            <div className="lofter-banner-text">
+              <h2>{lang === "no" ? "Hva lovet de — og hva skjedde?" : "What did they promise — and what happened?"}</h2>
+              <p>{lang === "no"
+                ? "Velg et parti for å se deres valgløfter fra partiprogrammet, koblet mot faktiske saker behandlet på Stortinget. Statusene er basert på vedtak og saksbehandling i Stortingets åpne data."
+                : "Select a party to see their election promises, linked to actual cases processed in the Storting. Statuses are based on decisions and case processing in Storting open data."
+              }</p>
+            </div>
+            <div className="lofter-banner-legend">
+              {(["fulfilled","partial","broken","pending"] as const).map(s => (
+                <div key={s} className="lofter-legend-item">
+                  <span className={`lofter-legend-dot lofter-legend-dot--${s}`} />
+                  <span>{STATUS_META[s][lang === "no" ? "label" : "labelEn"]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Parti-velger */}
           <div className="lofter-party-grid">
             {AGDER_PARTIER.map((p) => {
               const isActive = selectedParti === p.forkortelse
@@ -253,8 +290,8 @@ export default function Parti({ lang }: PartiProps) {
                   className={`lofter-party-card${isActive ? " lofter-party-card--active" : ""}`}
                   style={isActive ? {
                     borderColor: safeColor,
-                    boxShadow: `0 0 0 2px ${safeColor}33, 0 4px 16px ${safeColor}22`,
-                    background: `${safeColor}0f`,
+                    boxShadow: `0 0 0 2px ${safeColor}33, 0 6px 20px ${safeColor}22`,
+                    background: `${safeColor}0d`,
                   } : {}}
                   onClick={() => setSelectedParti(p.forkortelse)}
                 >
@@ -278,15 +315,28 @@ export default function Parti({ lang }: PartiProps) {
           </div>
 
           {!selectedParti && (
-            <p className="lofter-select-hint">{t.selectParty} ↑</p>
+            <p className="lofter-select-hint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M12 19V5M5 12l7-7 7 7"/>
+              </svg>
+              {lang === "no" ? "Velg et parti ovenfor" : "Select a party above"}
+            </p>
           )}
 
           {selectedParti && loading && (
-            <p className="lofter-status">{t.loading}</p>
+            <div className="lofter-loading">
+              <div className="lofter-loading-spinner" />
+              <span>{t.loading}</span>
+            </div>
           )}
 
           {selectedParti && !loading && error && (
-            <p className="lofter-status lofter-error">{error}</p>
+            <div className="lofter-error-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <p>{error}</p>
+            </div>
           )}
 
           {selectedParti && !loading && !error && promises.length === 0 && (
@@ -295,51 +345,63 @@ export default function Parti({ lang }: PartiProps) {
 
           {selectedParti && !loading && promises.length > 0 && (
             <div className="lofter-list">
-              {selectedPartyInfo && (
-                <div className="lofter-party-heading">
-                  <img src={selectedPartyInfo.logo} alt={selectedPartyInfo.navn} className="lofter-heading-logo" />
-                  <div className="lofter-heading-text">
-                    <strong>{selectedPartyInfo.navn}</strong>
-                    <span className="lofter-count">{filteredPromises.length} {lang === "no" ? "valgløfter registrert" : "pledges registered"}</span>
-                  </div>
-                  <div className="lofter-heading-stats">
-                    {(["fulfilled","partial","broken","pending"] as const).map(s => {
-                      const n = filteredPromises.filter(p => {
-                        const dom = p.lofte_sak.map(x=>x.status).includes("broken") ? "broken"
-                          : p.lofte_sak.map(x=>x.status).includes("partial") ? "partial"
-                          : p.lofte_sak.map(x=>x.status).includes("fulfilled") ? "fulfilled" : "pending"
-                        return dom === s
-                      }).length
-                      if (!n) return null
-                      return (
-                        <span key={s} className={`lofter-stat-pill lofter-stat-pill--${s}`}>
-                          {n} {STATUS_META[s][lang === "no" ? "label" : "labelEn"]}
-                        </span>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
 
-              {/* Category filter */}
+              {/* Parti-header med scorekort */}
+              {selectedPartyInfo && (() => {
+                const getStatus = (p: Valglofte): LofteSak["status"] => {
+                  const s = p.lofte_sak.map(x => x.status)
+                  return s.includes("broken") ? "broken" : s.includes("partial") ? "partial" : s.includes("fulfilled") ? "fulfilled" : "pending"
+                }
+                const counts = {
+                  fulfilled: filteredPromises.filter(p => getStatus(p) === "fulfilled").length,
+                  partial:   filteredPromises.filter(p => getStatus(p) === "partial").length,
+                  broken:    filteredPromises.filter(p => getStatus(p) === "broken").length,
+                  pending:   filteredPromises.filter(p => getStatus(p) === "pending").length,
+                }
+                const total = filteredPromises.length
+                const heldPct = total > 0 ? Math.round((counts.fulfilled + counts.partial * 0.5) / total * 100) : 0
+                return (
+                  <div className="lofter-scorekort">
+                    <div className="lofter-scorekort-top">
+                      <img src={selectedPartyInfo.logo} alt={selectedPartyInfo.navn} className="lofter-scorekort-logo" />
+                      <div className="lofter-scorekort-info">
+                        <strong>{selectedPartyInfo.navn}</strong>
+                        <span>{lang === "no" ? `${total} valgløfter registrert` : `${total} pledges registered`}</span>
+                      </div>
+                      <div className="lofter-scorekort-pct">
+                        <span className="lofter-score-num">{heldPct}%</span>
+                        <span className="lofter-score-label">{lang === "no" ? "holdt (helt/delvis)" : "kept (full/partial)"}</span>
+                      </div>
+                    </div>
+                    {/* Fremdriftsbar */}
+                    <div className="lofter-progress-bar">
+                      {counts.fulfilled > 0 && <div className="lofter-progress-seg lofter-progress-seg--fulfilled" style={{ width: `${counts.fulfilled/total*100}%` }} title={STATUS_META.fulfilled.label} />}
+                      {counts.partial > 0   && <div className="lofter-progress-seg lofter-progress-seg--partial"   style={{ width: `${counts.partial/total*100}%`   }} title={STATUS_META.partial.label} />}
+                      {counts.broken > 0    && <div className="lofter-progress-seg lofter-progress-seg--broken"    style={{ width: `${counts.broken/total*100}%`    }} title={STATUS_META.broken.label} />}
+                      {counts.pending > 0   && <div className="lofter-progress-seg lofter-progress-seg--pending"   style={{ width: `${counts.pending/total*100}%`   }} title={STATUS_META.pending.label} />}
+                    </div>
+                    <div className="lofter-scorekort-pills">
+                      {(["fulfilled","partial","broken","pending"] as const).map(s => counts[s] > 0 && (
+                        <span key={s} className={`lofter-stat-pill lofter-stat-pill--${s}`}>
+                          <span className="lofter-stat-num">{counts[s]}</span>
+                          {STATUS_META[s][lang === "no" ? "label" : "labelEn"]}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Kategori-filter */}
               {promises.length > 0 && (() => {
                 const allKategorier = [...new Set(promises.map(p => p.kategori).filter(Boolean))] as string[]
                 return allKategorier.length > 1 ? (
                   <div className="lofte-filter-strip">
-                    <button
-                      type="button"
-                      className={`lofte-filter-btn${!selectedLofteKategori ? " active" : ""}`}
-                      onClick={() => setSelectedLofteKategori(null)}
-                    >
-                      Alle
+                    <button type="button" className={`lofte-filter-btn${!selectedLofteKategori ? " active" : ""}`} onClick={() => setSelectedLofteKategori(null)}>
+                      {lang === "no" ? "Alle" : "All"}
                     </button>
                     {allKategorier.map(k => (
-                      <button
-                        key={k}
-                        type="button"
-                        className={`lofte-filter-btn${selectedLofteKategori === k ? " active" : ""}`}
-                        onClick={() => setSelectedLofteKategori(k)}
-                      >
+                      <button key={k} type="button" className={`lofte-filter-btn${selectedLofteKategori === k ? " active" : ""}`} onClick={() => setSelectedLofteKategori(k)}>
                         {k}
                       </button>
                     ))}
@@ -347,81 +409,137 @@ export default function Parti({ lang }: PartiProps) {
                 ) : null
               })()}
 
-              {filteredPromises.map((promise) => {
-                const statuses = promise.lofte_sak.map((s) => s.status)
-                const dominantStatus: LofteSak["status"] =
-                  statuses.includes("broken")    ? "broken"    :
-                  statuses.includes("partial")   ? "partial"   :
-                  statuses.includes("fulfilled") ? "fulfilled" : "pending"
-                const dm = STATUS_META[dominantStatus]
-                const matchedCases = promise.lofte_sak.filter(c => c.status !== "pending")
-                const hasMatches = matchedCases.length > 0
+              {/* Løfteliste */}
+              <div className="lofte-liste">
+                {filteredPromises.map((promise, idx) => {
+                  const statuses = promise.lofte_sak.map((s) => s.status)
+                  const dominantStatus: LofteSak["status"] =
+                    statuses.includes("broken")    ? "broken"    :
+                    statuses.includes("partial")   ? "partial"   :
+                    statuses.includes("fulfilled") ? "fulfilled" : "pending"
+                  const dm = STATUS_META[dominantStatus]
+                  const aktiveSaker = promise.lofte_sak.filter(c => c.status !== "pending")
 
-                return (
-                  <div key={promise.lofte_id} className={`lofte-item lofte-item--${dominantStatus}`}>
-                    <div className="lofte-item-header">
-                      <div className="lofte-item-status">
-                        <span className={`lofte-status-badge lofte-status-badge--${dominantStatus}`}>
-                          {lang === "no" ? dm.label : dm.labelEn}
-                        </span>
+                  return (
+                    <div key={promise.lofte_id} className={`lofte-item lofte-item--${dominantStatus}`}>
+
+                      {/* Topprad: nummer + kategori + periode */}
+                      <div className="lofte-item-meta">
+                        <span className="lofte-item-num">{idx + 1}</span>
                         {promise.kategori && (
-                          <span className="lofte-kategori">{promise.kategori}</span>
+                          <span className="lofte-kategori"
+                            style={KATEGORI_COLORS[promise.kategori]
+                              ? { background: KATEGORI_COLORS[promise.kategori].bg, color: KATEGORI_COLORS[promise.kategori].text, borderColor: "transparent" }
+                              : {}}>
+                            {promise.kategori}
+                          </span>
+                        )}
+                        {promise.program_periode && (
+                          <span className="lofte-periode">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            {promise.program_periode}
+                          </span>
                         )}
                       </div>
-                      {hasMatches && (
-                        <span className="lofte-matched-indicator">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                          </svg>
-                          {matchedCases.length} {lang === "no" ? "kobling" : "link"}{matchedCases.length !== 1 ? (lang === "no" ? "er" : "s") : ""}
-                        </span>
-                      )}
-                    </div>
-                    <p className="lofte-tekst">{promise.tekst}</p>
 
-                    {promise.lofte_sak.length > 0 && (
-                      <div className="lofte-saker-section">
-                        <p className="lofte-saker-label">
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                          </svg>
-                          {lang === "no" ? "Saker som svarer på dette løftet" : "Cases responding to this pledge"}
-                        </p>
-                        <div className="lofte-saker-cards">
-                          {promise.lofte_sak.map((c) => (
-                            <div key={c.id} className={`lofte-sak-card lofte-sak-card--${c.status}`}>
-                              <div className="lofte-sak-card-header">
-                                <span className={`lofte-sak-badge lofte-sak-badge--${c.status}`}>
-                                  {STATUS_META[c.status][lang === "no" ? "label" : "labelEn"]}
-                                </span>
-                                {c.sak_dato && (
-                                  <span className="lofte-sak-card-date">{c.sak_dato.slice(0, 10)}</span>
-                                )}
-                              </div>
-                              <p className="lofte-sak-card-title">{c.sak_tittel ?? c.sak_id}</p>
-                              {c.notat && (
-                                <p className="lofte-sak-card-note">{c.notat}</p>
-                              )}
-                              <a
-                                className="lofte-sak-card-link"
-                                href={`https://www.stortinget.no/no/Saker-og-publikasjoner/Saker/Sak/?p=${c.sak_id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {lang === "no" ? "Se sak hos Stortinget" : "View case at Stortinget"}
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                                </svg>
-                              </a>
-                            </div>
-                          ))}
+                      {/* To-kolonne layout: løfte | resultat */}
+                      <div className="lofte-tokolonne">
+
+                        {/* Venstre: Hva de lovet */}
+                        <div className="lofte-kolonne lofte-kolonne--lofte">
+                          <p className="lofte-kolonne-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            {lang === "no" ? "Hva de lovet" : "What they promised"}
+                          </p>
+                          <p className="lofte-tekst">"{promise.tekst}"</p>
+                        </div>
+
+                        {/* Høyre: Hva som skjedde */}
+                        <div className={`lofte-kolonne lofte-kolonne--resultat lofte-kolonne--${dominantStatus}`}>
+                          <p className="lofte-kolonne-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            {lang === "no" ? "Hva skjedde" : "What happened"}
+                          </p>
+                          <span className={`lofte-status-badge lofte-status-badge--${dominantStatus}`}>
+                            {lang === "no" ? dm.label : dm.labelEn}
+                          </span>
+                          <p className="lofte-resultat-forklaring">
+                            {STATUS_META[dominantStatus][lang === "no" ? "forklaring" : "forklaringEn"]}
+                          </p>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )
-              })}
+
+                      {/* Koblete stortingssaker */}
+                      {promise.lofte_sak.length > 0 && (
+                        <div className="lofte-saker-section">
+                          <p className="lofte-saker-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            {lang === "no" ? "Saker fra Stortinget koblet til dette løftet" : "Storting cases linked to this pledge"}
+                          </p>
+                          <div className="lofte-saker-cards">
+                            {promise.lofte_sak.map((c) => (
+                              <div key={c.id} className={`lofte-sak-card lofte-sak-card--${c.status}`}>
+                                <div className="lofte-sak-card-header">
+                                  <span className={`lofte-sak-badge lofte-sak-badge--${c.status}`}>
+                                    {STATUS_META[c.status][lang === "no" ? "label" : "labelEn"]}
+                                  </span>
+                                  {c.sak_dato && (
+                                    <span className="lofte-sak-card-date">
+                                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                                      </svg>
+                                      {new Date(c.sak_dato).toLocaleDateString(lang === "no" ? "nb-NO" : "en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="lofte-sak-card-title">{c.sak_tittel ?? c.sak_id}</p>
+                                {c.notat && (
+                                  <p className="lofte-sak-card-note">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    {c.notat}
+                                  </p>
+                                )}
+                                <a
+                                  className="lofte-sak-card-link"
+                                  href={`https://www.stortinget.no/no/Saker-og-publikasjoner/Saker/Sak/?p=${c.sak_id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {lang === "no" ? "Se sak hos Stortinget" : "View case at Stortinget"}
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                                  </svg>
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Kildeinformasjon */}
+              <div className="lofter-kilde-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {lang === "no"
+                  ? "Løftene er hentet fra partienes offisielle partiprogrammer. Kobling til Stortingssaker er basert på Stortingets åpne API og redaksjonell vurdering."
+                  : "Pledges are sourced from official party programs. Links to Storting cases are based on the Storting open API and editorial assessment."
+                }
+              </div>
             </div>
           )}
         </section>

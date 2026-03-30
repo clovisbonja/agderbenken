@@ -98,7 +98,7 @@ export default function Navbar({ theme, lang, onToggleTheme, onToggleLanguage }:
           <NavLink to="/" className="brand" onClick={() => setMenuÅpen(false)}>
             <strong>Sørblikket</strong>
             <span className="brand-divider" aria-hidden>|</span>
-            <span className="brand-sub">Regionens øye på Stortinget</span>
+            <span className="brand-sub">Agder regionens øye på Stortinget</span>
           </NavLink>
 
           {/* Desktop-nav — skjules på mobil via CSS */}

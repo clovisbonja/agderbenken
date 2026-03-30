@@ -131,6 +131,15 @@ export default function Parti({ lang }: PartiProps) {
     setError(null)
 
     async function load() {
+      // Supabase er ikke konfigurert — vis tydelig melding i stedet for å krasje
+      if (!supabase) {
+        if (!cancelled) {
+          setError("Valgløfter krever Supabase-konfig. Se .env.example for oppsett.")
+          setLoading(false)
+        }
+        return
+      }
+
       const { data, error: err } = await supabase
         .from("valgløfte")
         .select("*, lofte_sak(*)")

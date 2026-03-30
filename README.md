@@ -1,61 +1,207 @@
-# Sørblikket (Agderbenken)
-Sørblikket er en datadrevet webapplikasjon som gir innsyn i politiske saker fra Stortinget, med særlig kontekst rundt Agderbenken (representantene valgt fra Agder).
+# Sørblikket
 
-## Hva prosjektet gjør
-- Henter live saksdata fra Stortingets åpne XML API.
-- Gjør saker søkbare og grupperer dem i tema for rask oversikt.
-- Viser statistikk, statusfordeling, trender og komitéaktivitet.
-- Gir detaljvisning av valgt sak med enkel forklaring.
-- Har egne sider for representanter, partiprogrammer og om prosjektet.
+Et journalistisk innsyn-verktøy for Agderbenkens arbeid på Stortinget.
+Utviklet som bacheloroppgave i samarbeid med **Digin** og **Fædrelandsvennen**.
 
-## Navn og kontekst
-- **Sørblikket** er prosjektets navn og beskriver innsyn fra Sørlandet-perspektiv.
-- **Agderbenken** brukes der det er relevant i Storting-kontekst (gruppen av representanter fra Agder).
+---
 
-## Funksjoner
-- Norsk/engelsk språkbytte i navbar.
-- Dark mode / light mode på tvers av sider.
-- Statistikk-side med tydelig toppseksjon, forklaringer og flere dashboards.
-- Representantside med live data, filtrering på parti og biografi.
-- Responsivt design for desktop og mobil.
+## Hva er Sørblikket?
 
-## Teknologi
-- React + TypeScript + Vite
-- CSS (egen styling)
-- React Router
+Sørblikket henter live data direkte fra Stortingets åpne API og gjør politikk lettere å forstå for innbyggere, unge velgere og journalister i Agder. Ingen datainnsamling, ingen innlogging — alt er offentlig tilgjengelig informasjon.
 
-## Prosjektstruktur
-- `my-app/src/pages/ForsideTom.tsx` – enkel forside
-- `my-app/src/pages/Forside.tsx` – statistikkside
-- `my-app/src/pages/Representanter.tsx` – representantside
-- `my-app/src/pages/Parti.tsx` – partiprogrammer
-- `my-app/src/pages/Om.tsx` – om prosjektet
-- `my-app/src/components/Navbar.tsx` – navigasjon, språk og tema
-- `my-app/src/lib/categorizationEngine.ts` – kategorisering og søk
+**Sider i appen:**
 
-## Kom i gang lokalt
+| Side | URL | Beskrivelse |
+|---|---|---|
+| Forside | `/` | Oversikt og navigasjon |
+| Statistikk | `/statistikk` | Nøkkeltall, temafordeling og aktivitetstrend |
+| Stemmegivning | `/votering` | Voteringer og representantstemmer |
+| Representanter | `/representanter` | Alle 9 Agder-representanter med biografi |
+| Partiprogrammer | `/parti` | Programmer og valgløfter per parti |
+| Om | `/om` | Om prosjektet og samarbeidspartnere |
+
+---
+
+## Kom i gang
+
+### Krav
+
+- [Node.js](https://nodejs.org/) versjon 18 eller nyere
+- Git
+
+### 1. Klon repoet
+
 ```bash
-cd my-app
+git clone https://github.com/clovisbonja/agderbenken.git
+cd agderbenken/my-app
+```
+
+### 2. Installer avhengigheter
+
+```bash
 npm install
+```
+
+### 3. Start utviklingsserver
+
+```bash
 npm run dev
 ```
-Åpne deretter adressen Vite skriver ut (som regel `http://localhost:5173`).
 
-## Produksjonsbuild
+Åpne [`http://localhost:5173`](http://localhost:5173) i nettleseren.
+
+> **Merk:** Appen henter data fra Stortingets åpne API ved oppstart. Første lasting kan ta noen sekunder avhengig av nettverk.
+
+---
+
+## Supabase (valgfritt)
+
+Supabase brukes **kun** for valgløfte-fanen på Parti-siden. Resten av appen fungerer uten det.
+
+**Uten Supabase:** appen starter uten problemer. Valgløfter vises ikke, men du ser en tydelig melding.
+
+**Med Supabase:** kopier eksempelfilen og fyll inn nøklene:
+
 ```bash
-cd my-app
+cp .env.example .env.local
+```
+
+Åpne `.env.local` og sett inn verdiene fra [Supabase-dashbordet](https://supabase.com/dashboard) ditt:
+
+```
+VITE_SUPABASE_URL=https://ditt-prosjekt-id.supabase.co
+VITE_SUPABASE_ANON_KEY=din-anon-public-key-her
+```
+
+> **Viktig:** `.env.local` er gitignored og skal aldri commites. Del aldri nøkler offentlig.
+
+---
+
+## Bygge for produksjon
+
+```bash
 npm run build
+```
+
+Outputen havner i `dist/`. For å forhåndsvise produksjonsbygget lokalt:
+
+```bash
 npm run preview
 ```
 
-## Datakilde
-Data hentes fra Stortingets åpne data (XML API), blant annet:
-- `https://data.stortinget.no/eksport/saker`
-- `https://data.stortinget.no/eksport/sak`
-- `https://data.stortinget.no/eksport/dagensrepresentanter`
-- `https://data.stortinget.no/eksport/kodetbiografi`
+---
 
-## Videre arbeid
-- Justere kategoriseringsregler mot flere faktiske sakstyper.
-- Videre forbedre språk/oversettelser i alle edge-cases.
-- Utvide med flere forklarende visualiseringer for yngre brukere.
+## Prosjektstruktur
+
+```
+my-app/
+├── public/                  # Statiske filer (bilder, ikoner)
+│   └── logo-images/         # Partier og partnerlogoer
+│
+├── src/
+│   ├── pages/               # Én fil per side i appen
+│   │   ├── Hjem.tsx         # Forsiden
+│   │   ├── Statistikk.tsx   # Statistikk-siden
+│   │   ├── StatistikkDashboard.tsx  # Dashboard-komponenten
+│   │   ├── Votering.tsx     # Stemmegivningssiden
+│   │   ├── Representanter.tsx
+│   │   ├── Parti.tsx        # Partiprogrammer + valgløfter
+│   │   └── Om.tsx           # Om-siden
+│   │
+│   ├── components/
+│   │   └── Navbar.tsx       # Toppmeny med hamburgermeny på mobil
+│   │
+│   ├── hooks/
+│   │   ├── useStortingetData.ts   # Henter og cacher data fra Stortinget
+│   │   └── useLokalLagring.ts     # localStorage-wrapper (tema, språk)
+│   │
+│   ├── config/
+│   │   ├── partier.ts       # Alle Agder-partier med metadata
+│   │   ├── temaer.ts        # De 7 politiske temaene
+│   │   └── sesjon.ts        # Aktiv stortingssesjon + API-URLer
+│   │
+│   ├── lib/
+│   │   ├── categorizationEngine.ts  # AI-kategorisering av saker per tema
+│   │   └── supabase.ts              # Supabase-klient (null hvis ikke konfigurert)
+│   │
+│   ├── types/
+│   │   └── sak.ts           # TypeScript-typer for saker og voteringer
+│   │
+│   ├── utils/
+│   │   ├── xml.ts           # Parser for Stortingets XML-svar
+│   │   ├── dato.ts          # Datoformatering og trendsberegning
+│   │   └── status.ts        # Saksstatus-hjelpere
+│   │
+│   ├── styles/              # Én CSS-fil per side/komponent
+│   │   ├── basis.css        # Design tokens, reset, .page-layout
+│   │   ├── navbar.css
+│   │   ├── hjem.css
+│   │   ├── statistikk.css
+│   │   ├── votering.css
+│   │   ├── representanter.css
+│   │   ├── parti.css
+│   │   ├── om.css
+│   │   └── felleskomponenter.css   # Hero-banner og footer
+│   │
+│   └── App.tsx              # Rot: ruting, tema, språk, footer
+│
+├── .env.example             # Mal for miljøvariabler — kopier til .env.local
+└── package.json
+```
+
+---
+
+## Teknologi
+
+| Verktøy | Versjon | Brukes til |
+|---|---|---|
+| React | 19 | UI-komponenter |
+| TypeScript | 5.9 | Type-sikkerhet |
+| Vite | 7 | Byggverktøy og dev-server |
+| React Router | 7 | Klient-side ruting |
+| Supabase JS | 2 | Valgløfte-database (valgfritt) |
+
+---
+
+## API-datakilder
+
+Alt hentes fra **Stortingets åpne API** — ingen nøkkel kreves.
+Svar er i XML-format og parseres i `src/utils/xml.ts`.
+
+| Endepunkt | Brukes til |
+|---|---|
+| `/saker?sesjonid=ÅÅÅÅ-ÅÅÅÅ` | Alle saker i en sesjon |
+| `/voteringer?sesjonid=ÅÅÅÅ-ÅÅÅÅ` | Voteringer per sesjon |
+| `/voteringsresultat?voteringid=X` | Hvem stemte hva |
+| `/dagensrepresentanter` | Nåværende stortingsrepresentanter |
+| `/kodetbiografi?personid=P123` | Komiteer og verv |
+| `/personbilde?personid=P123` | Profilbilde |
+
+---
+
+## Vanlige problemer
+
+**Appen starter ikke / krasjer med Supabase-feil**
+→ Sørg for at `.env.local` eksisterer med gyldige verdier, _eller_ la den være tom — appen fungerer uten Supabase.
+
+**`node_modules` mangler**
+→ Kjør `npm install` inne i `my-app/`-mappen.
+
+**Port 5173 er opptatt**
+→ Vite velger automatisk neste ledige port og skriver det ut i terminalen.
+
+**Ingen data lastes inn**
+→ Stortingets API kan av og til være tregt. Sjekk nettverkstilgang og prøv igjen.
+
+**TypeScript-feil**
+→ Kjør `npx tsc --noEmit` for å se alle feil samlet.
+
+---
+
+## Bidra
+
+1. Lag en ny branch: `git checkout -b feature/det-du-jobber-med`
+2. Gjør endringer og commit
+3. Push og åpne en Pull Request mot `main`
+
+Partier og temaer konfigureres i `src/config/` — ingen kodeendringer i selve sidene er nødvendig for å legge til/fjerne data der.

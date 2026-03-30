@@ -1,3 +1,28 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * REPRESENTANTER — src/pages/Representanter.tsx
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Viser Agderbenkens stortingsrepresentanter.
+ * Henter live data fra Stortingets åpne XML-API.
+ *
+ * Funksjoner:
+ *   - Liste over alle nåværende Agder-representanter
+ *   - Filtrering etter parti
+ *   - Representantkort med bilde, alder, parti og komitétilhørighet
+ *   - Klikk åpner Stortingets offisielle representantside
+ *
+ * API-endepunkter som brukes:
+ *   - /dagensrepresentanter  ← Alle nåværende stortingsrepresentanter
+ *   - /kodetbiografi         ← Komiteer og verv per representant
+ *   - /personbilde           ← Profilbilde (hentes dynamisk)
+ *
+ * Støtter norsk (no) og engelsk (en) via lang-prop.
+ * CSS finnes i src/styles/representanter.css.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 import { useEffect, useMemo, useState } from "react"
 
 // Live-endepunkt for "dagens representanter" fra Stortinget.

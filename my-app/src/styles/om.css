@@ -1,21 +1,355 @@
-/* ── Om — om-siden (om-*) ───────────────────────────────────────── */
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * OM-SIDEN — src/styles/om.css
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Stilark for Om-siden (Om.tsx).
+ * Klasser: .om, .om-hero*, .om-body, .om-main, .om-sidebar,
+ *          .om-values, .om-goal-box, .om-partners-*
+ *
+ * Bildefilen for herobildet ligger i /public/om-hero.avif
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 
-/* Om page headings */
-.om-page h1, .om-page h2, .om-page h3 {
-  font-family: 'Playfair Display', Georgia, serif;
+/* ── Sidebeholder ─────────────────────────────────────────────────────── */
+.om {
+  display: flex;
+  flex-direction: column;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: var(--text);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DESIGN POLISH v3 — monochromatic blue, editorial structure
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ── Hero-bildebanner ─────────────────────────────────────────────────── */
+.om-hero {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow: hidden;
+  position: relative;
+  min-height: 280px;
+}
 
-/* ── 1. Om page: remove duplicate heading inside photo banner ────────── */
-.om-hero-h1 { display: none !important; }
-.om-hero-text { padding-top: 52px; }
+.om-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 30, 60, 0.62);
+  z-index: 0;
+}
 
-/* ── Om: photo hero fills nicely ─────────────────────────────────────── */
-.om-hero { min-height: 280px !important; }
+.om-hero-text {
+  position: relative;
+  z-index: 1;
+  padding: 52px 40px 52px 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-/* ── Theme tabs: more generous spacing ───────────────────────────────── */
-/* ── Om page: more section breathing room ────────────────────────────── */
-.om-section { padding: 48px 0 !important; }
+/* Skjuler duplikat h1 — tittelen vises allerede i ed-page-hero */
+.om-hero-h1 {
+  display: none;
+}
+
+.om-hero-text p {
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+
+/* Fakta-chips i herobildet */
+.om-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.om-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+}
+
+.om-fact-l {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.om-fact-v {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ── Hoveddel + sidebar ───────────────────────────────────────────────── */
+.om-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  background: var(--bg);
+  align-items: start;
+}
+
+.om-main {
+  padding: 52px 48px;
+  border-right: 1px solid var(--glass);
+}
+
+/* Overskrifter i hovedtekst */
+.om-section-h2 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+/* Blå dekorasjonslinje under seksjonstittel */
+.om-h2-line {
+  width: 48px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-bottom: 1.4rem;
+}
+
+.om-ab-intro {
+  font-size: 0.93rem;
+  line-height: 1.9;
+  color: var(--muted);
+  margin: 0 0 1.8rem;
+  max-width: 620px;
+}
+
+/* ── Verdikort ────────────────────────────────────────────────────────── */
+.om-values {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.om-val-card {
+  flex: 1 1 180px;
+  border-radius: 10px;
+  padding: 1.3rem 1.1rem;
+  border: 1px solid var(--glass);
+  background: color-mix(in srgb, var(--card) 88%, #60a5fa 12%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.om-val-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.om-val-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.om-val-card p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+.om-sidebar {
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 0;
+}
+
+/* Mål-boks i sidebar */
+.om-goal-box {
+  background: var(--accent);
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.om-goal-title {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.om-goal-sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 0.85rem;
+  line-height: 1.55;
+}
+
+.om-goal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.om-goal-list li {
+  font-size: 0.81rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.om-goal-list li:last-child {
+  border-bottom: none;
+}
+
+/* ── Samarbeidspartnere ───────────────────────────────────────────────── */
+.om-partners-section {
+  background: var(--card);
+  border-top: 1px solid var(--glass);
+  padding: 52px;
+}
+
+.om-partners-h3 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.om-partners-line {
+  width: 48px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-bottom: 1.8rem;
+}
+
+.om-partners-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 200px));
+  gap: 1.4rem;
+  justify-content: start;
+}
+
+/* Plassér 4. og 5. partnerkort i rad 2 */
+.om-partners-grid .om-partner-card:nth-child(4) { grid-column: 1; grid-row: 2; }
+.om-partners-grid .om-partner-card:nth-child(5) { grid-column: 2; grid-row: 2; }
+
+.om-partner-card {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--glass);
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 200px;
+}
+
+.om-partner-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1);
+}
+
+.om-partner-logo {
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.om-partner-info {
+  padding: 0.7rem 1rem;
+  background: var(--bg);
+  border-top: 1px solid var(--glass);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.om-partner-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.om-partner-visit {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ── Mobilresponsivitet ───────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .om-hero-text {
+    padding: 40px 24px;
+  }
+
+  .om-body {
+    grid-template-columns: 1fr;
+  }
+
+  .om-main {
+    padding: 36px 24px;
+    border-right: none;
+  }
+
+  .om-sidebar {
+    padding: 0 24px 36px;
+    position: static;
+  }
+
+  /* Skjul sidebar-mål-boks på mobil — ikke nok plass */
+  .om-goal-box {
+    display: none;
+  }
+
+  .om-partners-section {
+    padding: 36px 24px;
+  }
+
+  .om-partners-grid {
+    grid-template-columns: repeat(2, minmax(0, 180px));
+  }
+
+  /* Tilbakestill eksplisitt grid-plassering på mobil */
+  .om-partners-grid .om-partner-card:nth-child(4),
+  .om-partners-grid .om-partner-card:nth-child(5) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .om-partners-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .om-partner-card {
+    width: 100%;
+    max-width: 280px;
+  }
+}

@@ -21,7 +21,6 @@ import Parti from "./pages/Parti"
 import Representanter from "./pages/Representanter"
 import Om from "./pages/Om"
 import Votering from "./pages/Votering"
-import Prototyper from "./pages/Prototyper"
 
 // Stilark — ett per side for enkel oversikt og vedlikehold
 import "./styles/basis.css"
@@ -151,8 +150,7 @@ export default function App() {
         <Route path="/representanter" element={<Representanter lang={lang} />} />
         <Route path="/om"           element={<Om lang={lang} />} />
         <Route path="/votering"     element={<Votering lang={lang} />} />
-        <Route path="/prototyper"   element={<Prototyper />} />
-        {/* Ukjente URL-er sendes tilbake til forsiden */}
+{/* Ukjente URL-er sendes tilbake til forsiden */}
         <Route path="*"             element={<Navigate to="/" replace />} />
       </Routes>
 

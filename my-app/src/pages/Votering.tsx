@@ -1,3 +1,28 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * STEMMEGIVNING — src/pages/Votering.tsx
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Viser voteringer fra Stortinget for gjeldende sesjon.
+ * Henter saker og voteringer fra Stortingets åpne XML-API.
+ *
+ * Funksjoner:
+ *   - Søk og filtrering av voteringer
+ *   - Visning av representantstemmer per votering
+ *   - Oversikt over stemmeforhold (for/mot/fraværende)
+ *
+ * API-endepunkter som brukes:
+ *   - /saker          ← Liste over saker
+ *   - /voteringer     ← Alle voteringer per sak
+ *   - /voteringsresultat  ← Hvem stemte hva
+ *   - /voteringsforslag   ← Tekstlig forslag
+ *
+ * Støtter norsk (no) og engelsk (en) via lang-prop.
+ * CSS finnes i src/styles/votering.css.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 import { useEffect, useMemo, useState } from "react"
 
 // Stortinget API-endepunkter

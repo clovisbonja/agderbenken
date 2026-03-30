@@ -1,3 +1,25 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PARTI — src/pages/Parti.tsx
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Viser partier representert på Agderbenken, med partiprogrammer og
+ * valgløfter. Bruker Supabase for å laste valgløftedata.
+ *
+ * Faner per parti:
+ *   - "Partiprogram" — lenke til partiets offisielle program
+ *   - "Valgløfter"  — løfter fra Supabase med oppfyllelsesstatus
+ *
+ * Konfigurasjon:
+ *   - Partidata (navn, farge, logo, lenker) er i src/config/partier.ts
+ *   - Supabase-tilkobling er i src/lib/supabase.ts
+ *
+ * Støtter norsk (no) og engelsk (en) via lang-prop.
+ * CSS finnes i src/styles/parti.css.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 import { useEffect, useState } from "react"
 import type { CSSProperties } from "react"
 import { supabase } from "../lib/supabase"

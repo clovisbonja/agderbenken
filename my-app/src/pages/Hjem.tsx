@@ -1,9 +1,27 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FORSIDE — src/pages/Hjem.tsx
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Forsiden for Sørblikket. Inneholder:
+ *   - Hero-seksjon med nøkkeltall og CTA-knapp
+ *   - Fire feature-kort (Statistikk, Representanter, Stemmegivning, Parti)
+ *   - Tema-strip med lenker til statistikksiden
+ *   - Om-seksjon med forklaring av prosjektnavnet
+ *
+ * Støtter norsk (no) og engelsk (en) via lang-prop.
+ * CSS finnes i src/styles/hjem.css.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 import { NavLink } from "react-router-dom"
 
 type Lang = "no" | "en"
 type HjemProps = { lang: Lang }
 
-const THEMES = [
+// Temaene som vises i hero-panelet og temastripet
+const TEMAER = [
   {
     key: "klima",
     icon: (
@@ -124,7 +142,7 @@ export default function Hjem({ lang }: HjemProps) {
 
         <div className="fp-hero-right" aria-hidden>
           <div className="fp-hero-topics">
-            {THEMES.map((th) => (
+            {TEMAER.map((th) => (
               <div key={th.key} className="fp-hero-topic">
                 <span className="fp-hero-topic-icon">{th.icon}</span>
                 <span>{no ? th.no : th.en}</span>
@@ -225,7 +243,7 @@ export default function Hjem({ lang }: HjemProps) {
       <section className="fp-topics-section">
         <p className="fp-topics-label">{no ? "Temaer vi dekker" : "Topics we cover"}</p>
         <div className="fp-topics-row">
-          {THEMES.map((th) => (
+          {TEMAER.map((th) => (
             <NavLink
               key={th.key}
               to={`/statistikk`}

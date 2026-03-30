@@ -1,3 +1,23 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * STATISTIKK DASHBOARD — src/pages/StatistikkDashboard.tsx
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Fullt statistikk-dashboard for Agderbenkens saker på Stortinget.
+ * Henter og kategoriserer data fra Stortingets åpne XML-API.
+ *
+ * Inneholder:
+ *   - Oversiktskort (KPI-er): totalt antall saker, behandlede, aktive
+ *   - Temafordeling med søkefunksjon
+ *   - Saksliste per tema med sortering og filtrering
+ *   - Aktivitetsgraf (månedstrend)
+ *
+ * Kategorisering skjer via src/lib/categorizationEngine.ts.
+ * CSS finnes i src/styles/statistikk.css.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
 import React, { useEffect, useMemo, useState } from "react"
 import {
   categorizeCases,

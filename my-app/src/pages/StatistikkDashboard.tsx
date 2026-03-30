@@ -1338,8 +1338,8 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
                   {monthTrend.map(m => {
                     const pct = Math.round(m.value / maxVal * 100)
                     const isPeak = m.value === maxVal
-                    const lbl = new Date(m.label + "-01").toLocaleDateString(
-                      lang === "no" ? "no-NO" : "en-GB", { month: "short" }
+                    const lbl = new Date(m.label + "-01T12:00:00").toLocaleDateString(
+                      lang === "no" ? "nb-NO" : "en-GB", { month: "short", year: "2-digit" }
                     )
                     return (
                       <div key={m.label} className={`sig-monthly-col${isPeak ? " sig-monthly-col--peak" : ""}`}>
@@ -1434,7 +1434,7 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
                 const pct = Math.round(count / totalCases * 100)
                 return (
                   <div key={type} className="sig-type-row">
-                    <span className="sig-type-name" title={type}>{type}</span>
+                    <span className="sig-type-name" title={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                     <div className="sig-type-track">
                       <div className="sig-type-fill" style={{ width: `${Math.round(count / maxT * 100)}%` }} />
                     </div>

@@ -140,16 +140,6 @@ export default function Hjem({ lang }: HjemProps) {
           </NavLink>
         </div>
 
-        <div className="fp-hero-right" aria-hidden>
-          <div className="fp-hero-topics">
-            {TEMAER.map((th) => (
-              <div key={th.key} className="fp-hero-topic">
-                <span className="fp-hero-topic-icon">{th.icon}</span>
-                <span>{no ? th.no : th.en}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* ══ FEATURE CARDS ════════════════════════════════════════════ */}
@@ -256,7 +246,7 @@ export default function Hjem({ lang }: HjemProps) {
         </div>
       </section>
 
-      {/* ══ ABOUT ════════════════════════════════════════════════════ */}
+{/* ══ ABOUT ════════════════════════════════════════════════════ */}
       <section className="fp-about">
         <div className="fp-about-intro">
           <p className="fp-about-kicker">{no ? "Om prosjektet" : "About the project"}</p>

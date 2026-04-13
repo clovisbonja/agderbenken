@@ -15,6 +15,7 @@
 import { useEffect, useState } from "react"
 import { Routes, Route, Navigate, NavLink } from "react-router-dom"
 import Navbar from "./components/Navbar"
+import { useNettStatus } from "./hooks/useNettStatus"
 import Hjem from "./pages/Hjem"
 import Statistikk from "./pages/Statistikk"
 import Parti from "./pages/Parti"
@@ -82,63 +83,143 @@ function Footer({ lang }: { lang: "no" | "en" }) {
 
 // ── Hoved-app ─────────────────────────────────────────────────────────────────
 
+// ── Offline-banner ────────────────────────────────────────────────────────────
+function OfflineBanner({ lang }: { lang: "no" | "en" }) {
+  const erOnline = useNettStatus()
+  const [visKomTilbake, setVisKomTilbake] = useState(false)
+
+  useEffect(() => {
+    if (erOnline) {
+      // Vis kort "tilkoblet igjen"-melding etter at nett kom tilbake
+      setVisKomTilbake(true)
+      const t = setTimeout(() => setVisKomTilbake(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [erOnline])
+
+  if (erOnline && !visKomTilbake) return null
+
+  const no = lang === "no"
+
+  return (
+    <div className={`offline-banner ${erOnline ? "offline-banner--online" : "offline-banner--offline"}`} role="status">
+      {erOnline ? (
+        <>
+          <span className="offline-banner-dot offline-banner-dot--green" />
+          {no ? "Tilkoblet igjen" : "Back online"}
+        </>
+      ) : (
+        <>
+          <span className="offline-banner-dot offline-banner-dot--red" />
+          {no
+            ? "Ingen internettilkobling — data kan være utdatert"
+            : "No internet connection — data may be outdated"}
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function App() {
 
   // ── Tema-tilstand ────────────────────────────────────────────────────────────
-  // Leser fra localStorage ved oppstart. Hvis ingen verdi er lagret, sjekkes
-  // brukerens systempreferanse (prefers-color-scheme). Fallback er lys modus.
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
+  // null  = følg systemet (CSS @media tar seg av det — fungerer i Brave og alle andre)
+  // "dark"  = manuelt satt mørkt
+  // "light" = manuelt satt lyst
+  const [themeOverride, setThemeOverride] = useState<"light" | "dark" | null>(() => {
     try {
-      const lagret = localStorage.getItem("theme")
+      const lagret = localStorage.getItem("theme-override")
       if (lagret === "light" || lagret === "dark") return lagret
-
-      // Bruk systempreferanse hvis ingen localStorage-verdi finnes
-      const systemMørk =
-        typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-color-scheme: dark)").matches
-      return systemMørk ? "dark" : "light"
-    } catch {
-      return "light" // Fallback hvis localStorage ikke er tilgjengelig (f.eks. privat modus)
-    }
+    } catch {}
+    return null // ingen manuell override → CSS følger systemet
   })
+
 
   // ── Språk-tilstand ───────────────────────────────────────────────────────────
   // Norsk er standard. Språkvalget huskes i localStorage.
   const [lang, setLang] = useState<"no" | "en">(() => {
     try {
-      const lagret = localStorage.getItem("lang")
-      return lagret === "en" ? "en" : "no"
-    } catch {
-      return "no"
-    }
+      // Manuelt valg overstyrer alt
+      const lagret = localStorage.getItem("lang-override")
+      if (lagret === "en" || lagret === "no") return lagret
+    } catch {}
+
+    // Ingen manuell override → bruk maskinens språkinnstilling
+    const browserSpråk = navigator.languages ?? [navigator.language]
+    const erNorsk = browserSpråk.some((l) =>
+      l.toLowerCase().startsWith("nb") ||
+      l.toLowerCase().startsWith("nn") ||
+      l.toLowerCase().startsWith("no")
+    )
+    return erNorsk ? "no" : "en"
   })
 
-  // ── Tema-effekt ──────────────────────────────────────────────────────────────
-  // Oppdaterer data-theme-attributtet på <html> hver gang temaet endres.
-  // CSS bruker [data-theme="dark"] til å bytte farger.
+  // ── Tema-effekt: oppdater DOM ─────────────────────────────────────────────────
+  // Null (system-modus): fjern attributtet → CSS @media tar over (Brave-safe)
+  // "dark"/"light": sett attributtet eksplisitt → overstyrer CSS @media
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme)
-    document.documentElement.setAttribute("data-home-theme", theme)
+    const html = document.documentElement
+    if (themeOverride === null) {
+      // Ingen manuell override — la CSS @media (prefers-color-scheme) styre
+      html.removeAttribute("data-theme")
+      // data-home-theme: sett basert på faktisk system for å holde spesifikke stiler riktige
+      const isDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches
+      html.setAttribute("data-home-theme", isDark ? "dark" : "light")
+    } else {
+      html.setAttribute("data-theme", themeOverride)
+      html.setAttribute("data-home-theme", themeOverride)
+    }
     try {
-      localStorage.setItem("theme", theme)
+      if (themeOverride) {
+        localStorage.setItem("theme-override", themeOverride)
+      } else {
+        localStorage.removeItem("theme-override")
+      }
+      localStorage.removeItem("theme")        // rydd opp gammelt nøkkelnavn
+      localStorage.removeItem("theme-manuelt") // rydd opp gammelt flagg
     } catch {}
-  }, [theme])
+  }, [themeOverride])
+
+  // ── data-home-theme synkronisering ───────────────────────────────────────────
+  // matchMedia-event (fungerer i Chrome/Safari/Firefox) + focus-fallback for Brave
+  useEffect(() => {
+    if (themeOverride !== null) return // ikke treng lytter ved manuell override
+
+    const syncHomeTheme = () => {
+      const isDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches
+      document.documentElement.setAttribute("data-home-theme", isDark ? "dark" : "light")
+    }
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)")
+    mq.addEventListener("change", syncHomeTheme)
+    document.addEventListener("visibilitychange", syncHomeTheme)
+    window.addEventListener("focus", syncHomeTheme)
+
+    return () => {
+      mq.removeEventListener("change", syncHomeTheme)
+      document.removeEventListener("visibilitychange", syncHomeTheme)
+      window.removeEventListener("focus", syncHomeTheme)
+    }
+  }, [themeOverride])
 
   // ── Språk-effekt ─────────────────────────────────────────────────────────────
-  // Lagrer valgt språk i localStorage slik at det huskes ved neste besøk.
+  // Lagrer manuelt valgt språk i localStorage slik at det huskes ved neste besøk.
   useEffect(() => {
     try {
-      localStorage.setItem("lang", lang)
+      localStorage.setItem("lang-override", lang)
     } catch {}
   }, [lang])
 
   return (
     <>
+      {/* Offline-tilbakemelding */}
+      <OfflineBanner lang={lang} />
+
       {/* Fast toppnavigasjon — vises på alle sider */}
       <Navbar
-        theme={theme}
+        themeOverride={themeOverride}
         lang={lang}
-        onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
+        onSetTheme={(t) => setThemeOverride(t)}
         onToggleLanguage={() => setLang((l) => (l === "no" ? "en" : "no"))}
       />
 

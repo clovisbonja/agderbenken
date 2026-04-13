@@ -2,11 +2,53 @@
  * ═══════════════════════════════════════════════════════════════════════════
  * NAVBAR — src/styles/navbar.css
  * ═══════════════════════════════════════════════════════════════════════════
- *
- * Mobile-first. Hamburgermeny på skjermbredde < 768px.
- * Ingen !important — klasser defineres én gang, klart og tydelig.
- * ═══════════════════════════════════════════════════════════════════════════
  */
+
+/* ── Offline-banner ──────────────────────────────────────────────────────── */
+.offline-banner {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,.18);
+  animation: offline-slide-up 0.25s ease;
+}
+
+.offline-banner--offline {
+  background: #1a1a1a;
+  color: #f5f5f5;
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.offline-banner--online {
+  background: #0f2a1a;
+  color: #6ee7a0;
+  border: 1px solid rgba(110,231,160,.2);
+}
+
+.offline-banner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.offline-banner-dot--red   { background: #f87171; box-shadow: 0 0 6px #f87171; }
+.offline-banner-dot--green { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+
+@keyframes offline-slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(0.5rem); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* ── Topplinje ───────────────────────────────────────────────────────────── */
 
@@ -21,52 +63,41 @@
 
 [data-theme="dark"] .topbar {
   background: #13131a;
-  border-bottom-color: rgba(255, 255, 255, 0.10);
+  border-bottom-color: rgba(255,255,255,0.08);
 }
 
 .topbar-inner {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 28px;
-  height: 54px;
+  height: 56px;
   display: flex;
   align-items: center;
-  gap: 0;
 }
 
-/* ── Logo / brand ────────────────────────────────────────────────────────── */
+/* ── Logo ────────────────────────────────────────────────────────────────── */
 
 .brand {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   color: var(--text);
-  margin-right: auto;   /* skyv nav og tools til høyre */
+  margin-right: auto;
 }
 
 .brand strong {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text);
 }
 
-.brand-divider {
-  color: var(--line);
-  font-size: 16px;
-  font-weight: 300;
-  user-select: none;
-}
-
+/* Skjul undertekst alltid — holdes i koden men vises ikke */
+.brand-divider,
 .brand-sub {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+  display: none;
 }
 
 /* ── Desktop-nav ─────────────────────────────────────────────────────────── */
@@ -74,15 +105,16 @@
 .nav-desktop {
   display: flex;
   align-items: center;
-  margin-right: 16px;
+  gap: 2px;
+  margin-right: 12px;
 }
 
 .nav-btn {
   display: inline-flex;
   align-items: center;
-  padding: 0 14px;
-  height: 54px;
-  font-size: 13px;
+  padding: 0 12px;
+  height: 56px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--muted);
   text-decoration: none;
@@ -99,7 +131,6 @@
 
 .nav-btn:hover {
   color: var(--text);
-  border-bottom-color: var(--line);
 }
 
 .nav-btn.active {
@@ -108,46 +139,17 @@
   border-bottom-color: var(--accent);
 }
 
-/* ── Verktøyknapper (tema + språk) ───────────────────────────────────────── */
+/* ── Høyresiden ──────────────────────────────────────────────────────────── */
 
 .nav-tools {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.theme-toggle,
-.lang-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 11px;
-  height: 30px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
-  white-space: nowrap;
-}
-
-.theme-toggle:hover,
-.lang-toggle:hover {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--accent);
 }
 
 /* ── Hamburger-knapp ─────────────────────────────────────────────────────── */
-/* Skjules på desktop, vises kun på mobil */
 
 .hamburger {
-  display: none;           /* Skjult på desktop */
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -155,70 +157,72 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
   flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.hamburger:hover {
+  background: var(--surface);
 }
 
 .hamburger-linje {
   display: block;
-  width: 18px;
-  height: 2px;
+  width: 20px;
+  height: 1.5px;
   background: var(--text);
   border-radius: 2px;
   transition: transform 0.22s ease, opacity 0.22s ease;
   transform-origin: center;
 }
 
-/* Animer til X når menyen er åpen */
 .hamburger--open .hamburger-linje:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
+  transform: translateY(6.5px) rotate(45deg);
 }
 .hamburger--open .hamburger-linje:nth-child(2) {
   opacity: 0;
   transform: scaleX(0);
 }
 .hamburger--open .hamburger-linje:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
+  transform: translateY(-6.5px) rotate(-45deg);
 }
 
-/* ── Backdrop (mørkt overlegg bak mobilmenyen) ───────────────────────────── */
+/* ── Backdrop ────────────────────────────────────────────────────────────── */
 
 .mobil-backdrop {
-  display: none;    /* Vises kun via mobilregler nedenfor */
+  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0,0,0,0.3);
   z-index: 190;
-  backdrop-filter: blur(2px);
 }
 
-/* ── Mobilmeny-skuff ─────────────────────────────────────────────────────── */
-/* Starter utenfor skjermen (øverst), glir ned ved åpning */
+/* ── Meny (deles mellom desktop-dropdown og mobil-panel) ─────────────────── */
 
 .mobil-meny {
-  display: none;    /* Aktiveres i mobilreglene nedenfor */
+  display: flex;
   position: fixed;
-  top: 54px;        /* Starter rett under topbaren */
+  top: 56px;
   left: 0;
   right: 0;
   z-index: 195;
   background: var(--card);
-  border-bottom: 1px solid var(--line);
   flex-direction: column;
-  padding: 8px 0 16px;
-  transform: translateY(-8px);
+  padding: 0 0 8px;
+  transform: translateY(-6px);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.22s ease, opacity 0.22s ease;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 [data-theme="dark"] .mobil-meny {
   background: #13131a;
-  border-bottom-color: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255,255,255,0.08);
 }
 
 .mobil-meny--open {
@@ -227,16 +231,16 @@
   pointer-events: auto;
 }
 
-/* Lenker i mobilmenyen */
+/* ── Nav-lenker i menyen (vises bare på mobil) ───────────────────────────── */
+
 .mobil-lenke {
   display: block;
-  padding: 14px 24px;
-  font-size: 16px;
+  padding: 13px 20px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--muted);
   text-decoration: none;
-  border-left: 3px solid transparent;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  transition: color 0.12s, background 0.12s;
 }
 
 .mobil-lenke:hover {
@@ -246,35 +250,105 @@
 
 .mobil-lenke.active {
   color: var(--accent);
-  border-left-color: var(--accent);
   font-weight: 600;
-  background: var(--accent-s);
 }
 
-/* ── Responsive: mobilregler ─────────────────────────────────────────────── */
+/* ── Innstillingsseksjoner (språk + tema) ────────────────────────────────── */
+
+.mobil-theme-seksjon {
+  padding: 12px 20px 10px;
+  border-top: 1px solid var(--line);
+}
+
+.mobil-theme-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.mobil-theme-rad {
+  display: flex;
+  gap: 6px;
+}
+
+.mobil-theme-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.mobil-theme-btn:hover:not(.mobil-theme-btn--active) {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.mobil-theme-btn--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.flag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ── Desktop: kompakt dropdown-kort ─────────────────────────────────────── */
+
+@media (min-width: 769px) {
+  .mobil-lenke {
+    display: none;
+  }
+
+  .mobil-meny {
+    top: 60px;
+    left: auto;
+    right: 20px;
+    width: 260px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+    padding: 0 0 6px;
+  }
+
+  .mobil-theme-seksjon {
+    padding: 10px 14px 8px;
+  }
+
+  .mobil-theme-seksjon:first-of-type {
+    border-top: none;
+  }
+}
+
+/* ── Mobil ───────────────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
-  /* Skjul desktopnavigasjonen */
   .nav-desktop {
     display: none;
   }
 
-  /* Vis hamburgeren */
-  .hamburger {
-    display: flex;
-  }
-
-  /* Vis mobilmenyen (som flex, men usynlig inntil --open) */
-  .mobil-meny {
-    display: flex;
-  }
-
-  /* Vis backdropen kun når den finnes i DOM */
   .mobil-backdrop {
     display: block;
   }
 
-  /* Korter ned topbaren litt på mobil */
   .topbar-inner {
     padding: 0 16px;
     height: 52px;
@@ -282,24 +356,5 @@
 
   .mobil-meny {
     top: 52px;
-  }
-
-  /* Skjul underteknst og skilletegn i logo på svært smale skjermer */
-  .brand-divider,
-  .brand-sub {
-    display: none;
-  }
-
-  /* Temaveksler viser bare ikon/tekst — ingen lang label */
-  .theme-toggle {
-    font-size: 12px;
-    padding: 5px 9px;
-  }
-}
-
-@media (max-width: 480px) {
-  /* På veldig smale skjermer: skjul teksten i tema-knappen */
-  .theme-toggle span:last-child {
-    display: none;
   }
 }

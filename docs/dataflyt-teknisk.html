@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sørblikket — Dataflyt og Teknisk Detaljdokumentasjon</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --brand:   #1a3a5c;
+      --accent:  #2563eb;
+      --green:   #16a34a;
+      --red:     #dc2626;
+      --yellow:  #d97706;
+      --purple:  #7c3aed;
+      --text:    #111827;
+      --muted:   #6b7280;
+      --line:    #e5e7eb;
+      --surface: #f9fafb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5pt;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.65;
+    }
+
+    /* ── COVER ────────────────────────── */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+      background: linear-gradient(145deg, #0c1a2e 0%, #1a3a5c 100%);
+      color: #fff;
+      page-break-after: always;
+    }
+
+    .cover-series { font-size: 8.5pt; letter-spacing: 0.2em; text-transform: uppercase; color: #60a5fa; margin-bottom: 8px; }
+    .cover-doc { font-size: 9.5pt; color: #93c5fd; margin-bottom: 32px; }
+    .cover-title { font-family: 'Playfair Display', serif; font-size: 38pt; line-height: 1.1; margin-bottom: 16px; }
+    .cover-sub { font-size: 15pt; color: #bfdbfe; font-weight: 300; margin-bottom: 48px; }
+    .cover-desc { font-size: 11.5pt; color: #94a3b8; max-width: 540px; line-height: 1.8; margin-bottom: 60px; }
+
+    .cover-toc {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-width: 640px;
+    }
+
+    .cover-toc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 9.5pt;
+      color: #cbd5e1;
+    }
+
+    .cover-toc-num {
+      font-weight: 800;
+      color: #3b82f6;
+      font-size: 11pt;
+      min-width: 20px;
+    }
+
+    /* ── LAYOUT ───────────────────────── */
+    .page { padding: 56px 72px; max-width: 860px; margin: 0 auto; }
+    .page-break { page-break-after: always; }
+
+    .page-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 14px; margin-bottom: 32px; border-bottom: 1px solid var(--line);
+    }
+    .page-header-brand { font-family: 'Playfair Display', serif; font-size: 12pt; font-weight: 700; color: var(--brand); }
+    .page-header-chapter { font-size: 8.5pt; color: var(--muted); }
+
+    .page-footer {
+      margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted);
+    }
+
+    h1 { font-family: 'Playfair Display', serif; font-size: 24pt; color: var(--brand); margin-bottom: 8px; }
+    h2 { font-size: 15pt; font-weight: 700; color: var(--brand); margin-top: 36px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+    h3 { font-size: 11pt; font-weight: 700; color: var(--text); margin-top: 24px; margin-bottom: 10px; }
+    h4 { font-size: 9.5pt; font-weight: 700; color: var(--muted); margin-top: 18px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    p { margin-bottom: 12px; line-height: 1.75; color: #374151; }
+    .lead { font-size: 12pt; color: var(--muted); margin-bottom: 28px; line-height: 1.75; }
+
+    /* ── DATAFLYT DIAGRAM ─────────────── */
+    .flow-diagram {
+      margin: 28px 0;
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 32px;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 6px;
+    }
+
+    .flow-node {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .flow-node-label {
+      font-size: 7.5pt;
+      color: #60a5fa;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .flow-node-detail {
+      font-size: 8pt;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .flow-conn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 8px;
+      color: #334155;
+      font-size: 9.5pt;
+      flex-shrink: 0;
+      min-width: 40px;
+    }
+
+    .flow-conn-label {
+      font-size: 6.5pt;
+      color: #475569;
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .flow-section-label {
+      font-size: 7.5pt;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #475569;
+      margin: 20px 0 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 14px;
+    }
+
+    /* ── CODE BLOCK ───────────────────── */
+    .code-block {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      color: #e2e8f0;
+      line-height: 1.9;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .code-comment { color: #475569; }
+    .code-keyword { color: #60a5fa; }
+    .code-string  { color: #86efac; }
+    .code-fn      { color: #fbbf24; }
+    .code-var     { color: #f0abfc; }
+
+    /* ── CARDS ────────────────────────── */
+    .card { border: 1px solid var(--line); border-radius: 10px; padding: 18px; background: #fff; margin-bottom: 12px; }
+    .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+    .card-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 16px 0; }
+    .card-title { font-size: 8.5pt; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+    .card-l { border-left: 4px solid var(--accent); }
+    .card-green { border-left: 4px solid var(--green); }
+    .card-yellow { border-left: 4px solid var(--yellow); }
+    .card-purple { border-left: 4px solid var(--purple); }
+    .card-red { border-left: 4px solid var(--red); }
+
+    /* ── TABLE ────────────────────────── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 9.5pt; }
+    th { background: var(--brand); color: #fff; padding: 9px 14px; text-align: left; font-size: 8.5pt; font-weight: 600; letter-spacing: 0.05em; }
+    td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.6; }
+    tr:nth-child(even) td { background: var(--surface); }
+
+    code { font-family: 'JetBrains Mono', monospace; font-size: 8pt; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 6px; color: #1e40af; }
+
+    /* ── CALLOUT ──────────────────────── */
+    .callout { border-radius: 8px; padding: 16px 20px; margin: 16px 0; font-size: 9.5pt; line-height: 1.75; }
+    .callout-blue   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .callout-yellow { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .callout-green  { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+    .callout-red    { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+    /* ── BADGE ────────────────────────── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 100px; font-size: 8pt; font-weight: 600; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-yellow { background: #fef9c3; color: #a16207; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-gray   { background: #f3f4f6; color: #6b7280; }
+    .badge-purple { background: #ede9fe; color: #6d28d9; }
+
+    /* ── TIMELINE ─────────────────────── */
+    .timeline { position: relative; padding-left: 28px; margin: 20px 0; }
+    .timeline::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+
+    .timeline-item { position: relative; margin-bottom: 22px; }
+    .timeline-item::before { content: ''; position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--accent); }
+
+    .timeline-label { font-size: 8pt; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .timeline-content { font-size: 10pt; color: var(--text); line-height: 1.65; }
+
+    /* ── PRINT ────────────────────────── */
+    @media print {
+      body { font-size: 9.5pt; }
+      .cover { min-height: 100vh; }
+      .page { padding: 40px 56px; }
+      .page-break { page-break-after: always; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-series">Sørblikket · Teknisk dokumentasjon</div>
+  <div class="cover-doc">Dokument 2 av 2</div>
+  <div class="cover-title">Dataflyt og<br>Tekniske Detaljer</div>
+  <div class="cover-sub">Steg-for-steg gjennomgang av pipelinen</div>
+  <p class="cover-desc">
+    Dette dokumentet beskriver den eksakte dataflyten gjennom systemet — fra
+    henting av partiprogrammer til statusvisning i nettleseren. Inkluderer
+    kode-eksempler, feilhåndtering, miljøvariabler og driftsanvisninger.
+  </p>
+  <div class="cover-toc">
+    <div class="cover-toc-item"><span class="cover-toc-num">A</span>Fullstendig dataflyt</div>
+    <div class="cover-toc-item"><span class="cover-toc-num">B</span>AI-prompter forklart</div>
+    <div class="cover-toc-item"><span class="cover-toc-num">C</span>Miljøvariabler</div>
+    <div class="cover-toc-item"><span class="cover-toc-num">D</span>Feilhåndtering</div>
+    <div class="cover-toc-item"><span class="cover-toc-num">E</span>Frontend-detaljer</div>
+    <div class="cover-toc-item"><span class="cover-toc-num">F</span>Driftsanvisning</div>
+  </div>
+</div>
+
+<!-- SEKSJON A: DATAFLYT -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">A · Fullstendig dataflyt</span>
+  </div>
+
+  <h1>A — Fullstendig dataflyt</h1>
+  <p class="lead">Dataflyten fra råkilde til brukerens skjerm, steg for steg.</p>
+
+  <div class="flow-diagram">
+    <div class="flow-section-label">Fase 1 — Ekstraksjon (kjøres én gang per valgperiode)</div>
+
+    <div class="flow-row">
+      <div class="flow-node">
+        <div class="flow-node-label">Partiprogram (PDF/HTML)</div>
+        <div class="flow-node-detail">9 filer · Direkte fra partiene · PDF kodes til base64</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">HTTPS<br>fetch</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">extract-promises.mjs</div>
+        <div class="flow-node-detail">Node.js · Leser fil · Sender til Claude API</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">Anthropic<br>API</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">Claude AI (claude-opus-4-6)</div>
+        <div class="flow-node-detail">Streaming · 32k tokens · Returnerer JSON-liste med løfter</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">INSERT<br>Supabase</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">valgløfte-tabellen</div>
+        <div class="flow-node-detail">800+ løfter per parti · tekst + kategori</div>
+      </div>
+    </div>
+
+    <div class="flow-section-label">Fase 2 — Matching (kjøres månedlig)</div>
+
+    <div class="flow-row">
+      <div class="flow-node">
+        <div class="flow-node-label">valgløfte + Stortinget API</div>
+        <div class="flow-node-detail">Løfter fra DB + 1267 saker fra /saker (XML)</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">Anthropic<br>API</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">Claude AI — Matching</div>
+        <div class="flow-node-detail">8k tokens · Returnerer (lofte_id → sak_id)-par + notat</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">INSERT<br>Supabase</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">lofte_sak-tabellen</div>
+        <div class="flow-node-detail">Koblingstabell · status=pending ved opprettelse</div>
+      </div>
+    </div>
+
+    <div class="flow-section-label">Fase 3 — Statusoppdatering (kjøres ukentlig)</div>
+
+    <div class="flow-row">
+      <div class="flow-node">
+        <div class="flow-node-label">lofte_sak (alle koblinger)</div>
+        <div class="flow-node-detail">Henter alle par fra Supabase</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">XML<br>fetch</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">Stortinget API</div>
+        <div class="flow-node-detail">/voteringer?sakid= og /voteringsresultat?voteringid=</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">FOR/MOT<br>teller</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">update-status.mjs</div>
+        <div class="flow-node-detail">Ingen AI · Ren matematikk · Oppdaterer status i DB</div>
+      </div>
+    </div>
+
+    <div class="flow-section-label">Fase 4 — Presentasjon (live, hver gang brukeren besøker)</div>
+
+    <div class="flow-row">
+      <div class="flow-node">
+        <div class="flow-node-label">Supabase REST API</div>
+        <div class="flow-node-detail">Anon-nøkkel · Kun lesing · HTTPS</div>
+      </div>
+      <div class="flow-conn">+<div class="flow-conn-label">live</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">Stortinget API (live)</div>
+        <div class="flow-node-detail">/representanter · /voteringer (direkte fra nettleser)</div>
+      </div>
+      <div class="flow-conn">→<div class="flow-conn-label">React<br>render</div></div>
+      <div class="flow-node">
+        <div class="flow-node-label">Sørblikket nettside</div>
+        <div class="flow-node-detail">SPA · Alle sider · Mobil + desktop</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Tidslinje for en løftes liv</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-label">T=0 — Partiprogram publiseres</div>
+      <div class="timeline-content">Partiet legger ut sitt valgprogram 2025–2029 som PDF på sin nettside. Systemet kan nå hente og behandle det.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">T+1 time — Ekstraksjon</div>
+      <div class="timeline-content">Utvikler kjører <code>extract-promises.mjs</code>. Claude leser hele programmet og identifiserer alle løfter. De lagres i databasen med status <span class="badge badge-gray">pending</span>.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">T+2 timer — Matching</div>
+      <div class="timeline-content">Utvikler kjører <code>match-promises.mjs</code>. Claude kobler løftet til én eller flere stortingssaker. Koblingen lagres med status <span class="badge badge-gray">pending</span>.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">T+N måneder — Votert på Stortinget</div>
+      <div class="timeline-content">Stortinget behandler en sak som er matchet mot løftet. Voteringsdata blir tilgjengelig i Stortingets API.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">T+N måneder + neste kjøring — Status oppdatert</div>
+      <div class="timeline-content">Utvikler kjører <code>update-status.mjs</code>. Systemet teller FOR/MOT-stemmer og oppdaterer status til <span class="badge badge-green">fulfilled</span>, <span class="badge badge-red">broken</span>, eller <span class="badge badge-yellow">partial</span>.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">Alltid — Synlig på nettsiden</div>
+      <div class="timeline-content">Brukere kan se alle løfter og deres status på Parti-siden i sanntid.</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Dataflyt og Tekniske Detaljer</span>
+    <span>Seksjon A · Fullstendig dataflyt</span>
+  </div>
+</div>
+
+<!-- SEKSJON B: AI-PROMPTER -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">B · AI-prompter forklart</span>
+  </div>
+
+  <h1>B — AI-prompter forklart</h1>
+  <p class="lead">Claude AI mottar nøye utformede instruksjoner for hvert av de to oppgavene. Her er logikken bak dem.</p>
+
+  <h2>Ekstraksjonsprompt — "Finn alle løfter"</h2>
+  <p>
+    Prompten er bevisst aggressiv — den ber Claude finne <em>absolutt alle</em> løfter,
+    ikke bare de mest åpenbare. Den spesifiserer eksplisitt hvilke typer løfter som
+    skal inkluderes:
+  </p>
+
+  <div class="card-row">
+    <div class="card card-l">
+      <div class="card-title">Inkluder disse løftetypene</div>
+      <div style="font-size:9.5pt; line-height:1.8; color:#374151">
+        ✓ Tallfestede mål ("øke med 20%", "innen 2030")<br>
+        ✓ Forbudsløfter ("avvikle", "forby", "stanse")<br>
+        ✓ Handlingsplaner ("innføre", "opprette", "etablere")<br>
+        ✓ Finansieringsløfter ("bevilge", "øke støtten")<br>
+        ✓ Reform-løfter ("endre", "reformere")<br>
+        ✓ Garantier ("sikre", "bevare", "opprettholde")
+      </div>
+    </div>
+    <div class="card card-red">
+      <div class="card-title">Ekskluder disse</div>
+      <div style="font-size:9.5pt; line-height:1.8; color:#374151">
+        ✗ Generelle verdier ("vi tror på")<br>
+        ✗ Analyser av situasjonen<br>
+        ✗ Historisk beskrivelse<br>
+        ✗ Vage intensjoner uten konkret handling<br>
+        ✗ Repeterte formuleringer
+      </div>
+    </div>
+  </div>
+
+  <h3>Returformat fra Claude (ekstraksjon)</h3>
+  <div class="code-block">
+    <span class="code-comment">// Claude returnerer en JSON-liste:</span><br>
+    [<br>
+    &nbsp;&nbsp;{<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"tekst"</span>: <span class="code-string">"Ap vil innføre gratis SFO for alle elever på 1.–4. trinn."</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"kategori"</span>: <span class="code-string">"Utdanning"</span><br>
+    &nbsp;&nbsp;},<br>
+    &nbsp;&nbsp;{<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"tekst"</span>: <span class="code-string">"Vi vil redusere norske klimagassutslipp med 55% innen 2030."</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"kategori"</span>: <span class="code-string">"Klima"</span><br>
+    &nbsp;&nbsp;}<br>
+    ]
+  </div>
+
+  <h2>Matchingprompt — "Koble løfter til saker"</h2>
+  <p>
+    Claude mottar to lister: alle løfter fra ett parti, og alle stortingssaker.
+    Prompten gir Claude politisk kontekst slik at den kan matche riktig:
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Kontekstelementet</th><th>Hva Claude får vite</th><th>Hvorfor det hjelper</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Partirolle</td>
+        <td>Om partiet er i regjering, støtteparti eller opposisjon</td>
+        <td>Opposisjonspartier fremmer representantforslag, regjeringen fremmer proposisjoner</td>
+      </tr>
+      <tr>
+        <td>Dokumentgruppe</td>
+        <td>Om saken er representantforslag, proposisjon, melding, innstilling osv.</td>
+        <td>Representantforslag fra opposisjonsparti er mer relevant for opposisjonspartiets løfter</td>
+      </tr>
+      <tr>
+        <td>Emner</td>
+        <td>Stortingets eget emne-felt for hver sak</td>
+        <td>Forenkler filtrering og gir raskere match</td>
+      </tr>
+      <tr>
+        <td>Regjeringens plan</td>
+        <td>Fulltekst av "Regjeringens plan for Norge 2025–29"</td>
+        <td>Hjelper Claude å matche Ap-løfter mot regjeringens egne saker</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Returformat fra Claude (matching)</h3>
+  <div class="code-block">
+    <span class="code-comment">// Claude returnerer koblinger med begrunnelse:</span><br>
+    {<br>
+    &nbsp;&nbsp;<span class="code-var">"matches"</span>: [<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"lofte_id"</span>: <span class="code-string">"uuid-abc-123"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"sak_id"</span>: <span class="code-string">"2025-123456"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-var">"notat"</span>: <span class="code-string">"Saken gjelder utvidelse av SFO-ordningen,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;direkte relevant for løftet om gratis SFO."</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+    &nbsp;&nbsp;]<br>
+    }
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>Viktig:</strong> Claude er instruert om å <em>ikke</em> sette en øvre grense for antall matcher. Systemet er designet for å finne alle relevante koblinger, ikke bare de mest åpenbare. Antall tokens er satt til 8 192 for matchingprompten og 32 000 for ekstraksjonsprompten.
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Dataflyt og Tekniske Detaljer</span>
+    <span>Seksjon B · AI-prompter</span>
+  </div>
+</div>
+
+<!-- SEKSJON C: MILJØVARIABLER -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">C · Miljøvariabler og konfigurasjon</span>
+  </div>
+
+  <h1>C — Miljøvariabler</h1>
+  <p class="lead">Alle hemmeligheter og tilkoblingspunkter konfigureres via miljøvariabler — aldri hardkodet i kildekoden.</p>
+
+  <h2>Filstruktur</h2>
+  <div class="code-block">
+    agderbenken/<br>
+    ├── my-app/<br>
+    │ &nbsp;&nbsp; └── <span class="code-string">.env.local</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Alle nøkler (ikke i Git)<br>
+    └── .env.local &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Alternativ plassering for script
+  </div>
+
+  <h2>Alle variabler</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Variabel</th>
+        <th>Hvem bruker den</th>
+        <th>Tilgangsnivå</th>
+        <th>Beskrivelse</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>VITE_SUPABASE_URL</code></td>
+        <td>Frontend + Backend</td>
+        <td><span class="badge badge-blue">Offentlig (VITE_)</span></td>
+        <td>URL til Supabase-prosjektet</td>
+      </tr>
+      <tr>
+        <td><code>VITE_SUPABASE_ANON_KEY</code></td>
+        <td>Frontend (nettleser)</td>
+        <td><span class="badge badge-blue">Offentlig (VITE_)</span></td>
+        <td>Kun lesing med RLS-begrensninger</td>
+      </tr>
+      <tr>
+        <td><code>SUPABASE_SERVICE_KEY</code></td>
+        <td>Backend-skript</td>
+        <td><span class="badge badge-red">Hemmelig</span></td>
+        <td>Full skrivetilgang — aldri til frontend</td>
+      </tr>
+      <tr>
+        <td><code>ANTHROPIC_API_KEY</code></td>
+        <td>Backend-skript</td>
+        <td><span class="badge badge-red">Hemmelig</span></td>
+        <td>Tilgang til Claude AI API</td>
+      </tr>
+      <tr>
+        <td><code>LOVDATA_API_KEY</code></td>
+        <td>Backend-skript</td>
+        <td><span class="badge badge-yellow">Valgfri</span></td>
+        <td>Lovdata-søk. Hopper over om mangler.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-yellow">
+    <strong>Vite-prefikset forklart:</strong> Variabler med <code>VITE_</code>-prefiks er tilgjengelige i nettleseren via <code>import.meta.env.VITE_xxx</code>. Disse kan trygt sees av brukere. Variabler <em>uten</em> prefiks er kun tilgjengelig i Node.js-prosessen og når aldri nettleseren.
+  </div>
+
+  <h2>Eksempel .env.local</h2>
+  <div class="code-block">
+    <span class="code-comment"># Supabase — finn verdiene i Supabase Dashboard → Project Settings → API</span><br>
+    <span class="code-var">VITE_SUPABASE_URL</span>=https://abcdefghij.supabase.co<br>
+    <span class="code-var">VITE_SUPABASE_ANON_KEY</span>=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...<br>
+    <span class="code-var">SUPABASE_SERVICE_KEY</span>=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...<br>
+    <br>
+    <span class="code-comment"># Anthropic — finn på console.anthropic.com</span><br>
+    <span class="code-var">ANTHROPIC_API_KEY</span>=sk-ant-api03-...<br>
+    <br>
+    <span class="code-comment"># Lovdata — valgfri, deaktiveres automatisk om tom</span><br>
+    <span class="code-var">LOVDATA_API_KEY</span>=
+  </div>
+
+  <h2>Konfigurasjonsoppslag i skriptene</h2>
+  <p>
+    Skriptene laster <code>.env.local</code> manuelt ved hjelp av en innebygd parser
+    (ingen dotenv-pakke) og leter i to steder:
+  </p>
+  <div class="code-block">
+    <span class="code-comment">// Prøver begge plasseringer — første treff vinner</span><br>
+    <span class="code-fn">loadEnv</span>(new URL(<span class="code-string">"../my-app/.env.local"</span>, import.meta.url).pathname)<br>
+    <span class="code-fn">loadEnv</span>(new URL(<span class="code-string">"../.env.local"</span>, import.meta.url).pathname)
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Dataflyt og Tekniske Detaljer</span>
+    <span>Seksjon C · Miljøvariabler</span>
+  </div>
+</div>
+
+<!-- SEKSJON D: FEILHÅNDTERING -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">D · Feilhåndtering</span>
+  </div>
+
+  <h1>D — Feilhåndtering</h1>
+  <p class="lead">Systemet håndterer en rekke kjente feilsituasjoner. Her er de viktigste, med løsninger.</p>
+
+  <table>
+    <thead>
+      <tr><th>Feil</th><th>Årsak</th><th>Håndtering</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-red">HTTP 429</span> Too Many Requests</td>
+        <td>Stortingets API har rate-limiting per minutt</td>
+        <td>Eksponentiell backoff: 4s → 8s → 12s → 16s. Logges til konsoll.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">HTTP 429</span> fra PDF-nedlasting</td>
+        <td>Partinettstedene begrenser nedlastinger</td>
+        <td>Retry med alternativ URL. Rødt har reservelenke i <code>retry-sp-r.mjs</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">400</span> Credit balance too low</td>
+        <td>Anthropic API-kreditter er tomme</td>
+        <td>Kan ikke håndteres i kode. Brukeren må lade opp på console.anthropic.com.</td>
+      </tr>
+      <tr>
+        <td>Streaming timeout</td>
+        <td>Claude bruker mer enn 10 min på store svar</td>
+        <td>Streaming er alltid aktivert for max_tokens > 4096. Bruker <code>stream.finalMessage()</code>.</td>
+      </tr>
+      <tr>
+        <td>Supabase <code>null</code>-klient</td>
+        <td>Miljøvariabler mangler i frontend</td>
+        <td>Supabase-klienten returnerer <code>null</code>. Parti-siden viser en forklaring.</td>
+      </tr>
+      <tr>
+        <td>Offline / nettverksbrudd</td>
+        <td>Bruker mister internettforbindelsen</td>
+        <td>OfflineBanner-komponenten viser rød melding. Grønn "tilkoblet igjen" i 3 sek ved gjenoppkobling.</td>
+      </tr>
+      <tr>
+        <td>Ukjent URL</td>
+        <td>Bruker navigerer til ikke-eksisterende side</td>
+        <td>React Router <code>&lt;Navigate to="/" replace /&gt;</code> sender til forsiden.</td>
+      </tr>
+      <tr>
+        <td>Lovdata API mangler nøkkel</td>
+        <td><code>LOVDATA_API_KEY</code> ikke satt</td>
+        <td>Advarselsmelding til konsoll. Lovdata-søk hoppes over — resten kjører normalt.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>retry-skriptene</h2>
+  <p>
+    To spesialiserte retry-skript håndterer partier som mislykkes i hoveddriften:
+  </p>
+
+  <div class="card-row">
+    <div class="card card-yellow">
+      <div class="card-title">retry-sp-r.mjs</div>
+      <div style="font-size:9.5pt; line-height:1.75; color:#374151">
+        Kjøres manuelt etter feil på Sp og R (Rødt).
+        Bruker alternative PDF-URLer for Rødt, som har hatt
+        ustabile primær-URLer. Gjentar kun disse to partiene.
+      </div>
+    </div>
+    <div class="card card-yellow">
+      <div class="card-title">retry-missing.mjs</div>
+      <div style="font-size:9.5pt; line-height:1.75; color:#374151">
+        Identifiserer partier som mangler løfter i databasen
+        og kjører ekstraksjon kun for disse.
+        Brukes etter delvis mislykkede pipelines.
+      </div>
+    </div>
+  </div>
+
+  <h2>SIGPIPE ved piping til head</h2>
+  <div class="callout callout-yellow">
+    <strong>Advarsel:</strong> Kjør aldri <code>node scripts/match-promises.mjs | head -30</code>.
+    <code>head</code>-kommandoen avslutter prosessen med SIGPIPE når den har mottatt nok linjer,
+    noe som dreper Node.js-prosessen midt i en API-spørring. Bruk heller:
+    <br><br>
+    <code>node scripts/match-promises.mjs &gt; /tmp/match.log 2&gt;&amp;1 &amp;</code>
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Dataflyt og Tekniske Detaljer</span>
+    <span>Seksjon D · Feilhåndtering</span>
+  </div>
+</div>
+
+<!-- SEKSJON E: FRONTEND -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">E · Frontend-detaljer</span>
+  </div>
+
+  <h1>E — Frontend-detaljer</h1>
+
+  <h2>Temahåndtering — Brave-kompatibel mørk modus</h2>
+  <p>
+    Temaet er implementert med en kombinasjon av CSS og JavaScript for å fungere
+    optimalt i alle nettlesere, inkludert Brave som ikke alltid sender
+    <code>matchMedia</code>-endringshendelser korrekt.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Modus</th><th>DOM-tilstand</th><th>Mekanisme</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>null</code> (system)</td>
+        <td><code>&lt;html&gt;</code> uten <code>data-theme</code></td>
+        <td>CSS <code>@media (prefers-color-scheme: dark)</code> tar over — fungerer alltid</td>
+      </tr>
+      <tr>
+        <td><code>"dark"</code></td>
+        <td><code>&lt;html data-theme="dark"&gt;</code></td>
+        <td>CSS <code>[data-theme="dark"]</code>-selektor overstyrer media-query</td>
+      </tr>
+      <tr>
+        <td><code>"light"</code></td>
+        <td><code>&lt;html data-theme="light"&gt;</code></td>
+        <td>CSS <code>[data-theme="light"]</code>-selektor låser lyst tema</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-green">
+    <strong>Brave-fix:</strong> I system-modus brukes CSS <code>@media</code> som primærmekanisme — ikke JavaScript-events. Dette betyr at mørk modus fungerer selv om Brave ikke sender <code>change</code>-events til <code>matchMedia</code>. <code>visibilitychange</code> og <code>focus</code>-events brukes som fallback for å synkronisere <code>data-home-theme</code>-attributtet.
+  </div>
+
+  <h3>Toggle-syklusen</h3>
+  <div style="display:flex; align-items:center; gap:12px; margin:16px 0; font-size:10pt">
+    <div style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:10px 18px; text-align:center">
+      <div style="font-weight:700">System</div>
+      <div style="font-size:8pt; color:#6b7280">(null)</div>
+    </div>
+    <div style="color:#2563eb; font-size:14pt">→</div>
+    <div style="background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px 18px; text-align:center; color:#e2e8f0">
+      <div style="font-weight:700">Mørk</div>
+      <div style="font-size:8pt; color:#94a3b8">("dark")</div>
+    </div>
+    <div style="color:#2563eb; font-size:14pt">→</div>
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 18px; text-align:center">
+      <div style="font-weight:700">Lys</div>
+      <div style="font-size:8pt; color:#6b7280">("light")</div>
+    </div>
+    <div style="color:#2563eb; font-size:14pt">→</div>
+    <div style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:10px 18px; text-align:center">
+      <div style="font-weight:700">System</div>
+      <div style="font-size:8pt; color:#6b7280">(null)</div>
+    </div>
+  </div>
+
+  <h2>Språkdeteksjon</h2>
+  <p>
+    Systemet auto-detekterer brukerens språk fra nettleseren og maskinen,
+    uten å spørre brukeren eksplisitt:
+  </p>
+  <div class="code-block">
+    <span class="code-comment">// Sjekker navigator.languages i prioritetsrekkefølge</span><br>
+    <span class="code-keyword">const</span> <span class="code-var">browserSpråk</span> = navigator.languages ?? [navigator.language]<br>
+    <span class="code-keyword">const</span> <span class="code-var">erNorsk</span> = browserSpråk.<span class="code-fn">some</span>((l) =><br>
+    &nbsp;&nbsp;l.<span class="code-fn">toLowerCase</span>().<span class="code-fn">startsWith</span>(<span class="code-string">"nb"</span>) ||   <span class="code-comment">// Bokmål</span><br>
+    &nbsp;&nbsp;l.<span class="code-fn">toLowerCase</span>().<span class="code-fn">startsWith</span>(<span class="code-string">"nn"</span>) ||   <span class="code-comment">// Nynorsk</span><br>
+    &nbsp;&nbsp;l.<span class="code-fn">toLowerCase</span>().<span class="code-fn">startsWith</span>(<span class="code-string">"no"</span>)    <span class="code-comment">// Norsk (generelt)</span><br>
+    )<br>
+    <span class="code-keyword">return</span> erNorsk ? <span class="code-string">"no"</span> : <span class="code-string">"en"</span>
+  </div>
+
+  <h2>Mobilnavigasjon — Hamburgermeny</h2>
+  <p>
+    På skjermer smalere enn 768px skjules den horisontale navbaren og erstattes
+    av en hamburgermeny. Menyen lukkes automatisk ved:
+  </p>
+
+  <div class="card-row-3">
+    <div class="card" style="padding:14px; text-align:center">
+      <div style="font-size:20pt; margin-bottom:8px">🔗</div>
+      <div style="font-size:9pt; font-weight:600">Klikk på lenke</div>
+      <div style="font-size:8.5pt; color:#6b7280; margin-top:4px">URL-endring via useLocation()</div>
+    </div>
+    <div class="card" style="padding:14px; text-align:center">
+      <div style="font-size:20pt; margin-bottom:8px">⌨️</div>
+      <div style="font-size:9pt; font-weight:600">Escape-tasten</div>
+      <div style="font-size:8.5pt; color:#6b7280; margin-top:4px">keydown event listener</div>
+    </div>
+    <div class="card" style="padding:14px; text-align:center">
+      <div style="font-size:20pt; margin-bottom:8px">🫙</div>
+      <div style="font-size:9pt; font-weight:600">Klikk på backdrop</div>
+      <div style="font-size:8.5pt; color:#6b7280; margin-top:4px">Mørkt overlegg bak menyen</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Dataflyt og Tekniske Detaljer</span>
+    <span>Seksjon E · Frontend-detaljer</span>
+  </div>
+</div>
+
+<!-- SEKSJON F: DRIFTSANVISNING -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">F · Driftsanvisning</span>
+  </div>
+
+  <h1>F — Driftsanvisning</h1>
+  <p class="lead">Steg-for-steg guide for å drifte og oppdatere systemet.</p>
+
+  <h2>Førstegangsoppsett</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-label">1. Klon og installer</div>
+      <div class="timeline-content">
+        <div class="code-block" style="margin-top:8px; font-size:8pt">
+          cd agderbenken/my-app && npm install
+        </div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">2. Konfigurer miljøvariabler</div>
+      <div class="timeline-content">Lag <code>my-app/.env.local</code> med alle nøkler (se seksjon C).</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">3. Kjør ekstraksjon</div>
+      <div class="timeline-content">
+        <div class="code-block" style="margin-top:8px; font-size:8pt">
+          cd agderbenken && node scripts/extract-promises.mjs
+        </div>
+        Tar 15–45 minutter. Krever Anthropic-kreditter.
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">4. Kjør matching</div>
+      <div class="timeline-content">
+        <div class="code-block" style="margin-top:8px; font-size:8pt">
+          node scripts/match-promises.mjs
+        </div>
+        Tar 10–30 minutter avhengig av antall løfter.
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-label">5. Start nettstedet</div>
+      <div class="timeline-content">
+        <div class="code-block" style="margin-top:8px; font-size:8pt">
+          cd my-app && npm run dev
+        </div>
+        Åpnes på http://localhost:5173
+      </div>
+    </div>
+  </div>
+
+  <h2>Løpende vedlikehold</h2>
+  <table>
+    <thead>
+      <tr><th>Oppgave</th><th>Frekvens</th><th>Kommando</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Oppdater voteringsstatuser</td>
+        <td>Ukentlig / etter stortingssesjon</td>
+        <td><code>node scripts/update-status.mjs</code></td>
+      </tr>
+      <tr>
+        <td>Kjør ny matching (nye saker)</td>
+        <td>Månedlig</td>
+        <td><code>node scripts/match-promises.mjs</code></td>
+      </tr>
+      <tr>
+        <td>Re-ekstraher ved nytt program</td>
+        <td>Kun ved partiprogramendringer</td>
+        <td><code>node scripts/extract-promises.mjs</code></td>
+      </tr>
+      <tr>
+        <td>Gjenprøv feilede partier</td>
+        <td>Etter feilmelding</td>
+        <td><code>node scripts/retry-sp-r.mjs</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Vanlige årsaker til ingen treff</h2>
+  <div class="card-row">
+    <div class="card card-red">
+      <div class="card-title">Problem: 0% holdt på Parti-siden</div>
+      <div style="font-size:9.5pt; line-height:1.75; color:#374151">
+        <strong>Årsak 1:</strong> Ekstraksjon ikke kjørt — databasen er tom.<br>
+        <strong>Årsak 2:</strong> Matching ikke kjørt — ingen lofte_sak-koblinger.<br>
+        <strong>Årsak 3:</strong> Anthropic-kreditter tomme under kjøring.<br>
+        <strong>Løsning:</strong> Sjekk Supabase-dashbordet for rader i begge tabeller.
+      </div>
+    </div>
+    <div class="card card-yellow">
+      <div class="card-title">Problem: Skript krasjer</div>
+      <div style="font-size:9.5pt; line-height:1.75; color:#374151">
+        <strong>Sjekk 1:</strong> Er <code>.env.local</code> på plass?<br>
+        <strong>Sjekk 2:</strong> Er Anthropic-kreditter tilgjengelige?<br>
+        <strong>Sjekk 3:</strong> Er Supabase-prosjektet aktivt?<br>
+        <strong>Logg:</strong> Kjør med <code>&gt; /tmp/out.log 2&gt;&amp;1</code> for full logg.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>Kostnadsoversikt:</strong> Hvert API-kall til Claude (claude-opus-4-6) koster ca. $15 per million input-tokens og $75 per million output-tokens. Full ekstraksjon av alle 9 partier med 32 000 tokens per parti estimeres til $5–15 per kjøring.
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Dataflyt og Tekniske Detaljer</span>
+    <span>Seksjon F · Driftsanvisning</span>
+  </div>
+</div>
+
+</body>
+</html>

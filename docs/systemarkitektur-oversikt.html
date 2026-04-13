@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sørblikket — Systemarkitektur Oversikt</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --brand:   #1a3a5c;
+      --accent:  #2563eb;
+      --green:   #16a34a;
+      --red:     #dc2626;
+      --yellow:  #d97706;
+      --purple:  #7c3aed;
+      --text:    #111827;
+      --muted:   #6b7280;
+      --line:    #e5e7eb;
+      --surface: #f9fafb;
+      --card:    #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5pt;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── COVER PAGE ──────────────────────────────────── */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 80px;
+      background: linear-gradient(145deg, #0f172a 0%, #1e3a5f 60%, #1a3a5c 100%);
+      color: #fff;
+      page-break-after: always;
+    }
+
+    .cover-eyebrow {
+      font-size: 9pt;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      margin-bottom: 24px;
+    }
+
+    .cover-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 44pt;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .cover-sub {
+      font-size: 18pt;
+      font-weight: 300;
+      color: #bfdbfe;
+      margin-bottom: 48px;
+    }
+
+    .cover-desc {
+      font-size: 12pt;
+      color: #cbd5e1;
+      max-width: 560px;
+      line-height: 1.75;
+      margin-bottom: 64px;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 48px;
+    }
+
+    .cover-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cover-meta-label {
+      font-size: 8pt;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .cover-meta-value {
+      font-size: 11pt;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 100px;
+      padding: 8px 18px;
+      font-size: 9pt;
+      color: #93c5fd;
+      font-weight: 600;
+      margin-bottom: 40px;
+    }
+
+    /* ── CONTENT LAYOUT ──────────────────────────────── */
+    .page {
+      padding: 60px 72px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .page-break { page-break-after: always; }
+
+    /* ── HEADINGS ────────────────────────────────────── */
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26pt;
+      color: var(--brand);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 15pt;
+      font-weight: 700;
+      color: var(--brand);
+      margin-top: 40px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3 {
+      font-size: 11pt;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      line-height: 1.75;
+      color: #374151;
+    }
+
+    .lead {
+      font-size: 12.5pt;
+      color: var(--muted);
+      font-weight: 400;
+      margin-bottom: 32px;
+      line-height: 1.75;
+    }
+
+    /* ── SECTION HEADER ──────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .section-num {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15pt;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-label {
+      font-size: 9pt;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ── CARDS ───────────────────────────────────────── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px;
+      background: var(--card);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green  { border-left: 4px solid var(--green); }
+    .card-red    { border-left: 4px solid var(--red); }
+    .card-yellow { border-left: 4px solid var(--yellow); }
+    .card-purple { border-left: 4px solid var(--purple); }
+
+    .card-title {
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .card-body {
+      font-size: 10pt;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* ── ARCHITECTURE DIAGRAM ────────────────────────── */
+    .arch-diagram {
+      margin: 28px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      line-height: 1.5;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .arch-layer {
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .arch-layer-header {
+      background: rgba(255,255,255,0.06);
+      padding: 8px 16px;
+      font-size: 7.5pt;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .arch-layer-body {
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .arch-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 8.5pt;
+      color: #f1f5f9;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .arch-box-title {
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 4px;
+      font-size: 8pt;
+    }
+
+    .arch-box-detail {
+      color: #94a3b8;
+      font-size: 7.5pt;
+      line-height: 1.6;
+    }
+
+    .arch-arrow {
+      text-align: center;
+      color: #475569;
+      font-size: 11pt;
+      margin: 4px 0;
+      letter-spacing: 0.05em;
+    }
+
+    .arch-arrow-label {
+      font-size: 7pt;
+      color: #64748b;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── FLOW DIAGRAM ────────────────────────────────── */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 24px 0;
+      overflow-x: auto;
+    }
+
+    .flow-step {
+      flex: 1;
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 14px;
+      position: relative;
+    }
+
+    .flow-step-num {
+      font-size: 20pt;
+      font-weight: 800;
+      color: var(--accent);
+      opacity: 0.25;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .flow-step-title {
+      font-size: 9pt;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .flow-step-body {
+      font-size: 8.5pt;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      color: var(--accent);
+      font-size: 14pt;
+      flex-shrink: 0;
+    }
+
+    /* ── TABLE ───────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 9.5pt;
+    }
+
+    th {
+      background: var(--brand);
+      color: #fff;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 8.5pt;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    tr:nth-child(even) td { background: var(--surface); }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: #1e40af;
+    }
+
+    /* ── STATUS BADGES ───────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 8.5pt;
+      font-weight: 600;
+    }
+
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-yellow { background: #fef9c3; color: #a16207; }
+    .badge-gray   { background: #f3f4f6; color: #6b7280; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+
+    /* ── INFO BOX ────────────────────────────────────── */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 9.5pt;
+      color: #1e40af;
+      line-height: 1.7;
+    }
+
+    .info-box strong { color: #1d4ed8; }
+
+    .warn-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 9.5pt;
+      color: #92400e;
+      line-height: 1.7;
+    }
+
+    /* ── KEY-VALUE LIST ──────────────────────────────── */
+    .kv-list {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px 20px;
+      font-size: 9.5pt;
+      margin: 16px 0;
+      align-items: baseline;
+    }
+
+    .kv-key {
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .kv-val { color: #374151; }
+
+    /* ── PARTI ROLLER ────────────────────────────────── */
+    .parti-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .parti-pill {
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 9pt;
+      text-align: center;
+    }
+
+    .parti-pill-name {
+      font-weight: 700;
+      font-size: 11pt;
+      margin-bottom: 2px;
+    }
+
+    .parti-pill-role {
+      font-size: 7.5pt;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── HEADER / FOOTER ─────────────────────────────── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-header-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--brand);
+    }
+
+    .page-header-chapter {
+      font-size: 8.5pt;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    .page-footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: var(--muted);
+    }
+
+    /* ── PRINT ───────────────────────────────────────── */
+    @media print {
+      body { font-size: 9.5pt; }
+      .cover { min-height: 100vh; }
+      .page { padding: 40px 56px; }
+      .page-break { page-break-after: always; }
+      .arch-diagram { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ FORSIDE ══ -->
+<div class="cover">
+  <div class="cover-eyebrow">Teknisk dokumentasjon</div>
+  <div class="cover-title">Sørblikket</div>
+  <div class="cover-sub">Systemarkitektur — Oversikt</div>
+  <p class="cover-desc">
+    Sørblikket er et journalistisk sporingsverktøy som automatisk overvåker
+    om Agder-representantene på Stortinget holder sine valgløfter fra 2025-2029.
+    Dette dokumentet beskriver den tekniske arkitekturen, dataflyten og
+    de viktigste komponentene i systemet.
+  </p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Prosjekt</span>
+      <span class="cover-meta-value">Sørblikket · Agder</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Dokument</span>
+      <span class="cover-meta-value">Systemarkitektur</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Versjon</span>
+      <span class="cover-meta-value">1.0 · 2026</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Stack</span>
+      <span class="cover-meta-value">React · Node.js · Supabase · Claude AI</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ INNHOLDSFORTEGNELSE ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">Innholdsfortegnelse</span>
+  </div>
+
+  <h1>Innholdsfortegnelse</h1>
+  <p class="lead">Dette dokumentet gir en komplett teknisk oversikt over Sørblikket — fra datakilder til brukergrensesnitt.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px">Seksjon</th>
+        <th>Tittel</th>
+        <th style="width:200px">Innhold</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1</strong></td>
+        <td>Systemet i et nøtteskall</td>
+        <td>Hva Sørblikket er og hva det gjør</td>
+      </tr>
+      <tr>
+        <td><strong>2</strong></td>
+        <td>Systemarkitektur — 5 lag</td>
+        <td>Visuell oversikt over alle lag</td>
+      </tr>
+      <tr>
+        <td><strong>3</strong></td>
+        <td>Datakilder</td>
+        <td>Partiprogrammer, Stortinget API, Lovdata</td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td>
+        <td>Backend-pipeline</td>
+        <td>De tre Node.js-skriptene og dataflyten</td>
+      </tr>
+      <tr>
+        <td><strong>5</strong></td>
+        <td>Claude AI — kunstig intelligens</td>
+        <td>Hva AI-en brukes til og hvorfor</td>
+      </tr>
+      <tr>
+        <td><strong>6</strong></td>
+        <td>Database</td>
+        <td>Supabase-tabeller og relasjoner</td>
+      </tr>
+      <tr>
+        <td><strong>7</strong></td>
+        <td>Frontend</td>
+        <td>React-appens sider og komponenter</td>
+      </tr>
+      <tr>
+        <td><strong>8</strong></td>
+        <td>Partiroller og politisk kontekst</td>
+        <td>Regjering, støttepartier og opposisjon</td>
+      </tr>
+      <tr>
+        <td><strong>9</strong></td>
+        <td>Statusmodellen</td>
+        <td>Hvordan løftestatus beregnes</td>
+      </tr>
+      <tr>
+        <td><strong>10</strong></td>
+        <td>Teknologioversikt</td>
+        <td>Alle teknologier brukt i prosjektet</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Konfidensielt internt dokument</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 1 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">1 · Systemet i et nøtteskall</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <div class="section-label">Introduksjon</div>
+      <h2 style="margin-top:0; border:none; padding:0">Systemet i et nøtteskall</h2>
+    </div>
+  </div>
+
+  <p class="lead">
+    Sørblikket er et journalistisk sporingsverktøy for Agder-regionens øye på Stortinget.
+    Målet er enkelt: automatisk svare på spørsmålet "holder politikerne det de lovte?"
+  </p>
+
+  <h3>Kjernefunksjonaliteten</h3>
+  <p>
+    Systemet leser partiprogrammer fra alle ni partier representert i Agderbenken,
+    trekker ut konkrete valgløfter ved hjelp av kunstig intelligens, og kobler
+    deretter disse løftene til faktiske saker behandlet på Stortinget.
+    Til slutt henter systemet voteringsdata for å avgjøre om partiet stemte for
+    eller mot sine egne løfter.
+  </p>
+
+  <div class="card-grid">
+    <div class="card card-accent">
+      <div class="card-title">Problemet som løses</div>
+      <div class="card-body">Det er tidkrevende og vanskelig for journalister og innbyggere å manuelt følge med på om politikere holder løftene sine over en fireårsperiode.</div>
+    </div>
+    <div class="card card-green">
+      <div class="card-title">Løsningen</div>
+      <div class="card-body">Et automatisert system som kontinuerlig matcher løfter mot saker og oppdaterer status basert på faktiske stemmegivningsdata fra Stortinget.</div>
+    </div>
+  </div>
+
+  <h3>Systemets tre hoveddeler</h3>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-step-num">1</div>
+      <div class="flow-step-title">Ekstraksjon</div>
+      <div class="flow-step-body">Claude AI leser partiprogrammer og identifiserer alle konkrete valgløfter</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">2</div>
+      <div class="flow-step-title">Matching</div>
+      <div class="flow-step-body">AI kobler løfter til relevante stortingssaker fra Stortingets åpne API</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">3</div>
+      <div class="flow-step-title">Statusoppdatering</div>
+      <div class="flow-step-body">Voteringsdata avgjør om partiet stemte FOR eller MOT hvert løfte</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">4</div>
+      <div class="flow-step-title">Presentasjon</div>
+      <div class="flow-step-body">Nettsiden viser status til alle — ingen innlogging nødvendig</div>
+    </div>
+  </div>
+
+  <h3>Nøkkeltall</h3>
+  <div class="card-grid-3">
+    <div class="card" style="text-align:center; padding:24px 16px;">
+      <div style="font-size:28pt; font-weight:800; color:var(--accent)">9</div>
+      <div style="font-size:9pt; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em">Partier</div>
+    </div>
+    <div class="card" style="text-align:center; padding:24px 16px;">
+      <div style="font-size:28pt; font-weight:800; color:var(--green)">1 267</div>
+      <div style="font-size:9pt; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em">Stortingssaker/sesjon</div>
+    </div>
+    <div class="card" style="text-align:center; padding:24px 16px;">
+      <div style="font-size:28pt; font-weight:800; color:var(--purple)">32 000</div>
+      <div style="font-size:9pt; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em">AI-tokens per parti</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Agderbenken:</strong> Betegnelsen på stortingsrepresentantene valgt fra Agder-fylket (tidligere Aust-Agder og Vest-Agder). Sørblikket følger alle partier med representanter fra denne valgkretsen.
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 1 · Systemet i et nøtteskall</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 2 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">2 · Systemarkitektur</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div>
+      <div class="section-label">Arkitektur</div>
+      <h2 style="margin-top:0; border:none; padding:0">Systemarkitektur — 5 lag</h2>
+    </div>
+  </div>
+
+  <p class="lead">Sørblikket er bygget i fem tydelig adskilte lag, fra datakilder til brukerens nettleser.</p>
+
+  <div class="arch-diagram">
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 1 — DATAKILDER (Eksterne)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">Partiprogrammer</div>
+          <div class="arch-box-detail">PDF og HTML<br>9 partier · 2025–2029<br>Alle nedlastet direkte fra<br>partiene sine nettsider</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Stortinget Open API</div>
+          <div class="arch-box-detail">data.stortinget.no<br>XML-format · Ingen auth<br>/saker · /voteringer<br>/representanter</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Regjeringen.no</div>
+          <div class="arch-box-detail">Regjeringens plan<br>for Norge 2025–29<br>HTML-side · Brukes som<br>kontekst for Ap-løfter</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Lovdata API</div>
+          <div class="arch-box-detail">Valgfri datakilde<br>Krever API-nøkkel<br>Søker lover og vedtak<br>relevant for løftene</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">▼ &nbsp;&nbsp; PDF/HTML · XML · fetch</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 2 — BACKEND-SKRIPT (Node.js · Kjøres manuelt)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">extract-promises.mjs</div>
+          <div class="arch-box-detail">Steg 1: Leser PDF/HTML<br>→ sender til Claude<br>→ mottar løfter som JSON<br>→ lagrer i Supabase</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">match-promises.mjs</div>
+          <div class="arch-box-detail">Steg 2: Henter løfter + saker<br>→ Claude matcher dem<br>→ lagrer kobling i DB<br>Partirollebevisst v3</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">update-status.mjs</div>
+          <div class="arch-box-detail">Steg 3: Henter voteringer<br>Teller FOR/MOT per parti<br>Beregner status uten AI<br>Oppdaterer databasen</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">retry-*.mjs</div>
+          <div class="arch-box-detail">Gjenprøver partier ved<br>nettverksfeil eller 429<br>Eksponentiell backoff<br>ved rate-limiting</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">▼ &nbsp;&nbsp; Supabase JS SDK (HTTPS)</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 3 — DATABASE (Supabase / PostgreSQL)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">valgløfte</div>
+          <div class="arch-box-detail">lofte_id (PK)<br>parti · tekst · kategori<br>program_periode<br>opprettet</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">lofte_sak</div>
+          <div class="arch-box-detail">id (PK)<br>lofte_id (FK)<br>sak_id · sak_tittel<br>status · notat</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">▼ &nbsp;&nbsp; Supabase REST API (HTTPS · Anon-nøkkel · kun lesing)</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 4 — FRONTEND (React 19 · TypeScript · Vite)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">App.tsx</div>
+          <div class="arch-box-detail">Tema · Språk · Ruting<br>Offline-banner · Footer</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Hjem + Statistikk</div>
+          <div class="arch-box-detail">Forside · Live API-tall<br>Dashboard med grafer</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Parti.tsx</div>
+          <div class="arch-box-detail">Løfteoversikt fra Supabase<br>Status per løfte + sak</div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Votering + Repr.</div>
+          <div class="arch-box-detail">Live fra Stortinget API<br>XML-parsing i nettleser</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arrow">▼ &nbsp;&nbsp; HTTPS · Nettleser</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 5 — BRUKER</div>
+      <div class="arch-layer-body">
+        <div class="arch-box" style="flex:1">
+          <div class="arch-box-title">Alle nettlesere</div>
+          <div class="arch-box-detail">Chrome · Firefox · Safari · Brave · Mobil · Desktop · Ingen innlogging</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="info-box">
+    <strong>Viktig prinsipp:</strong> Lagene er løst koblet. Backend-skriptene kan kjøres uavhengig av frontend. Supabase fungerer som koblingspunktet mellom de to.
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 2 · Arkitektur</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 3 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">3 · Datakilder</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div>
+      <div class="section-label">Data</div>
+      <h2 style="margin-top:0; border:none; padding:0">Datakilder</h2>
+    </div>
+  </div>
+
+  <h3>Partiprogrammer (primær datakilde)</h3>
+  <p>
+    Alle ni partier i Agderbenken har programmer for perioden 2025–2029.
+    Programmet hentes direkte fra partienes egne nettsider, enten som PDF-fil
+    eller som HTML-side, avhengig av hva partiet tilbyr.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Parti</th>
+        <th>Format</th>
+        <th>Rolle i regjering</th>
+        <th>Merknad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Ap</strong> — Arbeiderpartiet</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-red">Regjering</span></td><td>Ap leder Støre-regjeringen</td></tr>
+      <tr><td><strong>H</strong> — Høyre</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td></td></tr>
+      <tr><td><strong>FrP</strong> — Fremskrittspartiet</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td></td></tr>
+      <tr><td><strong>Sp</strong> — Senterpartiet</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td></td></tr>
+      <tr><td><strong>SV</strong> — Sosialistisk Venstreparti</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td></td></tr>
+      <tr><td><strong>V</strong> — Venstre</td><td><span class="badge badge-green">HTML</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td>Ingen PDF-versjon tilgjengelig</td></tr>
+      <tr><td><strong>KrF</strong> — Kristelig Folkeparti</td><td><span class="badge badge-green">HTML</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td>Ingen PDF-versjon tilgjengelig</td></tr>
+      <tr><td><strong>R</strong> — Rødt</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td>Alternativ URL ved 429-feil</td></tr>
+      <tr><td><strong>MDG</strong> — Miljøpartiet De Grønne</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Stortinget Open Data API</h3>
+  <p>
+    Stortinget tilbyr et åpent API uten autentisering på <code>data.stortinget.no</code>.
+    All data returneres i XML-format og parseres manuelt i skriptene.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Endepunkt</th><th>Brukes til</th><th>Frekvens</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/saker</code></td><td>Hente alle stortingssaker (1 267/sesjon)</td><td>Matching-steg</td></tr>
+      <tr><td><code>/voteringer?sakid=</code></td><td>Finne voteringer knyttet til en sak</td><td>Statusoppdatering</td></tr>
+      <tr><td><code>/voteringsresultat?voteringid=</code></td><td>Hente partienes stemmer per votering</td><td>Statusoppdatering</td></tr>
+      <tr><td><code>/representanter</code></td><td>Hente representanter fra Agder</td><td>Frontend live</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn-box">
+    <strong>Rate-limiting:</strong> Stortingets API har en grense for antall spørringer per minutt. Skriptene har innebygd retry-logikk med eksponentiell ventetid (4–16 sekunder) ved rate-limiting.
+  </div>
+
+  <h3>Regjeringen.no — Kontekstdokument</h3>
+  <p>
+    "Regjeringens plan for Norge 2025–2029" hentes fra regjeringen.no og brukes
+    som ekstra kontekst når Claude matcher Ap-løfter mot stortingssaker.
+    Dette er fordi regjeringens løfter og partiets løfter delvis overlapper.
+  </p>
+
+  <h3>Lovdata API (valgfri)</h3>
+  <p>
+    Lovdata tilbyr et søke-API som kan finne relevante lover og vedtak.
+    Denne datakilden er valgfri og krever en separat API-nøkkel.
+    Hvis nøkkelen mangler, hoppes Lovdata-søket over automatisk.
+  </p>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 3 · Datakilder</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 4 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">4 · Backend-pipeline</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div>
+      <div class="section-label">Backend</div>
+      <h2 style="margin-top:0; border:none; padding:0">Backend-pipeline</h2>
+    </div>
+  </div>
+
+  <p class="lead">
+    Pipelinen består av tre Node.js-skript som kjøres i rekkefølge av en utvikler.
+    De er uavhengige av frontend og kommuniserer kun gjennom databasen.
+  </p>
+
+  <h3>Steg 1 — extract-promises.mjs</h3>
+  <div class="card card-accent" style="margin-bottom:16px">
+    <div class="card-title">Hva det gjør</div>
+    <div class="card-body">
+      For hvert av de ni partiene: (1) henter partiprogrammet som PDF eller HTML,
+      (2) koder PDF til base64, (3) sender hele dokumentet til Claude med instruksjon
+      om å finne ALLE løfter, (4) mottar strukturert JSON, (5) lagrer i Supabase.
+    </div>
+  </div>
+
+  <div class="kv-list">
+    <span class="kv-key">AI-modell:</span>      <span class="kv-val">claude-opus-4-6</span>
+    <span class="kv-key">Maks tokens:</span>    <span class="kv-val">32 000 (streaming påkrevet)</span>
+    <span class="kv-key">HTML-grense:</span>    <span class="kv-val">120 000 tegn</span>
+    <span class="kv-key">Streaming:</span>      <span class="kv-val">anthropic.messages.stream() → finalMessage()</span>
+    <span class="kv-key">Supabase-nøkkel:</span><span class="kv-val">SERVICE_KEY (full skrivetilgang)</span>
+  </div>
+
+  <h3>Steg 2 — match-promises.mjs (v3)</h3>
+  <div class="card card-green" style="margin-bottom:16px">
+    <div class="card-title">Hva det gjør</div>
+    <div class="card-body">
+      Henter alle løfter fra databasen, henter alle 1 267 saker fra Stortingets API,
+      sender begge listene til Claude og ber AI-en matche løfter mot relevante saker.
+      Claude returnerer par (løfte_id → sak_id) med begrunnelse. Disse lagres som
+      lofte_sak-koblinger i databasen.
+    </div>
+  </div>
+
+  <div class="kv-list">
+    <span class="kv-key">Partiroller:</span>    <span class="kv-val">Ap=regjering, Sp/SV/R/MDG=støtteparti, H/FrP/V/KrF=opposisjon</span>
+    <span class="kv-key">Dokumentgruppe:</span> <span class="kv-val">Parser &lt;dokumentgruppe&gt; fra XML (representantforslag, proposisjon, etc.)</span>
+    <span class="kv-key">Ekstra kontekst:</span><span class="kv-val">Regjeringens plan for Ap-løfter</span>
+    <span class="kv-key">Maks tokens:</span>    <span class="kv-val">8 192</span>
+    <span class="kv-key">Grense saker:</span>   <span class="kv-val">Ingen — alle 1 267 saker sendes</span>
+  </div>
+
+  <h3>Steg 3 — update-status.mjs</h3>
+  <div class="card card-yellow" style="margin-bottom:16px">
+    <div class="card-title">Hva det gjør</div>
+    <div class="card-body">
+      Ingen AI brukes i dette steget. Henter alle lofte_sak-koblinger fra databasen,
+      slår opp voteringsdata for hver sak via Stortingets API, teller partiets
+      FOR/MOT-stemmer, og oppdaterer status i databasen.
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Stemmer</th><th>Status satt</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Partiet stemte FOR i alle voteringer</td><td><span class="badge badge-green">fulfilled</span></td></tr>
+      <tr><td>Partiet stemte MOT i alle voteringer</td><td><span class="badge badge-red">broken</span></td></tr>
+      <tr><td>Blandet — noen for, noen mot</td><td><span class="badge badge-yellow">partial</span></td></tr>
+      <tr><td>Ingen voteringsdata funnet</td><td><span class="badge badge-gray">pending (uendret)</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Kjørekommandoer</h3>
+  <div style="background:#0f172a; border-radius:8px; padding:20px; font-family:'JetBrains Mono',monospace; font-size:9pt; color:#e2e8f0; line-height:2;">
+    <span style="color:#64748b"># Kjøres i denne rekkefølgen fra prosjektmappen:</span><br>
+    <span style="color:#4ade80">node</span> scripts/extract-promises.mjs<br>
+    <span style="color:#4ade80">node</span> scripts/match-promises.mjs<br>
+    <span style="color:#4ade80">node</span> scripts/update-status.mjs<br>
+    <br>
+    <span style="color:#64748b"># Ved feil på enkeltpartier:</span><br>
+    <span style="color:#4ade80">node</span> scripts/retry-sp-r.mjs<br>
+    <span style="color:#4ade80">node</span> scripts/retry-missing.mjs
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 4 · Backend-pipeline</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 5+6 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">5–6 · AI og Database</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div>
+      <div class="section-label">Kunstig intelligens</div>
+      <h2 style="margin-top:0; border:none; padding:0">Claude AI — Hva brukes den til?</h2>
+    </div>
+  </div>
+
+  <p>Claude AI (claude-opus-4-6 fra Anthropic) brukes i to av de tre pipeline-stegene:</p>
+
+  <div class="card-grid">
+    <div class="card card-purple">
+      <div class="card-title">Oppgave 1 · Ekstraksjon</div>
+      <div class="card-body">
+        Claude leser et helt partiprogram (opptil 154 sider PDF) og identifiserer
+        <strong>alle konkrete løfter</strong> — inkludert tallfestede mål, forbudsløfter,
+        handlingsplaner og satsingsområder. Returnerer strukturert JSON med
+        <code>tekst</code> og <code>kategori</code> per løfte.
+      </div>
+    </div>
+    <div class="card card-purple">
+      <div class="card-title">Oppgave 2 · Matching</div>
+      <div class="card-body">
+        Claude mottar alle løfter fra ett parti og alle 1 267 stortingssaker,
+        og avgjør hvilke saker som er relevante for hvert løfte. Claude vet
+        om saken er et <em>representantforslag</em> (fremmet av partiet selv)
+        eller en <em>proposisjon</em> (fremmet av regjeringen).
+      </div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <strong>Claude brukes IKKE i steg 3:</strong> Statusoppdateringen baseres utelukkende på faktiske stemmetall fra Stortingets API — ingen AI-tolkning av "holder løftet". Dette gir objektiv, etterprøvbar status.
+  </div>
+
+  <h3>Streaming — nødvendig for store svar</h3>
+  <p>
+    Når Claude skal lese hele partiprogrammer og returnere tusenvis av løfter, kan svaret
+    ta over 10 minutter. Anthropic krever da at streaming benyttes.
+    Koden bruker <code>anthropic.messages.stream()</code> etterfulgt av <code>await stream.finalMessage()</code>.
+  </p>
+
+  <div class="section-header" style="margin-top:40px">
+    <div class="section-num">6</div>
+    <div>
+      <div class="section-label">Lagring</div>
+      <h2 style="margin-top:0; border:none; padding:0">Database — Supabase / PostgreSQL</h2>
+    </div>
+  </div>
+
+  <p>Databasen har to tabeller med en én-til-mange-relasjon:</p>
+
+  <div class="card-grid">
+    <div class="card card-accent">
+      <div class="card-title">Tabell: valgløfte</div>
+      <div class="card-body" style="font-family:'JetBrains Mono',monospace; font-size:8.5pt; line-height:2">
+        lofte_id &nbsp;&nbsp;&nbsp; UUID (primærnøkkel)<br>
+        parti &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEXT (Ap, H, FrP…)<br>
+        tekst &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEXT (løftets ordlyd)<br>
+        kategori &nbsp;&nbsp; TEXT (Klima, Helse…)<br>
+        program_periode TEXT (2025–2029)<br>
+        opprettet &nbsp; TIMESTAMP
+      </div>
+    </div>
+    <div class="card card-green">
+      <div class="card-title">Tabell: lofte_sak</div>
+      <div class="card-body" style="font-family:'JetBrains Mono',monospace; font-size:8.5pt; line-height:2">
+        id &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; UUID (primærnøkkel)<br>
+        lofte_id &nbsp;&nbsp; UUID (→ valgløfte)<br>
+        sak_id &nbsp;&nbsp;&nbsp;&nbsp; TEXT (Stortingets ID)<br>
+        sak_tittel &nbsp; TEXT<br>
+        sak_dato &nbsp;&nbsp; DATE<br>
+        status &nbsp;&nbsp;&nbsp;&nbsp; ENUM (pending/fulfilled/<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;broken/partial)<br>
+        notat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEXT (AI-begrunnelse)
+      </div>
+    </div>
+  </div>
+
+  <h3>To nøkler med ulikt tilgangsnivå</h3>
+  <table>
+    <thead>
+      <tr><th>Nøkkel</th><th>Tilgang</th><th>Brukes av</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>SUPABASE_SERVICE_KEY</code></td>
+        <td>Full lese- og skrivetilgang — ingen RLS</td>
+        <td>Backend-skript (aldri i nettleseren)</td>
+      </tr>
+      <tr>
+        <td><code>VITE_SUPABASE_ANON_KEY</code></td>
+        <td>Kun lesing — underlagt Row Level Security</td>
+        <td>Frontend React-app (synlig i nettleser)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 5–6 · AI og Database</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 7 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">7 · Frontend</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div>
+      <div class="section-label">React-app</div>
+      <h2 style="margin-top:0; border:none; padding:0">Frontend — React + Vite</h2>
+    </div>
+  </div>
+
+  <p class="lead">
+    Nettsiden er bygget med React 19 og TypeScript, bundles med Vite,
+    og er en SPA (Single Page Application) med klientside-ruting.
+  </p>
+
+  <h3>Sider</h3>
+  <table>
+    <thead>
+      <tr><th>Side</th><th>URL</th><th>Datakilde</th><th>Beskrivelse</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Forside</strong></td><td><code>/</code></td><td>—</td><td>Hero-seksjon og tematiske lenker</td></tr>
+      <tr><td><strong>Statistikk</strong></td><td><code>/statistikk</code></td><td>Stortinget API</td><td>Live tall, dashboard, grafer per tema</td></tr>
+      <tr><td><strong>Stemmegivning</strong></td><td><code>/votering</code></td><td>Stortinget API</td><td>Partienes stemmegivning i sanntid</td></tr>
+      <tr><td><strong>Representanter</strong></td><td><code>/representanter</code></td><td>Stortinget API</td><td>Alle representanter fra Agder</td></tr>
+      <tr><td><strong>Partiprogrammer</strong></td><td><code>/parti</code></td><td>Supabase</td><td>Løfter og status per parti</td></tr>
+      <tr><td><strong>Om</strong></td><td><code>/om</code></td><td>—</td><td>Om prosjektet og kildene</td></tr>
+    </tbody>
+  </table>
+
+  <h3>App-skallet (App.tsx)</h3>
+  <p>App-komponenten håndterer tre globale tilstander som gjelder for hele nettsiden:</p>
+
+  <div class="card-grid-3">
+    <div class="card card-accent">
+      <div class="card-title">Tema</div>
+      <div class="card-body">
+        Tre modi: lys / mørk / system.
+        System-modus bruker CSS <code>@media (prefers-color-scheme)</code>
+        — fungerer i alle nettlesere inkl. Brave uten JavaScript-events.
+        Lagres i <code>localStorage</code>.
+      </div>
+    </div>
+    <div class="card card-green">
+      <div class="card-title">Språk</div>
+      <div class="card-body">
+        Norsk (no) og engelsk (en).
+        Auto-detekteres fra <code>navigator.languages</code> — sjekker nb/nn/no.
+        Kan overstyres manuelt. Lagres i <code>localStorage</code>.
+      </div>
+    </div>
+    <div class="card card-yellow">
+      <div class="card-title">Offline-banner</div>
+      <div class="card-body">
+        Lytter på <code>window.online</code>/<code>offline</code>-events.
+        Viser rød banner når nett er borte, grønn "tilkoblet igjen"-melding
+        i 3 sekunder ved gjenoppkobling.
+      </div>
+    </div>
+  </div>
+
+  <h3>Prosjektstruktur</h3>
+  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:20px; font-family:'JetBrains Mono',monospace; font-size:8.5pt; line-height:1.9; color:#334155;">
+    my-app/src/<br>
+    ├── <span style="color:#2563eb">App.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rot: tema, språk, ruting, footer<br>
+    ├── components/<br>
+    │ &nbsp;&nbsp; └── <span style="color:#2563eb">Navbar.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp; Desktop + hamburger-meny (mobil)<br>
+    ├── pages/<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Hjem.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Forside<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Statistikk.tsx</span> &nbsp; Live Stortingstall + dashboard<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Parti.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Løfteoversikt fra Supabase<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Votering.tsx</span> &nbsp;&nbsp;&nbsp; Stemmedata fra Stortinget<br>
+    │ &nbsp;&nbsp; └── <span style="color:#2563eb">Representanter.tsx</span> Agder-representanter<br>
+    ├── config/<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#16a34a">partier.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All partidata (navn, farge, logo)<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#16a34a">temaer.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Kategorikonfigurasjon<br>
+    │ &nbsp;&nbsp; └── <span style="color:#16a34a">sesjon.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Stortingssesjon-hjelper<br>
+    ├── lib/<br>
+    │ &nbsp;&nbsp; ├── <span style="color:#7c3aed">supabase.ts</span> &nbsp;&nbsp;&nbsp;&nbsp; Supabase-klient (anon-nøkkel)<br>
+    │ &nbsp;&nbsp; └── <span style="color:#7c3aed">categorizationEngine.ts</span><br>
+    ├── hooks/<br>
+    │ &nbsp;&nbsp; └── <span style="color:#d97706">useNettStatus.ts</span> &nbsp;Online/offline-deteksjon<br>
+    └── styles/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CSS per side (mobile-first)
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 7 · Frontend</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SEKSJON 8-10 ══ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">8–10 · Politisk kontekst, Status og Teknologi</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div>
+      <div class="section-label">Kontekst</div>
+      <h2 style="margin-top:0; border:none; padding:0">Partiroller etter valget 2025</h2>
+    </div>
+  </div>
+
+  <p>Systemet er rollebevisst — det betyr noe om partiet sitter i regjering, gir støtte, eller er i opposisjon:</p>
+
+  <div class="parti-grid">
+    <div class="parti-pill" style="background:#fef2f2; color:#991b1b">
+      <div class="parti-pill-name">Ap</div>
+      <div class="parti-pill-role">Regjering</div>
+    </div>
+    <div class="parti-pill" style="background:#fefce8; color:#78350f">
+      <div class="parti-pill-name">Sp</div>
+      <div class="parti-pill-role">Støtteparti</div>
+    </div>
+    <div class="parti-pill" style="background:#fefce8; color:#78350f">
+      <div class="parti-pill-name">SV</div>
+      <div class="parti-pill-role">Støtteparti</div>
+    </div>
+    <div class="parti-pill" style="background:#fefce8; color:#78350f">
+      <div class="parti-pill-name">R</div>
+      <div class="parti-pill-role">Støtteparti</div>
+    </div>
+    <div class="parti-pill" style="background:#fefce8; color:#78350f">
+      <div class="parti-pill-name">MDG</div>
+      <div class="parti-pill-role">Støtteparti</div>
+    </div>
+    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
+      <div class="parti-pill-name">H</div>
+      <div class="parti-pill-role">Opposisjon</div>
+    </div>
+    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
+      <div class="parti-pill-name">FrP</div>
+      <div class="parti-pill-role">Opposisjon</div>
+    </div>
+    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
+      <div class="parti-pill-name">V</div>
+      <div class="parti-pill-role">Opposisjon</div>
+    </div>
+    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
+      <div class="parti-pill-name">KrF</div>
+      <div class="parti-pill-role">Opposisjon</div>
+    </div>
+  </div>
+
+  <p>
+    Ap leder en mindretallsregjering (Støre-regjeringen). Sp, SV, R og MDG gir
+    parlamentarisk støtte uten å sitte i regjering. H, FrP, V og KrF er i opposisjon
+    og fremmer egne representantforslag.
+  </p>
+
+  <div class="section-header" style="margin-top:36px">
+    <div class="section-num">9</div>
+    <div>
+      <div class="section-label">Status</div>
+      <h2 style="margin-top:0; border:none; padding:0">Statusmodellen</h2>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th style="width:130px">Status</th><th>Betydning</th><th>Betingelse</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-gray">⏳ pending</span></td>
+        <td>Saken er matchet, men ikke votert ennå</td>
+        <td>Ingen voteringsdata funnet</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-green">✅ fulfilled</span></td>
+        <td>Løftet er holdt — partiet stemte for</td>
+        <td>FOR-stemmer > MOT i alle voteringer</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">❌ broken</span></td>
+        <td>Løftet er brutt — partiet stemte mot</td>
+        <td>MOT-stemmer > FOR i alle voteringer</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">🟡 partial</span></td>
+        <td>Blandet resultat — delvis holdt</td>
+        <td>Noen FOR, noen MOT voteringer</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-header" style="margin-top:36px">
+    <div class="section-num">10</div>
+    <div>
+      <div class="section-label">Teknologi</div>
+      <h2 style="margin-top:0; border:none; padding:0">Teknologioversikt</h2>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Frontend</div>
+      <div class="card-body">
+        React 19 · TypeScript · Vite<br>
+        React Router (SPA-ruting)<br>
+        CSS custom properties (ingen rammeverk)<br>
+        Mobile-first responsivt design
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Backend</div>
+      <div class="card-body">
+        Node.js (ES-moduler · .mjs)<br>
+        Anthropic SDK (@anthropic-ai/sdk)<br>
+        Supabase JS SDK<br>
+        Ingen web-server — ren scripting
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Database og hosting</div>
+      <div class="card-body">
+        Supabase (PostgreSQL + REST API)<br>
+        Row Level Security (RLS)<br>
+        Supabase Edge Functions (ikke i bruk ennå)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI</div>
+      <div class="card-body">
+        Anthropic Claude API<br>
+        Modell: claude-opus-4-6<br>
+        Streaming for lange svar<br>
+        Maks 32 000 tokens per kall
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur</span>
+    <span>Seksjon 8–10 · Kontekst, Status og Teknologi</span>
+  </div>
+</div>
+
+</body>
+</html>

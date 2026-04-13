@@ -20,9 +20,9 @@ import { NavLink, useLocation } from "react-router-dom"
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 type NavbarProps = {
-  theme: "light" | "dark"
+  themeOverride: "light" | "dark" | null
   lang: "no" | "en"
-  onToggleTheme: () => void
+  onSetTheme: (t: "light" | "dark" | null) => void
   onToggleLanguage: () => void
 }
 
@@ -59,9 +59,18 @@ function IkonMåne() {
   )
 }
 
+function IkonSystem() {
+  return (
+    <svg viewBox="0 0 20 20" width="14" height="14" fill="none" aria-hidden>
+      <rect x="2" y="3" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M7 17h6M10 14v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 // ── Komponent ─────────────────────────────────────────────────────────────────
 
-export default function Navbar({ theme, lang, onToggleTheme, onToggleLanguage }: NavbarProps) {
+export default function Navbar({ themeOverride, lang, onSetTheme, onToggleLanguage }: NavbarProps) {
   const [menuÅpen, setMenuÅpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const location = useLocation()
@@ -115,33 +124,15 @@ export default function Navbar({ theme, lang, onToggleTheme, onToggleLanguage }:
             ))}
           </nav>
 
-          {/* Høyresiden: verktøyknapper + hamburger */}
+          {/* Høyresiden: hamburger-knapp (alltid synlig) */}
           <div className="nav-tools">
             <button
-              className="theme-toggle"
-              aria-label={no ? "Bytt tema" : "Toggle theme"}
-              onClick={onToggleTheme}
-            >
-              {theme === "dark" ? <><IkonSol /> Dag</> : <><IkonMåne /> Natt</>}
-            </button>
-
-            <button
-              className="lang-toggle"
-              aria-label={no ? "Bytt språk" : "Toggle language"}
-              onClick={onToggleLanguage}
-            >
-              {lang === "no" ? "EN" : "NO"}
-            </button>
-
-            {/* Hamburger-knapp — vises kun på mobil */}
-            <button
               className={`hamburger${menuÅpen ? " hamburger--open" : ""}`}
-              aria-label={menuÅpen ? "Lukk meny" : "Åpne meny"}
+              aria-label={menuÅpen ? (no ? "Lukk meny" : "Close menu") : (no ? "Åpne meny" : "Open menu")}
               aria-expanded={menuÅpen}
               aria-controls="mobil-meny"
               onClick={() => setMenuÅpen((v) => !v)}
             >
-              {/* Tre streker → X ved åpning (animert i CSS) */}
               <span className="hamburger-linje" />
               <span className="hamburger-linje" />
               <span className="hamburger-linje" />
@@ -177,6 +168,50 @@ export default function Navbar({ theme, lang, onToggleTheme, onToggleLanguage }:
             {no ? lenke.labelNo : lenke.labelEn}
           </NavLink>
         ))}
+
+        {/* Språkvalg i mobilmenyen */}
+        <div className="mobil-theme-seksjon">
+          <span className="mobil-theme-label">{no ? "Språk" : "Language"}</span>
+          <div className="mobil-theme-rad">
+            <button
+              className={`mobil-theme-btn${lang === "no" ? " mobil-theme-btn--active" : ""}`}
+              onClick={() => { if (lang !== "no") { onToggleLanguage(); setMenuÅpen(false) } }}
+            >
+              <span className="flag">🇳🇴</span> Norsk
+            </button>
+            <button
+              className={`mobil-theme-btn${lang === "en" ? " mobil-theme-btn--active" : ""}`}
+              onClick={() => { if (lang !== "en") { onToggleLanguage(); setMenuÅpen(false) } }}
+            >
+              <span className="flag">🇬🇧</span> English
+            </button>
+          </div>
+        </div>
+
+        {/* Temakontroll i mobilmenyen */}
+        <div className="mobil-theme-seksjon">
+          <span className="mobil-theme-label">{no ? "Tema" : "Theme"}</span>
+          <div className="mobil-theme-rad">
+            <button
+              className={`mobil-theme-btn${themeOverride === "light" ? " mobil-theme-btn--active" : ""}`}
+              onClick={() => { onSetTheme("light"); setMenuÅpen(false) }}
+            >
+              <IkonSol />{no ? "Dag" : "Day"}
+            </button>
+            <button
+              className={`mobil-theme-btn${themeOverride === "dark" ? " mobil-theme-btn--active" : ""}`}
+              onClick={() => { onSetTheme("dark"); setMenuÅpen(false) }}
+            >
+              <IkonMåne />{no ? "Natt" : "Night"}
+            </button>
+            <button
+              className={`mobil-theme-btn${themeOverride === null ? " mobil-theme-btn--active" : ""}`}
+              onClick={() => { onSetTheme(null); setMenuÅpen(false) }}
+            >
+              <IkonSystem />{no ? "System" : "System"}
+            </button>
+          </div>
+        </div>
       </nav>
     </>
   )

@@ -23,24 +23,72 @@ html, body, #root { height: 100%; width: 100%; margin: 0; }
   --tag-bg:#f0f0ee;
   --bar-bg:#e8e5e0;
 }
+/* Mørkt tema — CSS-variabler for mørk modus */
+/* Brukes av: [data-theme="dark"] (manuelt) og @media (automatisk) */
+:root{
+  --dark-bg:#0d0d10;
+  --dark-card:#141418;
+  --dark-surface:#1c1c22;
+  --dark-text:#e8e6e1;
+  --dark-text2:#c8c5bf;
+  --dark-muted:#7a7878;
+  --dark-accent:#4d91ff;
+  --dark-accent-h:#3a7de6;
+  --dark-accent-s:rgba(77,145,255,.08);
+  --dark-accent-t:rgba(77,145,255,.16);
+  --dark-glass:rgba(255,255,255,.07);
+  --dark-line:rgba(255,255,255,.09);
+  --dark-line2:rgba(255,255,255,.05);
+  --dark-hero-bg:#08090e;
+  --dark-hero-col:#1a3a78;
+  --dark-tag-bg:rgba(255,255,255,.07);
+  --dark-bar-bg:rgba(255,255,255,.1);
+}
+
+/* Manuell dark-override via knapp (data-theme="dark") */
 [data-theme="dark"]{
-  --bg:#0d0d10;
-  --card:#141418;
-  --surface:#1c1c22;
-  --text:#e8e6e1;
-  --text2:#c8c5bf;
-  --muted:#7a7878;
-  --accent:#4d91ff;
-  --accent-h:#3a7de6;
-  --accent-s:rgba(77,145,255,.08);
-  --accent-t:rgba(77,145,255,.16);
-  --glass:rgba(255,255,255,.07);
-  --line:rgba(255,255,255,.09);
-  --line2:rgba(255,255,255,.05);
-  --hero-bg:#08090e;
-  --hero-col:#1a3a78;
-  --tag-bg:rgba(255,255,255,.07);
-  --bar-bg:rgba(255,255,255,.1);
+  --bg:var(--dark-bg);
+  --card:var(--dark-card);
+  --surface:var(--dark-surface);
+  --text:var(--dark-text);
+  --text2:var(--dark-text2);
+  --muted:var(--dark-muted);
+  --accent:var(--dark-accent);
+  --accent-h:var(--dark-accent-h);
+  --accent-s:var(--dark-accent-s);
+  --accent-t:var(--dark-accent-t);
+  --glass:var(--dark-glass);
+  --line:var(--dark-line);
+  --line2:var(--dark-line2);
+  --hero-bg:var(--dark-hero-bg);
+  --hero-col:var(--dark-hero-col);
+  --tag-bg:var(--dark-tag-bg);
+  --bar-bg:var(--dark-bar-bg);
+}
+
+/* Systempreferanse — følger enhetens dark mode automatisk.
+   Fungerer i alle nettlesere inkl. Brave, uten JavaScript-events.
+   Overstyres av [data-theme="light"] (manuelt valg av lys modus). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]){
+    --bg:var(--dark-bg);
+    --card:var(--dark-card);
+    --surface:var(--dark-surface);
+    --text:var(--dark-text);
+    --text2:var(--dark-text2);
+    --muted:var(--dark-muted);
+    --accent:var(--dark-accent);
+    --accent-h:var(--dark-accent-h);
+    --accent-s:var(--dark-accent-s);
+    --accent-t:var(--dark-accent-t);
+    --glass:var(--dark-glass);
+    --line:var(--dark-line);
+    --line2:var(--dark-line2);
+    --hero-bg:var(--dark-hero-bg);
+    --hero-col:var(--dark-hero-col);
+    --tag-bg:var(--dark-tag-bg);
+    --bar-bg:var(--dark-bar-bg);
+  }
 }
 
 *{box-sizing:border-box}

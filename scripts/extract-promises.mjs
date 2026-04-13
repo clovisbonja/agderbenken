@@ -82,7 +82,7 @@ const PARTIER = [
   {
     forkortelse: "R",
     navn: "Rødt",
-    url: "https://roedt.no/fil/25ba75b90597df613816bd5c6c77dc7d49192e20.pdf",
+    url: "https://roedt.no/fil/add2676c08676a581952a12f8f072e2126f9eb5b.pdf",
     type: "pdf",
   },
   {
@@ -121,28 +121,51 @@ async function fetchHtmlText(url) {
   const html = await res.text()
   const text = stripHtml(html)
   // Kutt til maks ~60 000 tegn for å holde seg under kontekstgrensen
-  return text.slice(0, 60000)
+  return text.slice(0, 120000)
 }
 
-async function fetchPdfBase64(url) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`)
-  const buffer = await res.arrayBuffer()
-  return Buffer.from(buffer).toString("base64")
+async function fetchPdfBase64(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; research bot)" },
+    })
+    if (res.ok) {
+      const buffer = await res.arrayBuffer()
+      return Buffer.from(buffer).toString("base64")
+    }
+    if (res.status === 429) {
+      const wait = (i + 1) * 10000
+      console.log(`   Rate limited, venter ${wait / 1000}s…`)
+      await new Promise((r) => setTimeout(r, wait))
+    } else {
+      throw new Error(`HTTP ${res.status} for ${url}`)
+    }
+  }
+  throw new Error(`Ga opp etter ${retries} forsøk`)
 }
 
 // ── Claude: ekstraksjon av løfter ────────────────────────────────────────────
 const EXTRACTION_PROMPT = (parti, kategorier) => `
 Du analyserer ${parti}s partiprogram for stortingsperioden 2025–2029.
 
-Din oppgave: Ekstraker ALLE KONKRETE politiske løfter fra programmet. Ikke ha noen øvre grense — hent absolutt alt som er en konkret forpliktelse eller handling.
+Din oppgave: Ekstraker ABSOLUTT ALLE konkrete politiske løfter, forpliktelser og tiltak fra hele programmet.
+Ingen øvre grense — jo flere jo bedre. Gå gjennom hvert eneste kapittel og avsnitt.
 
-Krav til hvert løfte:
-1. Det må være en KONKRET handling eller forpliktelse (ikke vage visjoner som "vi vil ha et bedre samfunn")
-2. Bruk så nært verbatim sitat som mulig fra kildeteksten
-3. Maks 250 tegn per løfte
-4. Velg kategori fra denne listen: ${kategorier.join(", ")}
-5. Dekk ALLE deler av programmet — ikke bare klimapolitikk, men også økonomi, helse, samferdsel, justis, familie, distrikt osv.
+Inkluder ALT som er:
+- En konkret handling ("vi vil innføre", "vi vil øke", "vi vil avvikle", "vi vil styrke")
+- Et tallfestet mål ("2 politifolk per 1000 innbyggere", "10 mrd til forsvar")
+- En lovmessig forpliktelse ("endre loven om X", "innføre rett til Y")
+- Et budsjettløfte ("bevilge mer til", "fjerne avgiften på")
+- Et forbudsløfte ("forby", "avvikle", "fjerne")
+- Enhver annen konkret, målbar forpliktelse
+
+IKKE inkluder: vage visjoner ("vi vil ha et godt samfunn"), verdierklæringer, eller generelle holdninger.
+
+Krav:
+1. Verbatim eller nær-verbatim sitat fra kildeteksten
+2. Maks 250 tegn per løfte
+3. Velg kategori fra: ${kategorier.join(", ")}
+4. Dekk ALLE kapitler og temaer i programmet
 
 Returner KUN gyldig JSON (ingen markdown, ingen forklaring):
 [
@@ -151,8 +174,6 @@ Returner KUN gyldig JSON (ingen markdown, ingen forklaring):
     "kategori": "En av kategoriene over"
   }
 ]
-
-Fokuser på løfter som er MÅLBARE og SPORBARE mot Stortingets saker.
 `
 
 async function extractPromises(parti, content, isPdf) {
@@ -169,18 +190,26 @@ async function extractPromises(parti, content, isPdf) {
         { type: "text", text: EXTRACTION_PROMPT(parti.navn, KATEGORIER) },
       ]
 
-  const msg = await anthropic.messages.create({
+  // Streaming kreves for lange svar (max_tokens > ~4096 kan ta >10 min)
+  const stream = anthropic.messages.stream({
     model: "claude-opus-4-6",
-    max_tokens: 8192,
+    max_tokens: 32000,
     messages: [{ role: "user", content: messageContent }],
   })
+  const msg = await stream.finalMessage()
 
   const text = msg.content[0].text.trim()
 
+  // Strip markdown code fences hvis Claude pakket svaret i ```json ... ```
+  const cleaned = text
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "")
+    .trim()
+
   try {
-    return JSON.parse(text)
+    return JSON.parse(cleaned)
   } catch {
-    const m = text.match(/\[[\s\S]*\]/)
+    const m = cleaned.match(/\[[\s\S]*\]/)
     if (m) return JSON.parse(m[0])
     throw new Error("Klarte ikke parse JSON fra Claude")
   }

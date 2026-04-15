@@ -36,7 +36,6 @@ const LENKER = [
   { to: "/representanter", labelNo: "Representanter",  labelEn: "Representatives" },
   { to: "/parti",          labelNo: "Partiprogrammer", labelEn: "Party Programs" },
   { to: "/om",             labelNo: "Om Agderbenken",  labelEn: "About" },
-  { to: "/personvern",     labelNo: "Personvern",      labelEn: "Privacy" },
 ]
 
 // ── SVG-ikoner ────────────────────────────────────────────────────────────────
@@ -212,6 +211,17 @@ export default function Navbar({ themeOverride, lang, onSetTheme, onToggleLangua
               <IkonSystem />{no ? "System" : "System"}
             </button>
           </div>
+        </div>
+
+        {/* Personvernserklæring-lenke i mobilmenyen */}
+        <div className="mobil-theme-seksjon">
+          <NavLink
+            to="/personvern"
+            end={false}
+            className="mobil-lenke mobil-lenke-personvern"
+          >
+            🔒 {no ? "Personvern" : "Privacy"}
+          </NavLink>
         </div>
       </nav>
     </>

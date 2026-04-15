@@ -22,6 +22,7 @@ import Parti from "./pages/Parti"
 import Representanter from "./pages/Representanter"
 import Om from "./pages/Om"
 import Votering from "./pages/Votering"
+import Personvern from "./pages/Personvern"
 
 // Stilark — ett per side for enkel oversikt og vedlikehold
 import "./styles/basis.css"
@@ -33,6 +34,7 @@ import "./styles/parti.css"
 import "./styles/votering.css"
 import "./styles/representanter.css"
 import "./styles/om.css"
+import "./styles/personvern.css"
 
 // ── Footer ────────────────────────────────────────────────────────────────────
 // Vises nederst på alle sider. Inneholder navigasjon og datakilder.
@@ -59,6 +61,7 @@ function Footer({ lang }: { lang: "no" | "en" }) {
           <NavLink to="/representanter" className="site-footer-link">{no ? "Representanter" : "Representatives"}</NavLink>
           <NavLink to="/parti" className="site-footer-link">{no ? "Partiprogrammer" : "Party Programs"}</NavLink>
           <NavLink to="/om" className="site-footer-link">{no ? "Om Agderbenken" : "About"}</NavLink>
+          <NavLink to="/personvern" className="site-footer-link">{no ? "Personvern" : "Privacy"}</NavLink>
         </nav>
 
         {/* Datakilder og samarbeidspartnere */}
@@ -231,6 +234,7 @@ export default function App() {
         <Route path="/representanter" element={<Representanter lang={lang} />} />
         <Route path="/om"           element={<Om lang={lang} />} />
         <Route path="/votering"     element={<Votering lang={lang} />} />
+        <Route path="/personvern"   element={<Personvern lang={lang} />} />
 {/* Ukjente URL-er sendes tilbake til forsiden */}
         <Route path="*"             element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,0 +1,493 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PERSONVERN.CSS — Personvernserklæring styling
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.personvern-page {
+  background: #f8f9fa;
+}
+
+.pv-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Intro Section
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-section {
+  margin-bottom: 3rem;
+}
+
+.pv-intro {
+  background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.pv-intro-text {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.pv-intro-meta {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Promise Grid (Do / Don't)
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .pv-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pv-promise-card {
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pv-promise-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #0f3460;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pv-promise-card-dont h3 {
+  color: #d63031;
+}
+
+.pv-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pv-list li {
+  padding: 0.75rem 0;
+  padding-left: 2rem;
+  position: relative;
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.pv-list-do li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.pv-list-dont li::before {
+  content: "✕";
+  position: absolute;
+  left: 0;
+  color: #d63031;
+  font-weight: bold;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Blocked Information
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-blocked {
+  margin-bottom: 3rem;
+}
+
+.pv-blocked h2,
+.pv-allowed h2,
+.pv-protection h2,
+.pv-rights h2,
+.pv-contact h2 {
+  font-size: 1.75rem;
+  color: #0f3460;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pv-subheader {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.pv-blocked-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.pv-blocked-card {
+  background: #fff5f5;
+  border: 2px solid #d63031;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.pv-blocked-card h3 {
+  color: #d63031;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.pv-blocked-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pv-blocked-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #333;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pv-blocked-list li::before {
+  content: "✕";
+  position: absolute;
+  left: 0;
+  color: #d63031;
+  font-weight: bold;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Allowed Searches
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-allowed {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid #27ae60;
+}
+
+.pv-allowed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.pv-allowed-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.pv-allowed-card h3 {
+  color: #15803d;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pv-allowed-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pv-allowed-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #333;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pv-allowed-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #27ae60;
+  font-weight: bold;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Protection Flow
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-protection {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid #0f3460;
+}
+
+.pv-protection-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .pv-protection-flow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+.pv-flow-step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f0f4f8;
+  padding: 1rem;
+  border-radius: 6px;
+  min-width: 180px;
+}
+
+.pv-flow-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #0f3460;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.pv-flow-step h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.pv-flow-arrow {
+  font-size: 1.5rem;
+  color: #0f3460;
+  font-weight: bold;
+}
+
+@media (max-width: 1024px) {
+  .pv-flow-arrow {
+    display: none;
+  }
+}
+
+.pv-measures {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e8e8e8;
+}
+
+.pv-measures h3 {
+  color: #0f3460;
+  margin-bottom: 1rem;
+}
+
+.pv-measures-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.pv-measures-list li {
+  padding: 0.75rem 0 0.75rem 1.75rem;
+  position: relative;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.pv-measures-list li::before {
+  content: "🔐";
+  position: absolute;
+  left: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Rights Section
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-rights {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid #0f3460;
+}
+
+.pv-rights-intro {
+  font-weight: 500;
+  color: #0f3460;
+  margin-bottom: 1rem;
+}
+
+.pv-rights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.pv-rights-list li {
+  padding: 1rem;
+  background: #f0f4f8;
+  border-left: 4px solid #0f3460;
+  border-radius: 4px;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Contact Section
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-contact {
+  margin-bottom: 3rem;
+}
+
+.pv-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.pv-contact-card {
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pv-contact-card h3 {
+  color: #0f3460;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.pv-contact-card p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.pv-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pv-contact-list li {
+  padding: 0.5rem 0;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Footer Promise
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-footer-promise {
+  margin-bottom: 0;
+}
+
+.pv-promise-box {
+  background: linear-gradient(135deg, #0f3460 0%, #1a5490 100%);
+  color: white;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.pv-promise-box h2 {
+  color: white;
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.pv-promise-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pv-promise-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.pv-promise-item span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #27ae60;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Responsive
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .pv-container {
+    padding: 2rem 1rem;
+  }
+
+  .pv-promise-card {
+    padding: 1.5rem;
+  }
+
+  .pv-promise-box {
+    padding: 2rem 1.5rem;
+  }
+
+  .pv-promise-items {
+    grid-template-columns: 1fr;
+  }
+}

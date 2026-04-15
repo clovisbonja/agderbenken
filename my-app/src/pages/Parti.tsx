@@ -102,6 +102,51 @@ const SUGGESTED_QUERIES_EN = [
   "What does H promise on education?",
 ]
 
+// GDPR — Sensitiv informasjon som aldri skal søkes
+const GDPR_BLOCK_PATTERNS = [
+  /\b\d{11}\b/,  // fødselsnummer (11 siffer)
+  /\b\d{6}\s?\d{5}\b/,  // норвегиаиска personnummer
+  /barnehage|skole\s+navn/i,  // barn-identifisering
+  /pasient|helse\s+opplysning/i,  // helseopplysninger
+  /medicin|resept|diagnose/i,
+  /religion|politisk|overbevisning/i,
+  /fagforening|streik|lønn\s+opplysning/i,
+  /lønnsliste|ansatt|personale/i,  // personell
+  /hemmelighet|konfidensiell|intern/i,
+  /kildekode|system|password|nøkkel/i,
+  /bankkonto|kredittkort|ssn/i,
+  /hjemmeadresse|hjemmeavtal|familje\s+forhold/i,
+]
+
+function validateGDPR(query: string): { valid: boolean; reason?: string } {
+  const q = query.toLowerCase()
+  for (const pattern of GDPR_BLOCK_PATTERNS) {
+    if (pattern.test(q)) {
+      return { valid: false, reason: "sensitiv_info" }
+    }
+  }
+  // Hvis spørsmålet har < 3 ord og ingen partinavn/nøkkelord, er det trolig upassende
+  const words = query.trim().split(/\s+/)
+  if (words.length < 2) return { valid: false, reason: "too_short" }
+  return { valid: true }
+}
+
+function getGDPRResponse(lang: Lang, reason?: string): string {
+  if (reason === "sensitiv_info") {
+    return lang === "no"
+      ? "Jeg kan ikke søke etter personopplysninger, helseopplysninger eller andre sensitive data. Spør heller om partiprogram og valgløfter."
+      : "I cannot search for personal information, health data, or other sensitive information. Please ask about party programs and pledges instead."
+  }
+  if (reason === "too_short") {
+    return lang === "no"
+      ? "Spørsmålet ditt er for kort. Prøv: 'Hva lover FrP om skatter?' eller 'Klima-løfter fra Venstre'"
+      : "Your question is too short. Try: 'What does FrP promise about taxes?' or 'Climate pledges from Venstre'"
+  }
+  return lang === "no"
+    ? "Jeg forstår ikke spørsmålet. Spør om partiprogram og valgløfter, f.eks. 'Hva lover Høyre om skatt?'"
+    : "I don't understand the question. Ask about party programs and pledges, e.g. 'What does H promise on tax?'"
+}
+
 // ── Hjelpere ──────────────────────────────────────────────────────────────────
 
 // ── Komponent ─────────────────────────────────────────────────────────────────
@@ -168,6 +213,16 @@ export default function Parti({ lang }: PartiProps) {
     const botPlaceholder: ChatMessage = { id: Date.now().toString() + "_bot", role: "bot", text: "", loading: true }
     setChatMessages(prev => [...prev, userMsg, botPlaceholder])
     setChatInput("")
+
+    // GDPR validation — blokkér sensitive queries
+    const gdprCheck = validateGDPR(query)
+    if (!gdprCheck.valid) {
+      const gdprResponse = getGDPRResponse(lang, gdprCheck.reason)
+      setChatMessages(prev => prev.map(m =>
+        m.id === botPlaceholder.id ? { ...m, text: gdprResponse, loading: false } : m
+      ))
+      return
+    }
 
     const { parti, keywords } = parseQuery(query)
     let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")

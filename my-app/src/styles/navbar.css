@@ -253,6 +253,28 @@
   font-weight: 600;
 }
 
+/* ── Personvernlenke (vises på både mobil og desktop) ────────────────────── */
+
+.mobil-lenke-personvern {
+  display: block;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.12s, background 0.12s;
+}
+
+.mobil-lenke-personvern:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.mobil-lenke-personvern.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ── Innstillingsseksjoner (språk + tema) ────────────────────────────────── */
 
 .mobil-theme-seksjon {

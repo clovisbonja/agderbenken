@@ -218,7 +218,7 @@ export default function Navbar({ themeOverride, lang, onSetTheme, onToggleLangua
           <NavLink
             to="/personvern"
             end={false}
-            className="mobil-lenke mobil-lenke-personvern"
+            className="mobil-lenke-personvern"
           >
             🔒 {no ? "Personvern" : "Privacy"}
           </NavLink>

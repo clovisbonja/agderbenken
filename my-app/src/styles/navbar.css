@@ -211,7 +211,7 @@
   z-index: 195;
   background: var(--card);
   flex-direction: column;
-  padding: 0 0 8px;
+  padding: 8px 0;
   transform: translateY(-6px);
   opacity: 0;
   pointer-events: none;
@@ -235,66 +235,83 @@
 
 .mobil-lenke {
   display: block;
-  padding: 10px 20px;
+  padding: 11px 20px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text);
   text-decoration: none;
-  transition: color 0.12s, background 0.12s;
+  transition: color 0.15s ease, background 0.15s ease;
+  border-left: 3px solid transparent;
+  margin: 0;
 }
 
 .mobil-lenke:hover {
-  color: var(--text);
-  background: var(--surface);
+  color: var(--accent);
+  background: var(--hover);
+  border-left-color: var(--accent);
 }
 
 .mobil-lenke.active {
   color: var(--accent);
   font-weight: 600;
+  background: var(--surface);
+  border-left-color: var(--accent);
 }
 
 /* ── Personvernlenke (vises på både mobil og desktop) ────────────────────── */
 
 .mobil-lenke-personvern {
   display: block;
-  padding: 10px 20px;
+  padding: 11px 20px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text);
   text-decoration: none;
-  transition: color 0.12s, background 0.12s;
+  transition: color 0.15s ease, background 0.15s ease;
+  border-left: 3px solid transparent;
+  margin: 0;
 }
 
 .mobil-lenke-personvern:hover {
-  color: var(--text);
-  background: var(--surface);
+  color: var(--accent);
+  background: var(--hover);
+  border-left-color: var(--accent);
 }
 
 .mobil-lenke-personvern.active {
   color: var(--accent);
   font-weight: 600;
+  background: var(--surface);
+  border-left-color: var(--accent);
 }
 
 /* ── Innstillingsseksjoner (språk + tema) ────────────────────────────────── */
 
 .mobil-theme-seksjon {
-  padding: 10px 20px 8px;
+  padding: 12px 20px;
   border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobil-theme-seksjon:first-of-type {
+  border-top: none;
 }
 
 .mobil-theme-label {
   display: block;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .mobil-theme-rad {
   display: flex;
-  gap: 4px;
+  gap: 5px;
 }
 
 .mobil-theme-btn {
@@ -302,29 +319,31 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 3px;
+  gap: 5px;
+  padding: 8px 4px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: 6px;
   background: transparent;
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--text);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   white-space: nowrap;
 }
 
 .mobil-theme-btn:hover:not(.mobil-theme-btn--active) {
-  background: var(--surface);
-  color: var(--text);
+  background: var(--hover);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .mobil-theme-btn--active {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+  font-weight: 600;
 }
 
 .flag {

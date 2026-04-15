@@ -12,8 +12,73 @@
  */
 
 import type { CSSProperties } from "react"
+import { useState } from "react"
 
 type Lang = "no" | "en"
+
+// ── Komponent for å tilbakestille innstillinger ────────────────────────────
+
+function StorageResetButton({ lang, resetText, successText }: { lang: Lang; resetText: string; successText: string }) {
+  const [isResetting, setIsResetting] = useState(false)
+
+  const handleReset = () => {
+    if (isResetting) return
+
+    if (!window.confirm(lang === "no" ? "Er du sikker? Dette vil tilbakestille tema, språk og alle innstillinger." : "Are you sure? This will reset your theme, language, and all settings.")) {
+      return
+    }
+
+    setIsResetting(true)
+
+    // Fjern alle localStorage-nøkler som vi setter
+    try {
+      localStorage.removeItem("theme-override")
+      localStorage.removeItem("lang-override")
+      localStorage.removeItem("sorblikket-howto-seen")
+      localStorage.removeItem("agder-cookies-ok")
+    } catch (e) {
+      console.error("Failed to reset settings:", e)
+    }
+
+    // Vis suksessmelding og last siden på nytt
+    alert(successText)
+    window.location.reload()
+  }
+
+  return (
+    <button
+      onClick={handleReset}
+      disabled={isResetting}
+      className="pv-reset-btn"
+      style={{
+        padding: "10px 16px",
+        marginTop: "12px",
+        backgroundColor: "#f5f5f5",
+        border: "1px solid #ddd",
+        borderRadius: "6px",
+        cursor: isResetting ? "not-allowed" : "pointer",
+        fontSize: "14px",
+        fontWeight: 500,
+        transition: "all 0.2s ease",
+        opacity: isResetting ? 0.6 : 1,
+      }}
+      onMouseEnter={(e) => {
+        if (!isResetting) {
+          (e.target as HTMLElement).style.backgroundColor = "#efefef"
+          (e.target as HTMLElement).style.borderColor = "#999"
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isResetting) {
+          (e.target as HTMLElement).style.backgroundColor = "#f5f5f5"
+          (e.target as HTMLElement).style.borderColor = "#ddd"
+        }
+      }}
+    >
+      {resetText}
+    </button>
+  )
+}
 
 const BLOCKED_CATEGORIES = [
   {
@@ -187,6 +252,16 @@ export default function Personvern({ lang }: { lang: Lang }) {
             "Rett til innsigelse mot behandling",
             "Rett til dataportabilitet",
           ],
+          storageHeader: "Lokale lagringsinnstillinger",
+          storageIntro: "Sørblikket lagrer kun ikke-sensitiv informasjon lokalt i nettleseren for å forbedre brukeropplevelsen:",
+          storageItems: [
+            "Tema-preferanse (lys/mørk modus)",
+            "Språkvalg (norsk/engelsk)",
+            "Visningstilstand for guider og instruksjoner",
+          ],
+          storageNote: "Disse innstillingene lagres i nettleserens localStorage og slettes når du tømmer nettleserkachen. Du kan tilbakestille alle innstillinger ved å klikke knappen under.",
+          resetSettingsBtn: "Tilbakestill alle innstillinger",
+          resetSuccess: "Innstillinger tilbakestilt! Siden lastes på nytt...",
         }
       : {
           title: "Privacy Policy",
@@ -233,6 +308,16 @@ export default function Personvern({ lang }: { lang: Lang }) {
             "Right to object to processing",
             "Right to data portability",
           ],
+          storageHeader: "Local storage settings",
+          storageIntro: "Sørblikket only stores non-sensitive information locally in your browser to improve your experience:",
+          storageItems: [
+            "Theme preference (light/dark mode)",
+            "Language choice (Norwegian/English)",
+            "Display state for guides and instructions",
+          ],
+          storageNote: "These settings are stored in your browser's localStorage and will be deleted when you clear your browser cache. You can reset all settings by clicking the button below.",
+          resetSettingsBtn: "Reset all settings",
+          resetSuccess: "Settings reset! Reloading page...",
         }
 
   return (
@@ -438,6 +523,19 @@ export default function Personvern({ lang }: { lang: Lang }) {
                 </ul>
               </div>
             </div>
+          </section>
+
+          {/* Local Storage Section */}
+          <section className="pv-section pv-storage">
+            <h2>{t.storageHeader}</h2>
+            <p>{t.storageIntro}</p>
+            <ul className="pv-storage-list">
+              {t.storageItems.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+            <p className="pv-storage-note">{t.storageNote}</p>
+            <StorageResetButton lang={lang} resetText={t.resetSettingsBtn} successText={t.resetSuccess} />
           </section>
 
           {/* Legal Basis Section */}

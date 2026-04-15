@@ -23,7 +23,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 // Stortinget API-endepunkter
 const SAKER_URL = "https://data.stortinget.no/eksport/saker"
@@ -480,7 +480,9 @@ export default function Votering({ lang }: VoteringProps) {
   const [forslag, setForslag] = useState<VoteringForslag[]>([])
   const [selectedSakId, setSelectedSakId] = useState<string | null>(null)
   const [selectedVoteringId, setSelectedVoteringId] = useState<string | null>(null)
+  const detailRef = useRef<HTMLElement>(null)
   const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<"alle" | "behandlet" | "venter_votering">("alle")
   const [expandedForslag, setExpandedForslag] = useState<Set<string>>(new Set())
 
   const [loadingSaker, setLoadingSaker] = useState(true)
@@ -502,16 +504,13 @@ export default function Votering({ lang }: VoteringProps) {
 
     async function load() {
       try {
-        const params = new URLSearchParams({ sesjonid: selectedSession, antall: "1000", format: "xml" })
+        const params = new URLSearchParams({ sesjonid: selectedSession, antall: "2000", format: "xml" })
         const res = await fetch(`${SAKER_URL}?${params}`, { signal: ctrl.signal })
         if (!res.ok) throw new Error(`${t.errorSaker} (${res.status})`)
         const xml = await res.text()
         const all = parseSaker(xml)
-        // Vis kun behandlede saker og saker som venter votering — disse har voteringsdata
-        const withVotes = all.filter(
-          (s) => s.status === "behandlet" || s.status === "venter_votering"
-        )
-        setSaker(withVotes)
+        // Behold alle saker — filtrering skjer i UI via statusFilter
+        setSaker(all)
       } catch (e) {
         if (ctrl.signal.aborted) return
         setErrorSaker(e instanceof Error ? e.message : t.errorSaker)
@@ -593,15 +592,23 @@ export default function Votering({ lang }: VoteringProps) {
   }, [selectedVoteringId])
 
   const filteredSaker = useMemo(() => {
-    if (!search.trim()) return saker
-    const q = search.toLowerCase()
-    return saker.filter(
-      (s) =>
-        s.tittel.toLowerCase().includes(q) ||
-        s.kortTittel.toLowerCase().includes(q) ||
-        s.id.toLowerCase().includes(q)
-    )
-  }, [saker, search])
+    let result = saker
+    // Statusfilter
+    if (statusFilter === "behandlet") result = result.filter(s => s.status === "behandlet")
+    else if (statusFilter === "venter_votering") result = result.filter(s => s.status === "venter_votering")
+    else result = result.filter(s => s.status === "behandlet" || s.status === "venter_votering")
+    // Tekstsøk
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(
+        (s) =>
+          s.tittel.toLowerCase().includes(q) ||
+          s.kortTittel.toLowerCase().includes(q) ||
+          s.id.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [saker, search, statusFilter])
 
   const selectedSak = useMemo(
     () => saker.find((s) => s.id === selectedSakId) ?? null,
@@ -689,6 +696,31 @@ export default function Votering({ lang }: VoteringProps) {
         </div>
       </div>
 
+      {/* Status-filter */}
+      <div className="vsl-status-filters">
+        {(["alle", "behandlet", "venter_votering"] as const).map((sf) => {
+          const labels: Record<string, string> = {
+            alle: lang === "no" ? "Alle" : "All",
+            behandlet: lang === "no" ? "Behandlet" : "Processed",
+            venter_votering: lang === "no" ? "Venter votering" : "Awaiting vote",
+          }
+          const count = sf === "alle"
+            ? saker.filter(s => s.status === "behandlet" || s.status === "venter_votering").length
+            : saker.filter(s => s.status === sf).length
+          return (
+            <button
+              key={sf}
+              type="button"
+              className={`vsl-status-btn${statusFilter === sf ? " vsl-status-btn--active" : ""}`}
+              onClick={() => setStatusFilter(sf)}
+            >
+              {labels[sf]}
+              <span className="vsl-status-count">{count}</span>
+            </button>
+          )
+        })}
+      </div>
+
       {loadingSaker ? (
         <div className="vsl-list-status">
           <span className="vsl-spinner" aria-hidden />
@@ -714,7 +746,12 @@ export default function Votering({ lang }: VoteringProps) {
                   key={sak.id}
                   role="listitem"
                   className={`vsl-item${isActive ? " vsl-item-active" : ""}`}
-                  onClick={() => setSelectedSakId(sak.id)}
+                  onClick={() => {
+                    setSelectedSakId(sak.id)
+                    setTimeout(() => {
+                      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                    }, 50)
+                  }}
                 >
                   <div className="vsl-item-main">
                     {th && <span className={`vsl-item-dot vsl-dot-${th}`} aria-hidden />}
@@ -733,7 +770,7 @@ export default function Votering({ lang }: VoteringProps) {
     </aside>
 
     {/* ── RIGHT DETAIL PANEL ── */}
-    <section className="vsl-detail">
+    <section className="vsl-detail" ref={detailRef}>
       {!selectedSakId ? (
         <div className="vsl-empty">
           <svg viewBox="0 0 56 56" width="56" height="56" fill="none" aria-hidden>

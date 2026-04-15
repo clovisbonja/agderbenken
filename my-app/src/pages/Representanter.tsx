@@ -40,6 +40,9 @@ type Representative = {
   parti: string
   kommune: string
   fylke: string
+  erVara: boolean
+  varaForNavn: string | null   // navn på den de vikarierer for
+  varaForId: string | null
 }
 
 type BiographyItem = {
@@ -154,6 +157,18 @@ function parseRepresentatives(xmlText: string): Representative[] {
         kommuneRaw || pickFirstNonEmpty(rep, ["hjemkommune", "kommune"]) || fylke
       )
 
+      // Vikariat — vara_representant + fast_vara_for
+      const erVara = getTextByLocalName(rep, "vara_representant") === "true"
+      const varaForNode = Array.from(rep.getElementsByTagName("*")).find(
+        (el) => el.localName === "fast_vara_for"
+      ) ?? null
+      const varaForFornavn = varaForNode ? getTextByLocalName(varaForNode, "fornavn") : ""
+      const varaForEtternavn = varaForNode ? getTextByLocalName(varaForNode, "etternavn") : ""
+      const varaForId = varaForNode ? getTextByLocalName(varaForNode, "id") : null
+      const varaForNavn = varaForFornavn && varaForEtternavn
+        ? `${varaForFornavn} ${varaForEtternavn}`
+        : null
+
       return {
         id: pickFirstNonEmpty(rep, ["id"]),
         fornavn: pickFirstNonEmpty(rep, ["fornavn"]),
@@ -162,6 +177,9 @@ function parseRepresentatives(xmlText: string): Representative[] {
         parti,
         kommune,
         fylke,
+        erVara,
+        varaForNavn,
+        varaForId: varaForId || null,
       }
     })
     // Vi viser bare rader med navn.
@@ -554,7 +572,19 @@ export default function Representanter({ lang }: RepresentanterProps) {
                     </div>
                     <h2 className="rp-detail-name">
                       {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
+                      {selectedRepresentative.erVara && (
+                        <span className="rp-detail-vara-badge">
+                          {lang === "no" ? "Vikariat" : "Substitute"}
+                        </span>
+                      )}
                     </h2>
+                    {selectedRepresentative.erVara && selectedRepresentative.varaForNavn && (
+                      <p className="rp-detail-vara-for">
+                        {lang === "no"
+                          ? `⇄ Vikarierer for ${selectedRepresentative.varaForNavn}`
+                          : `⇄ Substituting for ${selectedRepresentative.varaForNavn}`}
+                      </p>
+                    )}
                     <p className="rp-detail-age">
                       {selectedRepresentative.alder !== null
                         ? `${selectedRepresentative.alder} ${t.years}`
@@ -620,6 +650,11 @@ export default function Representanter({ lang }: RepresentanterProps) {
                         }
                       }}
                     >
+                      {rep.erVara && (
+                        <div className="rp-card-vara-badge">
+                          {lang === "no" ? "VIKAR" : "SUBSTITUTE"}
+                        </div>
+                      )}
                       <div className="rp-card-img-wrap" style={{ "--party-color": partyColor } as React.CSSProperties}>
                         <img
                           className="rp-card-img"
@@ -630,6 +665,11 @@ export default function Representanter({ lang }: RepresentanterProps) {
                       </div>
                       <div className="rp-card-info">
                         <h3 className="rp-card-name">{rep.fornavn} {rep.etternavn}</h3>
+                        {rep.erVara && rep.varaForNavn && (
+                          <p className="rp-card-vara-for">
+                            {lang === "no" ? `Vikarierer for ${rep.varaForNavn}` : `Substituting for ${rep.varaForNavn}`}
+                          </p>
+                        )}
                         <p className="rp-card-age">
                           {rep.alder !== null ? `${rep.alder} ${t.years}` : t.ageUnknown}
                         </p>

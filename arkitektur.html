@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<title>Sørblikket — Systemarkitektur</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: #0d0d10;
+    color: #e8e6e1;
+    min-height: 100vh;
+    padding: 2.5rem;
+  }
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #7a7878;
+    margin-bottom: 2rem;
+  }
+  h1 span { color: #4d91ff; }
+
+  svg { width: 100%; height: auto; display: block; }
+
+  /* ── farge-palette ── */
+  .c-ext    { fill: #141820; stroke: #2a3a5c; }
+  .c-script { fill: #0f1f1a; stroke: #1a4a35; }
+  .c-ai     { fill: #1a1020; stroke: #3a1a5c; }
+  .c-db     { fill: #1a1510; stroke: #4a3010; }
+  .c-fe     { fill: #0f1820; stroke: #1a3060; }
+  .c-user   { fill: #111418; stroke: #2a2a3a; }
+
+  .label-ext    { fill: #4d91ff; }
+  .label-script { fill: #4ade80; }
+  .label-ai     { fill: #c084fc; }
+  .label-db     { fill: #fb923c; }
+  .label-fe     { fill: #38bdf8; }
+  .label-user   { fill: #94a3b8; }
+
+  .arrow { stroke: #3a3a4a; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+  .arrow-ai  { stroke: #7c3aed; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; marker-end: url(#arrowhead-ai); }
+  .arrow-data { stroke: #1d4ed8; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead-data); }
+  .arrow-db  { stroke: #c2410c; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead-db); }
+
+  text { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Sørblikket &nbsp;·&nbsp; <span>Systemarkitektur</span></h1>
+
+<svg viewBox="0 0 1100 820" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3a3a4a"/>
+    </marker>
+    <marker id="arrowhead-ai" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrowhead-data" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrowhead-db" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#c2410c"/>
+    </marker>
+
+    <!-- gradients -->
+    <linearGradient id="gExt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2540"/>
+      <stop offset="100%" stop-color="#0d1520"/>
+    </linearGradient>
+    <linearGradient id="gScript" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f2820"/>
+      <stop offset="100%" stop-color="#071510"/>
+    </linearGradient>
+    <linearGradient id="gAI" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1030"/>
+      <stop offset="100%" stop-color="#110820"/>
+    </linearGradient>
+    <linearGradient id="gDB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#201808"/>
+      <stop offset="100%" stop-color="#130e05"/>
+    </linearGradient>
+    <linearGradient id="gFE" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1830"/>
+      <stop offset="100%" stop-color="#050e1c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LAG 1: DATAKILDER (topp) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- Lag-label -->
+  <text x="20" y="32" font-size="10" fill="#3a3a5a" font-weight="600" letter-spacing=".1em">DATAKILDER</text>
+
+  <!-- Stortinget API -->
+  <rect x="20" y="42" width="195" height="72" rx="8" fill="url(#gExt)" stroke="#2a3a5c" stroke-width="1"/>
+  <text x="35" y="63" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4d91ff">STORTINGET API</text>
+  <text x="35" y="79" font-size="9" fill="#7a7878">data.stortinget.no/eksport</text>
+  <text x="35" y="94" font-size="8.5" fill="#5a6a8a">/saker  /voteringer  /voteringsresultat</text>
+  <text x="35" y="106" font-size="8.5" fill="#5a6a8a">/representanter  /innstillinger</text>
+
+  <!-- Partiprogrammer -->
+  <rect x="228" y="42" width="175" height="72" rx="8" fill="url(#gExt)" stroke="#2a3a5c" stroke-width="1"/>
+  <text x="243" y="63" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4d91ff">PARTIPROGRAMMER</text>
+  <text x="243" y="79" font-size="9" fill="#7a7878">PDF  ·  HTML</text>
+  <text x="243" y="94" font-size="8.5" fill="#5a6a8a">Ap · H · FrP · Sp · SV</text>
+  <text x="243" y="106" font-size="8.5" fill="#5a6a8a">V · KrF · R · MDG</text>
+
+  <!-- Regjeringen.no -->
+  <rect x="416" y="42" width="170" height="72" rx="8" fill="url(#gExt)" stroke="#2a3a5c" stroke-width="1"/>
+  <text x="431" y="63" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4d91ff">REGJERINGEN.NO</text>
+  <text x="431" y="79" font-size="9" fill="#7a7878">Regjeringens plan for Norge</text>
+  <text x="431" y="94" font-size="8.5" fill="#5a6a8a">2025–2029 · PDF/HTML</text>
+  <text x="431" y="106" font-size="8.5" fill="#5a6a8a">Kontekst for Ap/støttepartier</text>
+
+  <!-- Lovdata -->
+  <rect x="599" y="42" width="165" height="72" rx="8" fill="url(#gExt)" stroke="#2a3a5c" stroke-width="1"/>
+  <text x="614" y="63" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4d91ff">LOVDATA API</text>
+  <text x="614" y="79" font-size="9" fill="#5a6a8a">(valgfri — LOVDATA_API_KEY)</text>
+  <text x="614" y="94" font-size="8.5" fill="#5a6a8a">/v1/search · /baseHistory</text>
+  <text x="614" y="106" font-size="8.5" fill="#5a6a8a">base: STV, NL, SF</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LAG 2: SKRIPT (node.js) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <text x="20" y="155" font-size="10" fill="#1a4a35" font-weight="600" letter-spacing=".1em">BACKEND SCRIPTS  (node.js)</text>
+
+  <!-- extract-promises -->
+  <rect x="20" y="165" width="215" height="100" rx="8" fill="url(#gScript)" stroke="#1a4a35" stroke-width="1"/>
+  <text x="35" y="186" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4ade80">extract-promises.mjs</text>
+  <text x="35" y="202" font-size="8.5" fill="#7a7878">Laster ned partiprogrammer</text>
+  <text x="35" y="216" font-size="8.5" fill="#7a7878">Sender til Claude (PDF/HTML)</text>
+  <text x="35" y="230" font-size="8.5" fill="#7a7878">Ekstrakter løfter med kategori</text>
+  <text x="35" y="246" font-size="8" fill="#4a7a5a">max_tokens: 32 000 · streaming</text>
+  <text x="35" y="258" font-size="8" fill="#4a7a5a">Skriver til: valgløfte-tabellen</text>
+
+  <!-- match-promises -->
+  <rect x="250" y="165" width="230" height="100" rx="8" fill="url(#gScript)" stroke="#1a4a35" stroke-width="1"/>
+  <text x="265" y="186" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4ade80">match-promises.mjs</text>
+  <text x="265" y="202" font-size="8.5" fill="#7a7878">Henter løfter fra Supabase</text>
+  <text x="265" y="216" font-size="8.5" fill="#7a7878">Sender alle 1267 saker til Claude</text>
+  <text x="265" y="230" font-size="8.5" fill="#7a7878">Partiroller: regjering / støtte / opp.</text>
+  <text x="265" y="246" font-size="8" fill="#4a7a5a">Lovdata-søk per løfte (valgfri)</text>
+  <text x="265" y="258" font-size="8" fill="#4a7a5a">Skriver til: lofte_sak-tabellen</text>
+
+  <!-- update-status -->
+  <rect x="495" y="165" width="215" height="100" rx="8" fill="url(#gScript)" stroke="#1a4a35" stroke-width="1"/>
+  <text x="510" y="186" font-size="9" font-weight="700" letter-spacing=".08em" fill="#4ade80">update-status.mjs</text>
+  <text x="510" y="202" font-size="8.5" fill="#7a7878">Henter voteringsresultat fra API</text>
+  <text x="510" y="216" font-size="8.5" fill="#7a7878">Teller for/mot per parti</text>
+  <text x="510" y="230" font-size="8.5" fill="#7a7878">fulfilled / broken / partial</text>
+  <text x="510" y="246" font-size="8" fill="#4a7a5a">Ingen AI — ren faktabasert logikk</text>
+  <text x="510" y="258" font-size="8" fill="#4a7a5a">Oppdaterer: lofte_sak.status</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- CLAUDE API (høyre side) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <text x="790" y="155" font-size="10" fill="#3a1a5c" font-weight="600" letter-spacing=".1em">AI</text>
+
+  <rect x="790" y="165" width="290" height="178" rx="8" fill="url(#gAI)" stroke="#3a1a5c" stroke-width="1"/>
+  <text x="808" y="188" font-size="9" font-weight="700" letter-spacing=".08em" fill="#c084fc">CLAUDE API  (Anthropic)</text>
+  <text x="808" y="206" font-size="8.5" fill="#7a7878">Modell: claude-opus-4-6</text>
+
+  <rect x="808" y="214" width="254" height="36" rx="4" fill="rgba(124,58,237,.1)" stroke="rgba(124,58,237,.2)" stroke-width="1"/>
+  <text x="820" y="228" font-size="8.5" fill="#c084fc" font-weight="600">Ekstraksjon</text>
+  <text x="820" y="241" font-size="8" fill="#7a7878">Finn ALLE løfter fra programtekst · max 32k tokens</text>
+
+  <rect x="808" y="256" width="254" height="36" rx="4" fill="rgba(124,58,237,.1)" stroke="rgba(124,58,237,.2)" stroke-width="1"/>
+  <text x="820" y="270" font-size="8.5" fill="#c084fc" font-weight="600">Matching</text>
+  <text x="820" y="283" font-size="8" fill="#7a7878">Match løfte mot 1267 saker · partiroll-kontekst</text>
+
+  <rect x="808" y="298" width="254" height="36" rx="4" fill="rgba(124,58,237,.1)" stroke="rgba(124,58,237,.2)" stroke-width="1"/>
+  <text x="820" y="312" font-size="8.5" fill="#c084fc" font-weight="600">Statuskode</text>
+  <text x="820" y="325" font-size="8" fill="#7a7878">fulfilled · broken · partial · pending</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LAG 3: DATABASE (Supabase) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <text x="20" y="305" font-size="10" fill="#4a3010" font-weight="600" letter-spacing=".1em">DATABASE  (Supabase / PostgreSQL)</text>
+
+  <!-- valgløfte -->
+  <rect x="20" y="315" width="225" height="110" rx="8" fill="url(#gDB)" stroke="#4a3010" stroke-width="1"/>
+  <text x="35" y="336" font-size="9" font-weight="700" letter-spacing=".08em" fill="#fb923c">valgløfte</text>
+  <line x1="35" y1="342" x2="228" y2="342" stroke="#4a3010" stroke-width="1"/>
+  <text x="35" y="356" font-size="8.5" fill="#7a7878">lofte_id     UUID  PK</text>
+  <text x="35" y="370" font-size="8.5" fill="#7a7878">parti        varchar  (Ap, H, FrP …)</text>
+  <text x="35" y="384" font-size="8.5" fill="#7a7878">tekst        text  (≤250 tegn)</text>
+  <text x="35" y="398" font-size="8.5" fill="#7a7878">kategori     varchar  (Klima, Helse …)</text>
+  <text x="35" y="412" font-size="8.5" fill="#7a7878">program_periode  varchar</text>
+
+  <!-- lofte_sak -->
+  <rect x="260" y="315" width="240" height="110" rx="8" fill="url(#gDB)" stroke="#4a3010" stroke-width="1"/>
+  <text x="275" y="336" font-size="9" font-weight="700" letter-spacing=".08em" fill="#fb923c">lofte_sak</text>
+  <line x1="275" y1="342" x2="482" y2="342" stroke="#4a3010" stroke-width="1"/>
+  <text x="275" y="356" font-size="8.5" fill="#7a7878">id          UUID  PK</text>
+  <text x="275" y="370" font-size="8.5" fill="#7a7878">lofte_id    UUID  FK → valgløfte</text>
+  <text x="275" y="384" font-size="8.5" fill="#7a7878">sak_id      varchar  (Stortinget ID)</text>
+  <text x="275" y="398" font-size="8.5" fill="#7a7878">status      fulfilled/broken/partial/pending</text>
+  <text x="275" y="412" font-size="8.5" fill="#7a7878">notat       text  (forklaring)</text>
+
+  <!-- Unik constraint -->
+  <rect x="260" y="430" width="240" height="20" rx="4" fill="rgba(251,146,60,.08)" stroke="rgba(251,146,60,.2)" stroke-width="1"/>
+  <text x="275" y="443" font-size="8" fill="#fb923c">UNIQUE (lofte_id, sak_id)</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LAG 4: FRONTEND (React) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <text x="20" y="490" font-size="10" fill="#1a3060" font-weight="600" letter-spacing=".1em">FRONTEND  (React 19 · TypeScript · Vite)</text>
+
+  <!-- Hooks -->
+  <rect x="20" y="500" width="185" height="130" rx="8" fill="url(#gFE)" stroke="#1a3060" stroke-width="1"/>
+  <text x="35" y="521" font-size="9" font-weight="700" letter-spacing=".08em" fill="#38bdf8">HOOKS</text>
+  <text x="35" y="538" font-size="8.5" fill="#7a7878">useStortingetData</text>
+  <text x="35" y="551" font-size="8" fill="#4a6a8a">  → fetch + cache API (5 min)</text>
+  <text x="35" y="566" font-size="8.5" fill="#7a7878">useNettStatus</text>
+  <text x="35" y="579" font-size="8" fill="#4a6a8a">  → online / offline events</text>
+  <text x="35" y="594" font-size="8.5" fill="#7a7878">useLokalLagring</text>
+  <text x="35" y="607" font-size="8" fill="#4a6a8a">  → localStorage wrapper</text>
+  <text x="35" y="622" font-size="8.5" fill="#7a7878">useNettStatus  ·  useRef</text>
+
+  <!-- Sider -->
+  <rect x="218" y="500" width="195" height="130" rx="8" fill="url(#gFE)" stroke="#1a3060" stroke-width="1"/>
+  <text x="233" y="521" font-size="9" font-weight="700" letter-spacing=".08em" fill="#38bdf8">SIDER</text>
+  <text x="233" y="538" font-size="8.5" fill="#7a7878">/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hjem</text>
+  <text x="233" y="552" font-size="8.5" fill="#7a7878">/statistikk &nbsp;&nbsp;Statistikk</text>
+  <text x="233" y="566" font-size="8.5" fill="#7a7878">/votering &nbsp;&nbsp;&nbsp;Stemmegivning</text>
+  <text x="233" y="580" font-size="8.5" fill="#7a7878">/representanter</text>
+  <text x="233" y="594" font-size="8.5" fill="#7a7878">/parti &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Partiprogrammer</text>
+  <text x="233" y="608" font-size="8.5" fill="#7a7878">/om &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Om Agderbenken</text>
+
+  <!-- Lib / Engine -->
+  <rect x="426" y="500" width="200" height="130" rx="8" fill="url(#gFE)" stroke="#1a3060" stroke-width="1"/>
+  <text x="441" y="521" font-size="9" font-weight="700" letter-spacing=".08em" fill="#38bdf8">LIB &amp; ENGINE</text>
+  <text x="441" y="538" font-size="8.5" fill="#7a7878">categorizationEngine</text>
+  <text x="441" y="551" font-size="8" fill="#4a6a8a">  fuzzyMatch · categorizeSak</text>
+  <text x="441" y="566" font-size="8.5" fill="#7a7878">supabase.ts</text>
+  <text x="441" y="579" font-size="8" fill="#4a6a8a">  createClient (anon key)</text>
+  <text x="441" y="594" font-size="8.5" fill="#7a7878">xml.ts · dato.ts · status.ts</text>
+  <text x="441" y="608" font-size="8" fill="#4a6a8a">  parseXml · hentTekst</text>
+
+  <!-- App shell -->
+  <rect x="639" y="500" width="200" height="130" rx="8" fill="url(#gFE)" stroke="#1a3060" stroke-width="1"/>
+  <text x="654" y="521" font-size="9" font-weight="700" letter-spacing=".08em" fill="#38bdf8">APP SHELL</text>
+  <text x="654" y="538" font-size="8.5" fill="#7a7878">App.tsx &nbsp;(routing)</text>
+  <text x="654" y="552" font-size="8.5" fill="#7a7878">Navbar.tsx &nbsp;(hamburger)</text>
+  <text x="654" y="566" font-size="8.5" fill="#7a7878">Theme: CSS @media + override</text>
+  <text x="654" y="580" font-size="8.5" fill="#7a7878">Lang: navigator.languages</text>
+  <text x="654" y="594" font-size="8.5" fill="#7a7878">Offline: online/offline events</text>
+  <text x="654" y="608" font-size="8.5" fill="#7a7878">Footer &nbsp;(alle sider)</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LAG 5: BRUKER -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <rect x="20" y="660" width="819" height="50" rx="8" fill="#0a0c10" stroke="#1c1c2a" stroke-width="1"/>
+  <text x="420" y="681" font-size="9" font-weight="700" letter-spacing=".08em" fill="#64748b" text-anchor="middle">BRUKER  —  Nettleser</text>
+  <text x="420" y="697" font-size="8.5" fill="#475569" text-anchor="middle">Chrome · Firefox · Safari · Brave  ·  Desktop og mobil  ·  Dark/light mode automatisk  ·  Norsk/engelsk automatisk</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- PILAR / TILKOBLINGER -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- Partiprogrammer → extract-promises -->
+  <line x1="315" y1="114" x2="128" y2="165" class="arrow" stroke="#2a4a3a" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowhead)"/>
+
+  <!-- Stortinget API → match-promises -->
+  <line x1="117" y1="114" x2="315" y2="165" class="arrow" stroke="#2a4a3a" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowhead)"/>
+
+  <!-- Regjeringen → match-promises -->
+  <line x1="500" y1="114" x2="400" y2="165" class="arrow" stroke="#2a4a3a" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowhead)"/>
+
+  <!-- Lovdata → match-promises -->
+  <line x1="650" y1="114" x2="440" y2="165" class="arrow" stroke="#2a4a3a" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowhead)"/>
+
+  <!-- Stortinget API → update-status -->
+  <line x1="117" y1="114" x2="600" y2="165" class="arrow" stroke="#2a4a3a" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowhead)"/>
+
+  <!-- Skript ↔ Claude -->
+  <line x1="235" y1="215" x2="790" y2="250" class="arrow-ai" marker-end="url(#arrowhead-ai)"/>
+  <line x1="480" y1="215" x2="790" y2="270" class="arrow-ai" marker-end="url(#arrowhead-ai)"/>
+
+  <!-- extract → valgløfte -->
+  <line x1="128" y1="265" x2="128" y2="315" class="arrow-db" stroke-width="1.5" marker-end="url(#arrowhead-db)"/>
+
+  <!-- match → lofte_sak -->
+  <line x1="365" y1="265" x2="380" y2="315" class="arrow-db" stroke-width="1.5" marker-end="url(#arrowhead-db)"/>
+
+  <!-- update-status → lofte_sak -->
+  <line x1="602" y1="265" x2="450" y2="315" class="arrow-db" stroke-width="1.5" marker-end="url(#arrowhead-db)"/>
+
+  <!-- DB → Frontend -->
+  <line x1="380" y1="455" x2="380" y2="500" class="arrow-data" stroke-width="1.5" marker-end="url(#arrowhead-data)"/>
+  <text x="388" y="480" font-size="8" fill="#1d4ed8">Supabase JS</text>
+
+  <!-- Stortinget API → Frontend (useStortingetData) -->
+  <line x1="117" y1="114" x2="117" y2="500" class="arrow-data" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowhead-data)"/>
+  <text x="122" y="460" font-size="8" fill="#1d4ed8">live XML</text>
+
+  <!-- Frontend → Bruker -->
+  <line x1="420" y1="630" x2="420" y2="660" class="arrow" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LEGENDE -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <rect x="870" y="490" width="210" height="180" rx="8" fill="#0a0c10" stroke="#1c1c2a" stroke-width="1"/>
+  <text x="886" y="510" font-size="9" font-weight="700" letter-spacing=".08em" fill="#64748b">LEGENDE</text>
+  <line x1="886" y1="516" x2="1062" y2="516" stroke="#1c1c2a" stroke-width="1"/>
+
+  <line x1="886" y1="534" x2="916" y2="534" stroke="#3a3a4a" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="924" y="537" font-size="8.5" fill="#7a7878">Dataflyt</text>
+
+  <line x1="886" y1="554" x2="916" y2="554" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrowhead-ai)"/>
+  <text x="924" y="557" font-size="8.5" fill="#7a7878">Claude API-kall</text>
+
+  <line x1="886" y1="574" x2="916" y2="574" stroke="#1d4ed8" stroke-width="1.5" marker-end="url(#arrowhead-data)"/>
+  <text x="924" y="577" font-size="8.5" fill="#7a7878">API-data (live)</text>
+
+  <line x1="886" y1="594" x2="916" y2="594" stroke="#c2410c" stroke-width="1.5" marker-end="url(#arrowhead-db)"/>
+  <text x="924" y="597" font-size="8.5" fill="#7a7878">Database-skriving</text>
+
+  <rect x="886" y="610" width="10" height="10" rx="2" fill="#0f2820" stroke="#1a4a35"/>
+  <text x="904" y="619" font-size="8.5" fill="#7a7878">Node.js script</text>
+
+  <rect x="886" y="628" width="10" height="10" rx="2" fill="url(#gFE)" stroke="#1a3060"/>
+  <text x="904" y="637" font-size="8.5" fill="#7a7878">React frontend</text>
+
+  <rect x="886" y="646" width="10" height="10" rx="2" fill="url(#gDB)" stroke="#4a3010"/>
+  <text x="904" y="655" font-size="8.5" fill="#7a7878">Supabase / PostgreSQL</text>
+</svg>
+</body>
+</html>

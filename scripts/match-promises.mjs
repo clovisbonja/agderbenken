@@ -262,14 +262,23 @@ async function searchLovdata(loefteTekst, kategori) {
   return resultater
 }
 
-// ── Hent løfter fra Supabase ──────────────────────────────────────────────────
+// ── Hent løfter fra Supabase (paginert — henter alle) ────────────────────────
 async function fetchPromises() {
-  const { data, error } = await supabase
-    .from("valgløfte")
-    .select("lofte_id, parti, tekst, kategori")
-  if (error) throw new Error("Supabase feil: " + error.message)
-  console.log(`  → ${data.length} løfter hentet fra Supabase`)
-  return data
+  const alle = []
+  const pageSize = 1000
+  let offset = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from("valgløfte")
+      .select("lofte_id, parti, tekst, kategori")
+      .range(offset, offset + pageSize - 1)
+    if (error) throw new Error("Supabase feil: " + error.message)
+    alle.push(...data)
+    if (data.length < pageSize) break
+    offset += pageSize
+  }
+  console.log(`  → ${alle.length} løfter hentet fra Supabase`)
+  return alle
 }
 
 // ── Hent eksisterende koblinger ───────────────────────────────────────────────

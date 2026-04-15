@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "agderbenken",
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["./my-app/node_modules/.bin/vite", "--config", "./my-app/vite.config.ts"],
+      "port": 5173
+    }
+  ]
+}

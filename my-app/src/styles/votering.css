@@ -2212,3 +2212,49 @@ input.vsl-search::placeholder {
 .vsl-sidebar {
   width: 420px !important;
 }
+
+/* ── Votering status filter ──────────────────────────────────────────── */
+.vsl-status-filters {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px 4px;
+  flex-wrap: wrap;
+}
+.vsl-status-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+  white-space: nowrap;
+}
+.vsl-status-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.vsl-status-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.vsl-status-btn--active .vsl-status-count {
+  background: rgba(255,255,255,.25);
+  color: #fff;
+}
+.vsl-status-count {
+  background: var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}

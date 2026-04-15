@@ -18,7 +18,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   categorizeCases,
   getAllThemes,
@@ -654,6 +654,7 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
   const [themePanel, setThemePanel] = useState<ThemeKey | null>(null)
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null)
   const [selectedCaseDetail, setSelectedCaseDetail] = useState<CaseDetail | null>(null)
+  const detailRef = useRef<HTMLElement>(null)
   const [loadingCaseDetail, setLoadingCaseDetail] = useState(false)
 
   const [showHowTo, setShowHowTo] = useState<boolean>(() => {
@@ -974,12 +975,10 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
               if (e.key === "Enter" || e.key === " ") { setStripTheme(card.key); setThemePanel(card.key); }
             }}
           >
-            <p>
-              <span className={`home-theme-symbol theme-${card.key}`}>
-                <ThemeSymbol theme={card.key} />
-              </span>{" "}
-              {card.name}
-            </p>
+            <span className={`home-theme-symbol theme-${card.key}`}>
+              <ThemeSymbol theme={card.key} />
+            </span>
+            <p>{card.name}</p>
             <small className="home-theme-strip-note">{THEME_BLURBS[lang][card.key]}</small>
           </article>
         ))}
@@ -1129,7 +1128,12 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
                   type="button"
                   key={item.id}
                   className={`home-case-btn ${selectedCase?.id === item.id ? "active" : ""}`}
-                  onClick={() => setSelectedCase(item)}
+                  onClick={() => {
+                    setSelectedCase(item)
+                    setTimeout(() => {
+                      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                    }, 50)
+                  }}
                 >
                   <div className={`home-case-btn-icon ${icon.cls}`}>
                     {icon.svg}
@@ -1152,7 +1156,7 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
       </section>
 
       <p className="home-section-note">{t("selectedCaseHelp")}</p>
-      <section className="home-grid detail-only home-dashboard-block">
+      <section className="home-grid detail-only home-dashboard-block" ref={detailRef}>
         <article className="home-detail">
           {selectedCase ? (
             <>

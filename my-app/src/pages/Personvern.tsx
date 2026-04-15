@@ -17,8 +17,8 @@ type Lang = "no" | "en"
 
 const BLOCKED_CATEGORIES = [
   {
-    title_no: "🚫 Personopplysninger",
-    title_en: "🚫 Personal Information",
+    title_no: "Personopplysninger",
+    title_en: "Personal Information",
     items_no: [
       "Fødselsnummer (11 siffer)",
       "Personnummer/D-nummer",
@@ -35,8 +35,8 @@ const BLOCKED_CATEGORIES = [
     ],
   },
   {
-    title_no: "🚫 Helseopplysninger",
-    title_en: "🚫 Health Information",
+    title_no: "Helseopplysninger",
+    title_en: "Health Information",
     items_no: [
       "Pasientinformasjon",
       "Diagnoser eller sykdomsbeskrivelser",
@@ -53,8 +53,8 @@ const BLOCKED_CATEGORIES = [
     ],
   },
   {
-    title_no: "🚫 Finansiell Informasjon",
-    title_en: "🚫 Financial Information",
+    title_no: "Finansiell Informasjon",
+    title_en: "Financial Information",
     items_no: [
       "Bankkonton eller kontonummer",
       "Kredittkortnummer",
@@ -71,8 +71,8 @@ const BLOCKED_CATEGORIES = [
     ],
   },
   {
-    title_no: "🚫 Religiøs og Politisk Informasjon",
-    title_en: "🚫 Religious and Political Information",
+    title_no: "Religiøs og Politisk Informasjon",
+    title_en: "Religious and Political Information",
     items_no: [
       "Religiøs overbevisning eller tro",
       "Politiske synspunkter om privatpersoner",
@@ -87,8 +87,8 @@ const BLOCKED_CATEGORIES = [
     ],
   },
   {
-    title_no: "🚫 Familje- og Arbeidsinformasjon",
-    title_en: "🚫 Family and Employment Information",
+    title_no: "Familie- og Arbeidsinformasjon",
+    title_en: "Family and Employment Information",
     items_no: [
       "Familjeforhold eller familiestatus",
       "Barn- eller familieinformasjon",
@@ -103,8 +103,8 @@ const BLOCKED_CATEGORIES = [
     ],
   },
   {
-    title_no: "🚫 Konfidensiell Informasjon",
-    title_en: "🚫 Confidential Information",
+    title_no: "Konfidensiell Informasjon",
+    title_en: "Confidential Information",
     items_no: [
       "Hemmeligheter eller fortrolig informasjon",
       "Interninformasjon fra organisasjoner",
@@ -144,96 +144,96 @@ export default function Personvern({ lang }: { lang: Lang }) {
     lang === "no"
       ? {
           title: "Personvernserklæring",
-          subtitle: "Sørblikket tar ditt privatliv alvorlig",
+          subtitle: "Dokumentasjon av vår personvernpolicy og databehandling",
           lastUpdated: "Sist oppdatert: 15. april 2026",
-          shortIntro: "Sørblikket bruker offentlige data fra Stortingets API",
-          tabDo: "Vi Gjør",
-          tabDont: "Vi Gjør IKKE",
-          tabProtection: "Beskyttelse",
-          tabRights: "Dine Rettigheter",
-          doHeader: "✅ Hva Vi Gjør",
-          dontHeader: "❌ Hva Vi IKKE Gjør",
-          protectionHeader: "🛡️ Hvordan Vi Beskytter Deg",
-          blockedHeader: "❌ Informasjon Vi IKKE Godtar",
-          blockedSubheader: "Chatboten vil automatisk blokkere søk som inneholder:",
-          allowedHeader: "✅ Lovlige Søk",
-          allowedSubheader: "Du KAN søke på:",
-          contactHeader: "📧 Kontakt",
-          rightsHeader: "Dine Rettigheter",
+          shortIntro: "Sørblikket er en journalistisk informasjonstjeneste som behandler offentlige data fra Stortingets åpne API-grensesnitt i samsvar med norsk personopplysningslov og EU-forordning 2016/679 (GDPR).",
+          tabDo: "Vår praksis",
+          tabDont: "Ikke akseptert",
+          tabProtection: "Sikkerhet",
+          tabRights: "Dine rettigheter",
+          doHeader: "Vår praksis",
+          dontHeader: "Hva vi ikke gjør",
+          protectionHeader: "Sikkerhetstiltak og beskyttelse",
+          blockedHeader: "Informasjon som ikke godtas",
+          blockedSubheader: "Systemet validerer og blokkerer automatisk forespørsler som inneholder følgende kategorier:",
+          allowedHeader: "Tillatte forespørsler",
+          allowedSubheader: "Du kan søke etter:",
+          contactHeader: "Kontakt",
+          rightsHeader: "Dine juridiske rettigheter",
           promises: [
-            "Bruker offentlige data fra Stortingets API",
-            "Lagrer IKKE personlig informasjon fra deg",
-            "Bruker IKKE cookies for sporing",
-            "Blokker automatisk sensitive søk",
-            "Respekterer ditt privatliv helt",
+            "Behandler utelukkende offentlige data fra Stortingets API",
+            "Lagrer ikke personlig informasjon om brukere",
+            "Bruker ikke sporings- eller markeringskjeks for overvåking",
+            "Implementerer automatisk validering av alle forespørsler",
+            "Respekterer personvern i samsvar med GDPR",
           ],
           doesNot: [
-            "Lagre IP-adresser dine",
-            "Bruke tracking-cookies",
-            "Lagre dine søk eller spørsmål",
-            "Dele informasjon med tredjeparter",
-            "Bruke analytics eller personprofilering",
+            "Registrerer eller lagrer IP-adresser",
+            "Bruker sporings- eller markeringskjeks",
+            "Lagrer dine søk eller spørsmål",
+            "Deler informasjon med tredjeparter",
+            "Bruker analytikk eller personprofilering",
           ],
           protectionMeasures: [
-            "Automatisk GDPR-validering av alle søk",
-            "SSL/TLS-kryptering for all datatrafrikk",
-            "Sikker Supabase-database",
-            "Streng input-validering",
-            "Regelmessige sikkerhetsopdateringer",
+            "Automatisk GDPR-basert validering av alle forespørsler",
+            "SSL/TLS-kryptering for all datatransport",
+            "Sikker database med tilgangskontroll",
+            "Streng input-validering og sanitering",
+            "Regelmessige sikkerhetsopdateringer og revisjon",
           ],
           rights: [
-            "Få tilgang til dine data (hvis noen finnes)",
-            "Slette dine data",
-            "Korrigere feil opplysninger",
-            "Motsette deg prosessering",
-            "Overføre dine data",
+            "Innsynsrett i behandlede personopplysninger",
+            "Rett til sletting (retten til å bli glemt)",
+            "Rett til retting av uriktige opplysninger",
+            "Rett til innsigelse mot behandling",
+            "Rett til dataportabilitet",
           ],
         }
       : {
           title: "Privacy Policy",
-          subtitle: "Sørblikket takes your privacy seriously",
+          subtitle: "Documentation of our privacy policy and data processing practices",
           lastUpdated: "Last updated: April 15, 2026",
-          shortIntro: "Sørblikket uses public data from Stortinget's API",
-          tabDo: "What We Do",
-          tabDont: "What We Don't",
-          tabProtection: "Protection",
+          shortIntro: "Sørblikket is a journalistic information service that processes public data from the Storting's open API in accordance with Norwegian personal data protection legislation and EU Regulation 2016/679 (GDPR).",
+          tabDo: "Our Practices",
+          tabDont: "Not Accepted",
+          tabProtection: "Security",
           tabRights: "Your Rights",
-          doHeader: "✅ What We Do",
-          dontHeader: "❌ What We Don't Do",
-          protectionHeader: "🛡️ How We Protect You",
-          blockedHeader: "❌ Information We Don't Accept",
-          blockedSubheader: "The chatbot will automatically block searches containing:",
-          allowedHeader: "✅ Allowed Searches",
-          allowedSubheader: "You CAN search for:",
-          contactHeader: "📧 Contact",
-          rightsHeader: "Your Rights",
+          doHeader: "Our Practices",
+          dontHeader: "What we don't do",
+          protectionHeader: "Security measures and protection",
+          blockedHeader: "Information that is not accepted",
+          blockedSubheader: "The system automatically validates and blocks requests containing the following categories:",
+          allowedHeader: "Permitted Requests",
+          allowedSubheader: "You may search for:",
+          contactHeader: "Contact",
+          rightsHeader: "Your Legal Rights",
           promises: [
-            "Use public data from Stortinget API",
-            "Do NOT store personal information from you",
-            "Do NOT use tracking cookies",
-            "Automatically block sensitive searches",
-            "Fully respect your privacy",
+            "Process only public data from the Storting API",
+            "Do not store personal information about users",
+            "Do not use tracking or marking cookies for monitoring",
+            "Implement automatic validation of all requests",
+            "Respect privacy in accordance with GDPR",
           ],
           doesNot: [
-            "Store your IP addresses",
-            "Use tracking cookies",
+            "Record or store IP addresses",
+            "Use tracking or marking cookies",
             "Store your searches or questions",
             "Share information with third parties",
             "Use analytics or personal profiling",
           ],
           protectionMeasures: [
-            "Automatic GDPR validation of all searches",
-            "SSL/TLS encryption for all data traffic",
-            "Secure Supabase database",
-            "Strict input validation",
-            "Regular security updates",
+            "Automatic GDPR-based validation of all requests",
+            "SSL/TLS encryption for all data transport",
+            "Secure database with access controls",
+            "Strict input validation and sanitization",
+            "Regular security updates and audits",
           ],
           rights: [
-            "Get access to your data (if any exists)",
-            "Delete your data",
-            "Correct incorrect information",
-            "Object to processing",
-            "Transfer your data",
+            "Right of access to processed personal data",
+            "Right to erasure (right to be forgotten)",
+            "Right to rectification of incorrect information",
+            "Right to object to processing",
+            "Right to data portability",
           ],
         }
 
@@ -405,7 +405,7 @@ export default function Personvern({ lang }: { lang: Lang }) {
             </ul>
           </section>
 
-          {/* Contact */}
+          {/* Contact and Complaints */}
           <section className="pv-section pv-contact">
             <h2>{t.contactHeader}</h2>
             <div className="pv-contact-grid">
@@ -413,74 +413,49 @@ export default function Personvern({ lang }: { lang: Lang }) {
                 <h3>Sørblikket</h3>
                 <p>
                   {lang === "no"
-                    ? "Spørsmål om personvern?"
-                    : "Questions about privacy?"}
+                    ? "For spørsmål og henvendelser vedrørende personvern:"
+                    : "For questions and inquiries regarding privacy:"}
                 </p>
                 <ul className="pv-contact-list">
-                  <li>📧 personvern@sørblikket.no</li>
-                  <li>🌐 www.sørblikket.no</li>
+                  <li>personvern@sørblikket.no</li>
+                  <li>www.sørblikket.no</li>
                 </ul>
               </div>
 
               <div className="pv-contact-card">
                 <h3>
                   {lang === "no"
-                    ? "Datatilsynet (Klageklage)"
-                    : "Datatilsynet (Complaints)"}
+                    ? "Datatilsynet"
+                    : "The Norwegian Data Protection Authority"}
                 </h3>
                 <p>
                   {lang === "no"
-                    ? "Bekymringer om personvernbehandlingen?"
-                    : "Concerns about privacy handling?"}
+                    ? "Klager og henvendelser om personvernbehandlingen:"
+                    : "For complaints and concerns regarding privacy handling:"}
                 </p>
                 <ul className="pv-contact-list">
-                  <li>🌐 www.datatilsynet.no</li>
-                  <li>📧 post@datatilsynet.no</li>
-                  <li>📞 +47 21 50 18 50</li>
+                  <li>www.datatilsynet.no</li>
+                  <li>post@datatilsynet.no</li>
+                  <li>+47 21 50 18 50</li>
                 </ul>
               </div>
             </div>
           </section>
 
-          {/* Footer Promise */}
-          <section className="pv-section pv-footer-promise">
-            <div className="pv-promise-box">
-              <h2>
-                {lang === "no"
-                  ? "🤝 Vårt Løfte til Deg"
-                  : "🤝 Our Promise to You"}
-              </h2>
-              <div className="pv-promise-items">
-                <div className="pv-promise-item">
-                  <span>✓</span>
-                  {lang === "no"
-                    ? "Ingen sporing av deg"
-                    : "No tracking of you"}
-                </div>
-                <div className="pv-promise-item">
-                  <span>✓</span>
-                  {lang === "no" ? "Ingen salg av data" : "No sale of data"}
-                </div>
-                <div className="pv-promise-item">
-                  <span>✓</span>
-                  {lang === "no"
-                    ? "Ingen deling med tredjeparter"
-                    : "No sharing with third parties"}
-                </div>
-                <div className="pv-promise-item">
-                  <span>✓</span>
-                  {lang === "no"
-                    ? "Maksimal sikkerhet og transparans"
-                    : "Maximum security and transparency"}
-                </div>
-                <div className="pv-promise-item">
-                  <span>✓</span>
-                  {lang === "no"
-                    ? "Full respekt for GDPR"
-                    : "Full respect for GDPR"}
-                </div>
-              </div>
-            </div>
+          {/* Legal Basis Section */}
+          <section className="pv-section pv-legal">
+            <h2>{lang === "no" ? "Juridisk grunnlag" : "Legal Basis"}</h2>
+            <p>
+              {lang === "no"
+                ? "Behandlingen av data utføres i henhold til følgende juridiske rammer:"
+                : "Data processing is carried out in accordance with the following legal frameworks:"}
+            </p>
+            <ul className="pv-legal-list">
+              <li>{lang === "no" ? "EU-forordning 2016/679 (GDPR)" : "EU Regulation 2016/679 (GDPR)"}</li>
+              <li>{lang === "no" ? "Norsk personopplysningsloven (LOV-2018-06-15-38)" : "Norwegian Personal Data Protection Act"}</li>
+              <li>{lang === "no" ? "Offentleglova (LOV-2006-05-19-16)" : "Freedom of Information Act"}</li>
+              <li>{lang === "no" ? "Norsk presseetikks kodeks" : "Norwegian Press Ethics Code"}</li>
+            </ul>
           </section>
         </article>
       </main>

@@ -21,10 +21,11 @@
 }
 
 .pv-intro {
-  background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
-  color: white;
+  background: #f5f5f5;
+  border-left: 4px solid #0f3460;
+  color: #333;
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 4px;
   margin-bottom: 2rem;
 }
 
@@ -395,14 +396,16 @@
 
 .pv-contact-card h3 {
   color: #0f3460;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .pv-contact-card p {
   color: #666;
   font-size: 0.95rem;
   margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .pv-contact-list {
@@ -418,56 +421,46 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Footer Promise
+   Footer Section
    ────────────────────────────────────────────────────────────────────────── */
 
 .pv-footer-promise {
   margin-bottom: 0;
 }
 
-.pv-promise-box {
-  background: linear-gradient(135deg, #0f3460 0%, #1a5490 100%);
-  color: white;
-  padding: 3rem 2rem;
-  border-radius: 12px;
-  text-align: center;
+.pv-legal {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
 }
 
-.pv-promise-box h2 {
-  color: white;
-  font-size: 1.75rem;
-  margin-bottom: 2rem;
-  justify-content: center;
+.pv-legal h2 {
+  color: #0f3460;
+  margin-bottom: 1rem;
 }
 
-.pv-promise-items {
+.pv-legal p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.pv-legal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  max-width: 1000px;
-  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
-.pv-promise-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 1rem;
+.pv-legal-list li {
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-}
-
-.pv-promise-item span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: #27ae60;
-  border-radius: 50%;
-  flex-shrink: 0;
-  font-weight: bold;
+  background: #f9f9f9;
+  border-left: 3px solid #0f3460;
+  color: #333;
+  font-size: 0.95rem;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────

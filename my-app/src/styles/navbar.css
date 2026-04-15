@@ -235,8 +235,8 @@
 
 .mobil-lenke {
   display: block;
-  padding: 13px 20px;
-  font-size: 15px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--muted);
   text-decoration: none;
@@ -257,8 +257,8 @@
 
 .mobil-lenke-personvern {
   display: block;
-  padding: 13px 20px;
-  font-size: 15px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--muted);
   text-decoration: none;
@@ -278,23 +278,23 @@
 /* ── Innstillingsseksjoner (språk + tema) ────────────────────────────────── */
 
 .mobil-theme-seksjon {
-  padding: 12px 20px 10px;
+  padding: 10px 20px 8px;
   border-top: 1px solid var(--line);
 }
 
 .mobil-theme-label {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .mobil-theme-rad {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .mobil-theme-btn {
@@ -302,13 +302,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 7px 4px;
+  gap: 4px;
+  padding: 6px 3px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   font-family: 'Inter', sans-serif;

@@ -168,11 +168,10 @@ export default function Personvern({ lang }: { lang: Lang }) {
             "Respekterer personvern i samsvar med GDPR",
           ],
           doesNot: [
-            "Registrerer eller lagrer IP-adresser",
+            "Lagrer personlig informasjon",
             "Bruker sporings- eller markeringskjeks",
-            "Lagrer dine søk eller spørsmål",
-            "Deler informasjon med tredjeparter",
-            "Bruker analytikk eller personprofilering",
+            "Deler data med tredjeparter",
+            "Bruker analytikk eller profiler brukere",
           ],
           protectionMeasures: [
             "Automatisk GDPR-basert validering av alle forespørsler",
@@ -215,11 +214,10 @@ export default function Personvern({ lang }: { lang: Lang }) {
             "Respect privacy in accordance with GDPR",
           ],
           doesNot: [
-            "Record or store IP addresses",
+            "Store personal information",
             "Use tracking or marking cookies",
-            "Store your searches or questions",
-            "Share information with third parties",
-            "Use analytics or personal profiling",
+            "Share data with third parties",
+            "Use analytics or profile users",
           ],
           protectionMeasures: [
             "Automatic GDPR-based validation of all requests",

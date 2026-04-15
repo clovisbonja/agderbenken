@@ -87,11 +87,10 @@ Du kan søke etter:
 - Offentlige representantopplysninger
 
 ### Data som ikke behandles
-- Vi lagrer ikke IP-adresser dine
+- Vi lagrer ikke personlig informasjon
 - Vi bruker ikke sporings- eller markeringskjeks
-- Vi lagrer ikke dine søk eller forespørsler
-- Vi deler ikke informasjon med tredjeparter
-- Vi bruker ikke analytikk eller personprofilering
+- Vi deler ikke data med tredjeparter
+- Vi bruker ikke analytikk eller profiler brukere
 
 ---
 

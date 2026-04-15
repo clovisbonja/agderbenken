@@ -36,6 +36,7 @@ const LENKER = [
   { to: "/representanter", labelNo: "Representanter",  labelEn: "Representatives" },
   { to: "/parti",          labelNo: "Partiprogrammer", labelEn: "Party Programs" },
   { to: "/om",             labelNo: "Om Agderbenken",  labelEn: "About" },
+  { to: "/personvern",     labelNo: "Personvern",      labelEn: "Privacy" },
 ]
 
 // ── SVG-ikoner ────────────────────────────────────────────────────────────────

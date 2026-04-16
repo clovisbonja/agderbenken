@@ -331,9 +331,11 @@
 }
 
 .pv-measures-list li::before {
-  content: "🔐";
+  content: "✓";
   position: absolute;
   left: 0;
+  color: #27ae60;
+  font-weight: bold;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────

@@ -2258,3 +2258,175 @@ input.vsl-search::placeholder {
   min-width: 20px;
   text-align: center;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   REDESIGN — Friskere stemmegivningsside
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Full viewport fra navbar-kant (ingen hero over splitten) ── */
+.vsl-page {
+  height: calc(100vh - 56px) !important;
+}
+
+/* ── Sidebar-tittel vises igjen (hero fjernet) ── */
+.vsl-page-title {
+  display: block !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  margin: 0 0 2px !important;
+  letter-spacing: -.02em !important;
+  line-height: 1.1 !important;
+}
+.vsl-page-sub {
+  display: block !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: rgba(255,255,255,.42) !important;
+  margin: 0 0 10px !important;
+}
+
+/* ── Resultatkort — vedtak øverst ── */
+.vsl-result-hero {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 26px 0;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.vsl-result-hero-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+}
+
+.vsl-result-hero-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.vsl-result-hero-verdict {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin: 0;
+}
+
+.vsl-result-hero-counts {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+}
+
+.vsl-result-hero-sep {
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.vsl-result-hero-for strong  { color: #16a34a; font-size: 22px; font-weight: 800; font-family: 'Playfair Display', Georgia, serif; }
+.vsl-result-hero-mot strong  { color: #dc2626; font-size: 22px; font-weight: 800; font-family: 'Playfair Display', Georgia, serif; }
+.vsl-result-hero-absent strong { color: var(--muted); font-size: 22px; font-weight: 800; font-family: 'Playfair Display', Georgia, serif; }
+
+.vsl-result-hero-for small,
+.vsl-result-hero-mot small,
+.vsl-result-hero-absent small {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Proportional bar — spans full card width */
+.vsl-result-hero-bar {
+  display: flex;
+  height: 8px;
+  gap: 2px;
+  margin: 0 -26px;
+}
+
+.vsl-result-hero-seg { height: 100%; transition: flex .5s ease; }
+.vsl-seg-for     { background: #16a34a; }
+.vsl-seg-mot     { background: #dc2626; }
+.vsl-seg-absent  { background: #9ca3af; }
+
+.vsl-result-hero-unanimous {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0;
+  padding-bottom: 20px;
+}
+
+/* ── Rep-kort: vis partinavn ── */
+.vsl-rep-parti {
+  display: block !important;
+  font-size: 11px !important;
+  color: var(--muted) !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+}
+
+/* ── Bedre visuell vekting av artikkeltittel ── */
+.vsl-article-title {
+  font-size: 24px !important;
+  line-height: 1.3 !important;
+}
+
+/* ── Tema-secondary: visuelt sekundær (kontekst) ── */
+.vsl-tema-secondary {
+  opacity: .8 !important;
+}
+.vsl-tema-secondary .vsl-section-heading {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+.vsl-tema-secondary .vsl-section-label {
+  font-size: 9px !important;
+}
+
+/* ── Mobil: stabel-layout ── */
+@media (max-width: 700px) {
+  .vsl-page {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .vsl-sidebar {
+    width: 100% !important;
+    max-height: 42vh !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+  .vsl-detail {
+    overflow-y: auto !important;
+    flex: 1 !important;
+  }
+  .vsl-article {
+    padding: 24px 20px 60px !important;
+  }
+  .vsl-result-hero-verdict {
+    font-size: 26px !important;
+  }
+  .vsl-result-hero-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+}

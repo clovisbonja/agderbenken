@@ -646,16 +646,6 @@ export default function Votering({ lang }: VoteringProps) {
 
 
   return (
-    <>
-    <section className="ed-page-hero">
-      <div className="ed-page-hero-content">
-        <p className="ed-page-hero-kicker">Stortinget · Agder</p>
-        <h1 className="ed-page-hero-heading">{lang === "no" ? "Stemmegivning" : "Voting"}</h1>
-        <p className="ed-page-hero-lead">{lang === "no" ? "Se hva Stortinget stemte over og hvordan Agderbenkens representanter stemte i hver sak." : "See what Parliament voted on and how Agder's representatives voted in each case."}</p>
-      </div>
-      <div className="ed-page-hero-panel" aria-hidden />
-    </section>
-
     <div className="vsl-page">
 
     {/* ── LEFT SIDEBAR ── */}
@@ -754,7 +744,6 @@ export default function Votering({ lang }: VoteringProps) {
                   }}
                 >
                   <div className="vsl-item-main">
-                    {th && <span className={`vsl-item-dot vsl-dot-${th}`} aria-hidden />}
                     <span className="vsl-item-title">{sak.kortTittel || sak.tittel}</span>
                   </div>
                   <span className="vsl-item-meta">
@@ -850,7 +839,121 @@ export default function Votering({ lang }: VoteringProps) {
             return (
               <div className="vsl-content">
 
-                {/* ① DET BLE STEMT OVER */}
+                {/* ① STORTINGETS VEDTAK */}
+                <div className="vsl-result-hero">
+                  <div className="vsl-result-hero-top">
+                    <div>
+                      <p className="vsl-result-hero-label">{lang === "no" ? "Stortingets vedtak" : "Parliament's decision"}</p>
+                      <p className="vsl-result-hero-verdict" style={{ color: vedtakColor(selectedVotering) }}>
+                        {vedtakLabel(selectedVotering)}
+                      </p>
+                    </div>
+                    {selectedVotering.personligVotering && (
+                      <div className="vsl-result-hero-counts">
+                        <span className="vsl-result-hero-for">
+                          <strong>{selectedVotering.antallFor}</strong>
+                          <small>{lang === "no" ? " for" : " for"}</small>
+                        </span>
+                        <span className="vsl-result-hero-sep">·</span>
+                        <span className="vsl-result-hero-mot">
+                          <strong>{selectedVotering.antallMot}</strong>
+                          <small>{lang === "no" ? " mot" : " against"}</small>
+                        </span>
+                        {selectedVotering.antallIkkeTilStede > 0 && (
+                          <>
+                            <span className="vsl-result-hero-sep">·</span>
+                            <span className="vsl-result-hero-absent">
+                              <strong>{selectedVotering.antallIkkeTilStede}</strong>
+                              <small>{lang === "no" ? " ikke til stede" : " absent"}</small>
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {selectedVotering.personligVotering && total > 0 && (
+                    <div className="vsl-result-hero-bar">
+                      {[
+                        { n: selectedVotering.antallFor, cls: "vsl-seg-for" },
+                        { n: selectedVotering.antallMot, cls: "vsl-seg-mot" },
+                        { n: selectedVotering.antallIkkeTilStede, cls: "vsl-seg-absent" },
+                      ].filter(b => b.n > 0).map((b, i) => (
+                        <div key={i} className={`vsl-result-hero-seg ${b.cls}`} style={{ flex: b.n }} />
+                      ))}
+                    </div>
+                  )}
+                  {!selectedVotering.personligVotering && (
+                    <p className="vsl-result-hero-unanimous">
+                      {lang === "no" ? "Enstemmig — ingen individuelle stemmer registrert." : "Unanimous — no individual votes recorded."}
+                    </p>
+                  )}
+                </div>
+
+                {/* ② AGDERBENKENS STEMMER */}
+                <div className="vsl-agder-focus">
+                  <p className="vsl-section-label">{lang === "no" ? "Agderbenkens stemmer" : "Agder votes"}</p>
+
+                  {loadingVoting && (
+                    <div className="vsl-detail-status">
+                      <span className="vsl-spinner" aria-hidden />
+                      <span>{t.loadingVoting}</span>
+                    </div>
+                  )}
+
+                  {repVoter.length > 0 && (
+                    <>
+                      <div className="vsl-agder-scoreboard">
+                        <div className="vsl-agder-score vsl-agder-score-for">
+                          <span className="vsl-agder-score-num">{agderSummary.forCount}</span>
+                          <span className="vsl-agder-score-lbl">{lang === "no" ? "stemte for" : "voted for"}</span>
+                        </div>
+                        <div className="vsl-agder-score-sep">·</div>
+                        <div className="vsl-agder-score vsl-agder-score-mot">
+                          <span className="vsl-agder-score-num">{agderSummary.motCount}</span>
+                          <span className="vsl-agder-score-lbl">{lang === "no" ? "stemte mot" : "voted against"}</span>
+                        </div>
+                        {agderSummary.absentCount > 0 && (
+                          <>
+                            <div className="vsl-agder-score-sep">·</div>
+                            <div className="vsl-agder-score vsl-agder-score-absent">
+                              <span className="vsl-agder-score-num">{agderSummary.absentCount}</span>
+                              <span className="vsl-agder-score-lbl">{lang === "no" ? "ikke til stede" : "absent"}</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="vsl-rep-grid">
+                        {repVoter.map((rv) => (
+                          <div key={rv.representantId} className={`vsl-rep-card vsl-rep-${rv.vote}`}>
+                            <span className="vsl-rep-stripe" style={{ background: getPartyColor(rv.parti) }} />
+                            <div className="vsl-rep-info">
+                              <span className="vsl-rep-name">{rv.fornavn} {rv.etternavn}</span>
+                              <span className="vsl-rep-parti">{rv.parti}</span>
+                            </div>
+                            <div className="vsl-rep-icon"><VoteIcon vote={rv.vote} /></div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="vsl-rep-legend">
+                        <span className="vsl-rep-legend-item"><VoteIcon vote="for" />{lang === "no" ? "Stemte for" : "Voted for"}</span>
+                        <span className="vsl-rep-legend-item"><VoteIcon vote="mot" />{lang === "no" ? "Stemte mot" : "Voted against"}</span>
+                        <span className="vsl-rep-legend-item"><VoteIcon vote="ikke_tilstede" />{lang === "no" ? "Ikke til stede" : "Absent"}</span>
+                      </div>
+                    </>
+                  )}
+
+                  {repVoter.length === 0 && !loadingVoting && (
+                    <p className="vsl-agder-no-data">
+                      {lang === "no"
+                        ? "Ingen individuelle stemmer registrert for denne voteringen."
+                        : "No individual votes recorded for this vote."}
+                    </p>
+                  )}
+                </div>
+
+                {/* ③ DET BLE STEMT OVER */}
                 <div className="vsl-tema-secondary">
                   <p className="vsl-section-label">{lang === "no" ? "Det ble stemt over" : "They voted on"}</p>
                   <h3 className="vsl-section-heading">
@@ -920,105 +1023,6 @@ export default function Votering({ lang }: VoteringProps) {
                   )}
                 </div>
 
-                {/* ② AGDERBENKENS STEMMER */}
-                <div className="vsl-agder-focus">
-                  <p className="vsl-section-label">{lang === "no" ? "Agderbenkens stemmer" : "Agder votes"}</p>
-
-                  {loadingVoting && (
-                    <div className="vsl-detail-status">
-                      <span className="vsl-spinner" aria-hidden />
-                      <span>{t.loadingVoting}</span>
-                    </div>
-                  )}
-
-                  {repVoter.length > 0 && (
-                    <>
-                      <div className="vsl-agder-scoreboard">
-                        <div className="vsl-agder-score vsl-agder-score-for">
-                          <span className="vsl-agder-score-num">{agderSummary.forCount}</span>
-                          <span className="vsl-agder-score-lbl">{lang === "no" ? "stemte for" : "voted for"}</span>
-                        </div>
-                        <div className="vsl-agder-score-sep">·</div>
-                        <div className="vsl-agder-score vsl-agder-score-mot">
-                          <span className="vsl-agder-score-num">{agderSummary.motCount}</span>
-                          <span className="vsl-agder-score-lbl">{lang === "no" ? "stemte mot" : "voted against"}</span>
-                        </div>
-                        {agderSummary.absentCount > 0 && (
-                          <>
-                            <div className="vsl-agder-score-sep">·</div>
-                            <div className="vsl-agder-score vsl-agder-score-absent">
-                              <span className="vsl-agder-score-num">{agderSummary.absentCount}</span>
-                              <span className="vsl-agder-score-lbl">{lang === "no" ? "ikke til stede" : "absent"}</span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="vsl-rep-grid">
-                        {repVoter.map((rv) => (
-                          <div key={rv.representantId} className={`vsl-rep-card vsl-rep-${rv.vote}`}>
-                            <span className="vsl-rep-stripe" style={{ background: getPartyColor(rv.parti) }} />
-                            <div className="vsl-rep-info">
-                              <span className="vsl-rep-name">{rv.fornavn} {rv.etternavn}</span>
-                              <span className="vsl-rep-parti">{rv.parti}</span>
-                            </div>
-                            <div className="vsl-rep-icon"><VoteIcon vote={rv.vote} /></div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="vsl-rep-legend">
-                        <span className="vsl-rep-legend-item"><VoteIcon vote="for" />{lang === "no" ? "Stemte for" : "Voted for"}</span>
-                        <span className="vsl-rep-legend-item"><VoteIcon vote="mot" />{lang === "no" ? "Stemte mot" : "Voted against"}</span>
-                        <span className="vsl-rep-legend-item"><VoteIcon vote="ikke_tilstede" />{lang === "no" ? "Ikke til stede" : "Absent"}</span>
-                      </div>
-                    </>
-                  )}
-
-                  {repVoter.length === 0 && !loadingVoting && (
-                    <p className="vsl-agder-no-data">
-                      {lang === "no"
-                        ? "Ingen individuelle stemmer registrert for denne voteringen."
-                        : "No individual votes recorded for this vote."}
-                    </p>
-                  )}
-                </div>
-
-                {/* ③ HELE STORTINGET */}
-                <div className="vsl-section vsl-storting-compact">
-                  <p className="vsl-section-label">{lang === "no" ? "Hele Stortinget stemte" : "Full Parliament voted"}</p>
-                  <div className="vsl-storting-row">
-                    <span className="vsl-storting-verdict" style={{ color: vedtakColor(selectedVotering) }}>
-                      {vedtakLabel(selectedVotering)}
-                    </span>
-                    {selectedVotering.personligVotering && (
-                      <span className="vsl-storting-counts">
-                        <span className="vsl-count-for">✓ {selectedVotering.antallFor}</span>
-                        <span className="vsl-count-mot">✗ {selectedVotering.antallMot}</span>
-                        {selectedVotering.antallIkkeTilStede > 0 && (
-                          <span className="vsl-count-absent">– {selectedVotering.antallIkkeTilStede}</span>
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  {selectedVotering.personligVotering && (
-                    <div className="vsl-storting-bar-wrap">
-                      {[
-                        { pct: Math.round(selectedVotering.antallFor / Math.max(1,total) * 100), cls: "votering-fill-for" },
-                        { pct: Math.round(selectedVotering.antallMot / Math.max(1,total) * 100), cls: "votering-fill-mot" },
-                        { pct: Math.round(selectedVotering.antallIkkeTilStede / Math.max(1,total) * 100), cls: "votering-fill-absent" },
-                      ].filter(b => b.pct > 0).map((b, i) => (
-                        <div key={i} className={`vsl-storting-seg ${b.cls}`} style={{ width: `${b.pct}%` }} title={`${b.pct}%`} />
-                      ))}
-                    </div>
-                  )}
-                  {!selectedVotering.personligVotering && (
-                    <p className="vsl-storting-unanimous">
-                      {lang === "no" ? "Enstemmig — ingen individuelle stemmer registrert." : "Unanimous — no individual votes recorded."}
-                    </p>
-                  )}
-                </div>
-
               </div>
             )
           })()}
@@ -1028,6 +1032,5 @@ export default function Votering({ lang }: VoteringProps) {
     </section>
 
   </div>
-  </>
 )
 }

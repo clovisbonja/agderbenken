@@ -94,12 +94,34 @@ const SUGGESTED_QUERIES_NO = [
   "Hva lover Høyre om utdanning?",
   "Hva lover AP om arbeid?",
   "Hva lover MDG om miljø?",
+  "Hva lover Venstre om rusreform?",
+  "Hva lover KrF om familie?",
+  "Hva lover Rødt om bolig?",
+  "Hva lover Sp om distrikt?",
+  "Hva lover partiene om eldreomsorg?",
+  "Hva lover partiene om innvandring?",
+  "Hva lover partiene om samferdsel?",
+  "Hva lover partiene om barn og unge?",
+  "Hva lover FrP om bompenger?",
+  "Hva lover AP om velferd?",
+  "Hva lover Høyre om næringsliv?",
+  "Hva lover SV om boligpolitikk?",
+  "Hva lover MDG om kollektivtransport?",
+  "Hva lover partiene om forsvar?",
 ]
 const SUGGESTED_QUERIES_EN = [
   "What does FrP promise about taxes?",
   "What does SV promise on climate?",
   "Which parties promise more health funding?",
   "What does H promise on education?",
+  "What does V promise on drug reform?",
+  "What does KrF promise for families?",
+  "What does R promise on housing?",
+  "What does Sp promise for rural areas?",
+  "What do parties promise on elderly care?",
+  "What do parties promise on immigration?",
+  "What does FrP promise on road tolls?",
+  "What does AP promise on welfare?",
 ]
 
 // GDPR — Sensitiv informasjon som aldri skal søkes
@@ -147,7 +169,38 @@ function getGDPRResponse(lang: Lang, reason?: string): string {
     : "I don't understand the question. Ask about party programs and pledges, e.g. 'What does H promise on tax?'"
 }
 
-// ── Hjelpere ──────────────────────────────────────────────────────────────────
+// ── Relevansrangering ─────────────────────────────────────────────────────────
+
+function scoreResult(result: ChatResultLofte, keywords: string[], query: string): number {
+  const text = result.tekst.toLowerCase()
+  const kategori = (result.kategori ?? "").toLowerCase()
+  const queryLower = query.toLowerCase()
+  let score = 0
+
+  // 1. Eksakt fraser-treff i teksten — høyest prioritet
+  if (text.includes(queryLower)) score += 100
+
+  // 2. Alle søkeord treffer i teksten (AND-logikk = svært relevant)
+  const allMatch = keywords.every(k => text.includes(k))
+  if (allMatch && keywords.length > 1) score += 60
+
+  // 3. Poeng per enkelt søkeord som treffer i teksten
+  for (const kw of keywords) {
+    if (text.includes(kw)) {
+      score += 20
+      // Bonus for antall forekomster (maks 3 bonus)
+      const count = (text.match(new RegExp(kw, "g")) ?? []).length
+      score += Math.min(count - 1, 3) * 5
+    }
+    // Søkeord treffer i kategori (indikerer sterk tematisk relevans)
+    if (kategori.includes(kw)) score += 15
+  }
+
+  // 4. Kortere tekst med treff er mer presis → lett bonus
+  if (score > 0) score += Math.max(0, 30 - Math.floor(result.tekst.length / 20))
+
+  return score
+}
 
 // ── Komponent ─────────────────────────────────────────────────────────────────
 
@@ -199,12 +252,21 @@ export default function Parti({ lang }: PartiProps) {
   // Chatbot state
   const [chatInput, setChatInput] = useState("")
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [expandedResults, setExpandedResults] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const lastUserMsgRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
-
-  // Chatbot scroll
+  // Chatbot scroll — scroller kun inni chat-containeren, ikke siden
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const container = chatContainerRef.current
+    if (!container) return
+    if (lastUserMsgRef.current) {
+      const msgTop = lastUserMsgRef.current.offsetTop - container.offsetTop
+      container.scrollTo({ top: msgTop, behavior: "smooth" })
+    } else {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" })
+    }
   }, [chatMessages])
 
   async function sendChatMessage(query: string) {
@@ -232,24 +294,46 @@ export default function Parti({ lang }: PartiProps) {
       const filter = keywords.map(k => `tekst.ilike.%${k}%`).join(",")
       q = q.or(filter)
     }
-    q = q.limit(15)
     const { data, error: err } = await q
 
-    const results = (data ?? []) as ChatResultLofte[]
+    const rawResults = (data ?? []) as ChatResultLofte[]
+
+    // Ranger etter relevans — best treff øverst
+    const results = [...rawResults].sort((a, b) =>
+      scoreResult(b, keywords, query) - scoreResult(a, keywords, query)
+    )
+
     let botText = ""
     if (err) {
       botText = lang === "no" ? "Beklager, noe gikk galt med søket." : "Sorry, something went wrong."
     } else if (results.length === 0) {
+      // Bedre "no results" melding med forslag
+      const suggestions = lang === "no"
+        ? "Tips: Prøv et annet ord, eller spørr om ett parti om gangen."
+        : "Tip: Try a different word or ask about one party at a time."
       botText = lang === "no"
-        ? `Fant ingen løfter for "${query}". Prøv et annet søkeord eller parti.`
-        : `No pledges found for "${query}". Try a different keyword or party.`
+        ? `Fant ingen løfter for "${query}".\n${suggestions}`
+        : `No pledges found for "${query}".\n${suggestions}`
     } else {
-      const byParti: Record<string, number> = {}
-      results.forEach(r => { byParti[r.parti] = (byParti[r.parti] ?? 0) + 1 })
-      const partiSummary = Object.entries(byParti).map(([p, n]) => `${p} (${n})`).join(", ")
+      // Bedre resultatsammendrag med kategorier
+      const byParti: Record<string, ChatResultLofte[]> = {}
+      const byCategory: Record<string, number> = {}
+      results.forEach(r => {
+        if (!byParti[r.parti]) byParti[r.parti] = []
+        byParti[r.parti].push(r)
+        if (r.kategori) byCategory[r.kategori] = (byCategory[r.kategori] ?? 0) + 1
+      })
+
+      const partiList = Object.entries(byParti).map(([p, items]) => `${p} (${items.length})`).join(", ")
+      const topCategories = Object.entries(byCategory)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([cat]) => cat)
+        .join(", ")
+
       botText = lang === "no"
-        ? `Fant ${results.length} løfter${parti ? ` fra ${parti}` : ""}: ${partiSummary}`
-        : `Found ${results.length} pledges${parti ? ` from ${parti}` : ""}: ${partiSummary}`
+        ? `Fant ${results.length} løfte${results.length !== 1 ? "r" : ""}${parti ? ` fra ${parti}` : ""} – ${partiList}${topCategories ? ` • Tema: ${topCategories}` : ""}`
+        : `Found ${results.length} pledge${results.length !== 1 ? "s" : ""}${parti ? ` from ${parti}` : ""} – ${partiList}${topCategories ? ` • Topics: ${topCategories}` : ""}`
     }
 
     setChatMessages(prev => prev.map(m =>
@@ -289,13 +373,13 @@ export default function Parti({ lang }: PartiProps) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
-            {lang === "no" ? "Spør om løfter" : "Ask about pledges"}
+            {lang === "no" ? "Spør chatboten" : "Ask the chatbot"}
           </button>
         </div>
         <p className="parti-tab-hint">
           {tab === "programs"
             ? (lang === "no" ? "Direktelenker til partienes offisielle programmer" : "Direct links to official party programs")
-            : (lang === "no" ? "Søk blant 5 500+ valgløfter fra alle partier" : "Search across 5,500+ election pledges from all parties")}
+            : (lang === "no" ? "Still spørsmål direkte til chatboten om partiløfter" : "Ask the chatbot directly about party pledges")}
         </p>
       </div>
 
@@ -342,29 +426,23 @@ export default function Parti({ lang }: PartiProps) {
                 </svg>
               </div>
               <div>
-                <h2 className="chat-header-title">{lang === "no" ? "Spør om partiløfter" : "Ask about party pledges"}</h2>
-                <p className="chat-header-sub">{lang === "no" ? "Søk blant 5 500+ løfter fra alle partiprogrammer 2025–2029" : "Search across 5,500+ pledges from all 2025–2029 party programs"}</p>
+                <h2 className="chat-header-title">{lang === "no" ? "Spør chatboten om partiløfter" : "Ask the chatbot about party pledges"}</h2>
+                <p className="chat-header-sub">{lang === "no" ? "Still spørsmål om hva partiene lover — chatboten søker blant 5 500+ løfter fra alle partiprogrammer 2025–2029" : "Ask what parties promise — the chatbot searches 5,500+ pledges from all 2025–2029 party programs"}</p>
               </div>
             </div>
 
             {/* Meldingsliste */}
-            <div className="chat-messages">
+            <div className="chat-messages" ref={chatContainerRef}>
               {chatMessages.length === 0 && (
                 <div className="chat-empty">
-                  <p className="chat-empty-title">{lang === "no" ? "Still et spørsmål om hva partiene lover" : "Ask a question about what parties promise"}</p>
-                  <p className="chat-empty-sub">{lang === "no" ? "Eksempler:" : "Examples:"}</p>
-                  <div className="chat-suggestions">
-                    {(lang === "no" ? SUGGESTED_QUERIES_NO : SUGGESTED_QUERIES_EN).map((q) => (
-                      <button key={q} type="button" className="chat-suggestion-btn"
-                        onClick={() => sendChatMessage(q)}>
-                        {q}
-                      </button>
-                    ))}
-                  </div>
+                  <p className="chat-empty-title">{lang === "no" ? "Still chatboten et spørsmål om hva partiene lover" : "Ask the chatbot what parties promise"}</p>
                 </div>
               )}
-              {chatMessages.map((msg) => (
-                <div key={msg.id} className={`chat-msg chat-msg--${msg.role}`}>
+              {chatMessages.map((msg, idx) => {
+                const isLastUserMsg = msg.role === "user" &&
+                  chatMessages.slice(idx + 1).every(m => m.role !== "user")
+                return (
+                <div key={msg.id} ref={isLastUserMsg ? lastUserMsgRef : undefined} className={`chat-msg chat-msg--${msg.role}`}>
                   {msg.role === "bot" && (
                     <div className="chat-bot-avatar" aria-hidden>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -380,32 +458,82 @@ export default function Parti({ lang }: PartiProps) {
                         <p className="chat-bubble-text">{msg.text}</p>
                         {msg.results && msg.results.length > 0 && (
                           <div className="chat-results">
-                            {msg.results.map((r) => {
-                              const partyInfo = AGDER_PARTIER.find(p => p.forkortelse === r.parti)
-                              const partyColor = partyInfo?.farge ?? "#6b7280"
-                              return (
-                                <div key={r.lofte_id} className="chat-result-item">
-                                  <div className="chat-result-top">
-                                    <span className="chat-result-parti"
-                                      style={{ background: partyColor + "18", color: partyColor, borderColor: partyColor + "44" }}>
-                                      {r.parti}
-                                    </span>
-                                    {r.kategori && (
-                                      <span className="chat-result-kat">{r.kategori}</span>
-                                    )}
-                                  </div>
-                                  <p className="chat-result-tekst">"{r.tekst}"</p>
-                                </div>
-                              )
-                            })}
+                            {(() => {
+                              // Gruppér resultater etter parti
+                              const grouped: Record<string, ChatResultLofte[]> = {}
+                              msg.results.forEach(r => {
+                                if (!grouped[r.parti]) grouped[r.parti] = []
+                                grouped[r.parti].push(r)
+                              })
+
+                              // Vis maks 8 resultater per default, med "se mer" hvis det er mange
+                              const maxPerParty = 3
+                              const isExpanded = expandedResults === msg.id
+
+                              // Sorter partigrupper etter første treff-posisjon
+                              // (reflekterer relevansrangering fra søket)
+                              const firstIndex = (partyId: string) =>
+                                msg.results!.findIndex(r => r.parti === partyId)
+
+                              return Object.entries(grouped)
+                                .sort((a, b) => firstIndex(a[0]) - firstIndex(b[0]))
+                                .map(([partyId, items]) => {
+                                  const partyInfo = AGDER_PARTIER.find(p => p.forkortelse === partyId)
+                                  const partyColor = partyInfo?.farge ?? "#6b7280"
+                                  const displayItems = isExpanded ? items : items.slice(0, maxPerParty)
+                                  const hasMore = items.length > maxPerParty && !isExpanded
+
+                                  return (
+                                    <div key={partyId} className="chat-result-group">
+                                      <div className="chat-result-party-header">
+                                        <span className="chat-result-party-badge"
+                                          style={{ background: partyColor + "22", color: partyColor, borderColor: partyColor + "44" }}>
+                                          {partyId} • {items.length}
+                                        </span>
+                                      </div>
+                                      {displayItems.map((r) => (
+                                        <div key={r.lofte_id} className="chat-result-item">
+                                          {r.kategori && (
+                                            <span className="chat-result-kat">{r.kategori}</span>
+                                          )}
+                                          <p className="chat-result-tekst">"{r.tekst}"</p>
+                                        </div>
+                                      ))}
+                                      {hasMore && (
+                                        <button
+                                          type="button"
+                                          className="chat-show-more"
+                                          onClick={() => setExpandedResults(msg.id)}
+                                        >
+                                          {lang === "no" ? `Vis ${items.length - maxPerParty} til...` : `Show ${items.length - maxPerParty} more...`}
+                                        </button>
+                                      )}
+                                    </div>
+                                  )
+                                })
+                            })()}
                           </div>
                         )}
                       </>
                     )}
                   </div>
                 </div>
-              ))}
+              )
+              })}
               <div ref={chatEndRef} />
+            </div>
+
+            {/* Forslag — alltid synlig */}
+            <div className="chat-suggestions-bar">
+              <span className="chat-suggestions-label">{lang === "no" ? "Prøv:" : "Try:"}</span>
+              <div className="chat-suggestions-scroll">
+                {(lang === "no" ? SUGGESTED_QUERIES_NO : SUGGESTED_QUERIES_EN).map((q) => (
+                  <button key={q} type="button" className="chat-suggestion-chip"
+                    onClick={() => sendChatMessage(q)}>
+                    {q}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Input */}
@@ -416,7 +544,7 @@ export default function Parti({ lang }: PartiProps) {
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder={lang === "no" ? "Spør om partiløfter, f.eks. 'Hva lover FrP om skatt?'" : "Ask about pledges, e.g. 'What does FrP promise on tax?'"}
+                placeholder={lang === "no" ? "Spør chatboten, f.eks. 'Hva lover Høyre om skatt?'" : "Ask the chatbot, e.g. 'What does H promise on tax?'"}
                 autoComplete="off"
               />
               <button type="submit" className="chat-send-btn" disabled={!chatInput.trim()}>

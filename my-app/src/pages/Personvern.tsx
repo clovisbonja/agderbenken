@@ -218,11 +218,11 @@ export default function Personvern({ lang }: { lang: Lang }) {
           tabRights: "Dine rettigheter",
           doHeader: "Vår praksis",
           dontHeader: "Hva vi ikke gjør",
-          protectionHeader: "Sikkerhetstiltak og beskyttelse",
-          blockedHeader: "Informasjon som ikke godtas",
-          blockedSubheader: "Systemet validerer og blokkerer automatisk forespørsler som inneholder følgende kategorier:",
-          allowedHeader: "Tillatte forespørsler",
-          allowedSubheader: "Du kan søke etter:",
+          protectionHeader: "Sikkerhetstiltak i søket",
+          blockedHeader: "Sensitive opplysninger",
+          blockedSubheader: "Ikke last opp sensitive eller personlige opplysninger i søkeboksen.",
+          allowedHeader: "Tillatte søk",
+          allowedSubheader: "I søkeboksen kan du spørre om:",
           contactHeader: "Kontakt",
           rightsHeader: "Dine juridiske rettigheter",
           promises: [
@@ -233,7 +233,7 @@ export default function Personvern({ lang }: { lang: Lang }) {
             "Respekterer personvern i samsvar med GDPR",
           ],
           doesNot: [
-            "Lagrer personlig informasjon",
+            "Håndterer sensitiv eller personlig informasjon",
             "Bruker sporings- eller markeringskjeks",
             "Deler data med tredjeparter",
             "Bruker analytikk eller profiler brukere",
@@ -274,11 +274,11 @@ export default function Personvern({ lang }: { lang: Lang }) {
           tabRights: "Your Rights",
           doHeader: "Our Practices",
           dontHeader: "What we don't do",
-          protectionHeader: "Security measures and protection",
-          blockedHeader: "Information that is not accepted",
-          blockedSubheader: "The system automatically validates and blocks requests containing the following categories:",
-          allowedHeader: "Permitted Requests",
-          allowedSubheader: "You may search for:",
+          protectionHeader: "Security in search",
+          blockedHeader: "Sensitive Information",
+          blockedSubheader: "Do not enter sensitive or personal information in the search box.",
+          allowedHeader: "Permitted Searches",
+          allowedSubheader: "In the search box, you can ask about:",
           contactHeader: "Contact",
           rightsHeader: "Your Legal Rights",
           promises: [
@@ -289,7 +289,7 @@ export default function Personvern({ lang }: { lang: Lang }) {
             "Respect privacy in accordance with GDPR",
           ],
           doesNot: [
-            "Store personal information",
+            "Handle sensitive or personal information",
             "Use tracking or marking cookies",
             "Share data with third parties",
             "Use analytics or profile users",
@@ -368,23 +368,6 @@ export default function Personvern({ lang }: { lang: Lang }) {
           <section className="pv-section pv-blocked">
             <h2>{t.blockedHeader}</h2>
             <p className="pv-subheader">{t.blockedSubheader}</p>
-
-            <div className="pv-blocked-grid">
-              {BLOCKED_CATEGORIES.map((category, idx) => (
-                <div key={idx} className="pv-blocked-card">
-                  <h3>
-                    {lang === "no" ? category.title_no : category.title_en}
-                  </h3>
-                  <ul className="pv-blocked-list">
-                    {(lang === "no" ? category.items_no : category.items_en).map(
-                      (item, i) => (
-                        <li key={i}>{item}</li>
-                      )
-                    )}
-                  </ul>
-                </div>
-              ))}
-            </div>
           </section>
 
           {/* Allowed Searches */}
@@ -492,19 +475,6 @@ export default function Personvern({ lang }: { lang: Lang }) {
           <section className="pv-section pv-contact">
             <h2>{t.contactHeader}</h2>
             <div className="pv-contact-grid">
-              <div className="pv-contact-card">
-                <h3>Sørblikket</h3>
-                <p>
-                  {lang === "no"
-                    ? "For spørsmål og henvendelser vedrørende personvern:"
-                    : "For questions and inquiries regarding privacy:"}
-                </p>
-                <ul className="pv-contact-list">
-                  <li>personvern@sørblikket.no</li>
-                  <li>www.sørblikket.no</li>
-                </ul>
-              </div>
-
               <div className="pv-contact-card">
                 <h3>
                   {lang === "no"

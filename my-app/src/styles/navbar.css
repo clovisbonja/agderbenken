@@ -346,11 +346,6 @@
   font-weight: 600;
 }
 
-.flag {
-  font-size: 15px;
-  line-height: 1;
-}
-
 /* ── Desktop: kompakt dropdown-kort ─────────────────────────────────────── */
 
 @media (min-width: 769px) {

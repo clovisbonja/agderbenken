@@ -177,13 +177,13 @@ export default function Navbar({ themeOverride, lang, onSetTheme, onToggleLangua
               className={`mobil-theme-btn${lang === "no" ? " mobil-theme-btn--active" : ""}`}
               onClick={() => { if (lang !== "no") { onToggleLanguage(); setMenuÅpen(false) } }}
             >
-              <span className="flag">🇳🇴</span> Norsk
+              Norsk
             </button>
             <button
               className={`mobil-theme-btn${lang === "en" ? " mobil-theme-btn--active" : ""}`}
               onClick={() => { if (lang !== "en") { onToggleLanguage(); setMenuÅpen(false) } }}
             >
-              <span className="flag">🇬🇧</span> English
+              English
             </button>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function Navbar({ themeOverride, lang, onSetTheme, onToggleLangua
             end={false}
             className="mobil-lenke-personvern"
           >
-            🔒 {no ? "Personvern" : "Privacy"}
+            {no ? "Personvern" : "Privacy"}
           </NavLink>
         </div>
       </nav>

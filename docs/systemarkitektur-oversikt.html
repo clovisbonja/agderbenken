@@ -79,6 +79,7 @@
     .cover-meta {
       display: flex;
       gap: 48px;
+      flex-wrap: wrap;
     }
 
     .cover-meta-item {
@@ -98,20 +99,6 @@
       font-size: 11pt;
       color: #e2e8f0;
       font-weight: 500;
-    }
-
-    .cover-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 100px;
-      padding: 8px 18px;
-      font-size: 9pt;
-      color: #93c5fd;
-      font-weight: 600;
-      margin-bottom: 40px;
     }
 
     /* ── CONTENT LAYOUT ──────────────────────────────── */
@@ -219,14 +206,11 @@
       background: var(--card);
     }
 
-    .card-accent {
-      border-left: 4px solid var(--accent);
-    }
-
-    .card-green  { border-left: 4px solid var(--green); }
-    .card-red    { border-left: 4px solid var(--red); }
-    .card-yellow { border-left: 4px solid var(--yellow); }
-    .card-purple { border-left: 4px solid var(--purple); }
+    .card-accent  { border-left: 4px solid var(--accent); }
+    .card-green   { border-left: 4px solid var(--green); }
+    .card-red     { border-left: 4px solid var(--red); }
+    .card-yellow  { border-left: 4px solid var(--yellow); }
+    .card-purple  { border-left: 4px solid var(--purple); }
 
     .card-title {
       font-size: 9pt;
@@ -406,6 +390,23 @@
       color: #1e40af;
     }
 
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    pre .c  { color: #64748b; }
+    pre .k  { color: #93c5fd; }
+    pre .s  { color: #86efac; }
+    pre .f  { color: #fde68a; }
+
     /* ── STATUS BADGES ───────────────────────────────── */
     .badge {
       display: inline-flex;
@@ -448,6 +449,19 @@
       line-height: 1.7;
     }
 
+    .warn-box strong { color: #78350f; }
+
+    .note-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 9.5pt;
+      color: #14532d;
+      line-height: 1.7;
+    }
+
     /* ── KEY-VALUE LIST ──────────────────────────────── */
     .kv-list {
       display: grid;
@@ -465,34 +479,6 @@
     }
 
     .kv-val { color: #374151; }
-
-    /* ── PARTI ROLLER ────────────────────────────────── */
-    .parti-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 16px 0;
-    }
-
-    .parti-pill {
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 9pt;
-      text-align: center;
-    }
-
-    .parti-pill-name {
-      font-weight: 700;
-      font-size: 11pt;
-      margin-bottom: 2px;
-    }
-
-    .parti-pill-role {
-      font-size: 7.5pt;
-      opacity: 0.75;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
 
     /* ── HEADER / FOOTER ─────────────────────────────── */
     .page-header {
@@ -528,51 +514,58 @@
       color: var(--muted);
     }
 
+    ul.doc-list {
+      margin: 8px 0 16px 22px;
+      line-height: 2;
+      color: #374151;
+    }
+
+    ul.doc-list li { margin-bottom: 2px; }
+
     /* ── PRINT ───────────────────────────────────────── */
     @media print {
       body { font-size: 9.5pt; }
       .cover { min-height: 100vh; }
       .page { padding: 40px 56px; }
       .page-break { page-break-after: always; }
-      .arch-diagram { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .arch-diagram, pre { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════ FORSIDE ══ -->
+<!-- ═══════════════════════════════════════════════ FORSIDE ══ -->
 <div class="cover">
-  <div class="cover-eyebrow">Teknisk dokumentasjon</div>
+  <div class="cover-eyebrow">Teknisk dokumentasjon · Sørblikket – Agderbenken</div>
   <div class="cover-title">Sørblikket</div>
   <div class="cover-sub">Systemarkitektur — Oversikt</div>
   <p class="cover-desc">
-    Sørblikket er et journalistisk sporingsverktøy som automatisk overvåker
-    om Agder-representantene på Stortinget holder sine valgløfter fra 2025-2029.
-    Dette dokumentet beskriver den tekniske arkitekturen, dataflyten og
-    de viktigste komponentene i systemet.
+    Fullstendig teknisk gjennomgang av Sørblikket, et journalistikkverktøy for å følge
+    Agder-regionens stortingsrepresentanter. Dekker sidestruktur, ruter, teknologistack,
+    datakilder, komponentarkitektur, chatbot-arkitektur og datautvinningsskript.
   </p>
   <div class="cover-meta">
     <div class="cover-meta-item">
       <span class="cover-meta-label">Prosjekt</span>
-      <span class="cover-meta-value">Sørblikket · Agder</span>
+      <span class="cover-meta-value">Sørblikket · Agderbenken</span>
     </div>
     <div class="cover-meta-item">
       <span class="cover-meta-label">Dokument</span>
-      <span class="cover-meta-value">Systemarkitektur</span>
+      <span class="cover-meta-value">Systemarkitektur Oversikt</span>
     </div>
     <div class="cover-meta-item">
       <span class="cover-meta-label">Versjon</span>
-      <span class="cover-meta-value">1.0 · 2026</span>
+      <span class="cover-meta-value">2.0 · April 2026</span>
     </div>
     <div class="cover-meta-item">
       <span class="cover-meta-label">Stack</span>
-      <span class="cover-meta-value">React · Node.js · Supabase · Claude AI</span>
+      <span class="cover-meta-value">React 19 · TypeScript · Vite · React Router v7 · Supabase</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════ INNHOLDSFORTEGNELSE ══ -->
+<!-- ═════════════════════════════════════ INNHOLDSFORTEGNELSE ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
@@ -580,836 +573,1081 @@
   </div>
 
   <h1>Innholdsfortegnelse</h1>
-  <p class="lead">Dette dokumentet gir en komplett teknisk oversikt over Sørblikket — fra datakilder til brukergrensesnitt.</p>
+  <p class="lead">
+    Dette dokumentet gir en presis teknisk oversikt over Sørblikket, et verktøy for journalister og
+    innbyggere i Agder som ønsker å følge med på sine stortingsrepresentanter.
+    Åtte seksjoner dekker alt fra ruter og stack til chatbot-arkitektur og offline-skript.
+  </p>
 
   <table>
     <thead>
       <tr>
-        <th style="width:60px">Seksjon</th>
+        <th style="width:56px">Del</th>
         <th>Tittel</th>
-        <th style="width:200px">Innhold</th>
+        <th style="width:340px">Innhold</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><strong>1</strong></td>
-        <td>Systemet i et nøtteskall</td>
-        <td>Hva Sørblikket er og hva det gjør</td>
+        <td>Prosjektoversikt</td>
+        <td>Hva Sørblikket er, formål, målgruppe og det sentrale arkitekturprinsippet om ingen server-proxy</td>
       </tr>
       <tr>
         <td><strong>2</strong></td>
-        <td>Systemarkitektur — 5 lag</td>
-        <td>Visuell oversikt over alle lag</td>
+        <td>Sideoversikt og ruter</td>
+        <td>Alle syv ruter med URL-sti, navigasjonsetikett og beskrivelse av funksjonalitet</td>
       </tr>
       <tr>
         <td><strong>3</strong></td>
-        <td>Datakilder</td>
-        <td>Partiprogrammer, Stortinget API, Lovdata</td>
+        <td>Teknisk stack</td>
+        <td>React 19, TypeScript, Vite, React Router v7 og Supabase — versjon og begrunnelse for hvert valg</td>
       </tr>
       <tr>
         <td><strong>4</strong></td>
-        <td>Backend-pipeline</td>
-        <td>De tre Node.js-skriptene og dataflyten</td>
+        <td>Systemarkitektur og datakilder</td>
+        <td>Lagdelt arkitekturdiagram, Stortingets XML API, Supabase-bruk, sesjon-ID-beregning, auto-refresh og XML-parsing</td>
       </tr>
       <tr>
         <td><strong>5</strong></td>
-        <td>Claude AI — kunstig intelligens</td>
-        <td>Hva AI-en brukes til og hvorfor</td>
+        <td>Komponentstruktur</td>
+        <td>Fullstendig mappestruktur under <code>src/</code> med forklaring av hvert fil og ansvar</td>
       </tr>
       <tr>
         <td><strong>6</strong></td>
-        <td>Database</td>
-        <td>Supabase-tabeller og relasjoner</td>
+        <td>Chatbot-arkitektur</td>
+        <td>Valgløfte-chatboten på Parti-siden: søkemekanisme, Supabase-spørring, lokal relevanssoring — og tydelig avgrensning mot generativ KI</td>
       </tr>
       <tr>
         <td><strong>7</strong></td>
-        <td>Frontend</td>
-        <td>React-appens sider og komponenter</td>
+        <td>Scripts og datainnsamling</td>
+        <td>Alle offline-skript som kjøres manuelt: <code>extract-promises.mjs</code>, <code>extract-agder-promises.mjs</code> og retry-varianter. SQL-skjema. Hva som er fjernet</td>
       </tr>
       <tr>
         <td><strong>8</strong></td>
-        <td>Partiroller og politisk kontekst</td>
-        <td>Regjering, støttepartier og opposisjon</td>
-      </tr>
-      <tr>
-        <td><strong>9</strong></td>
-        <td>Statusmodellen</td>
-        <td>Hvordan løftestatus beregnes</td>
-      </tr>
-      <tr>
-        <td><strong>10</strong></td>
-        <td>Teknologioversikt</td>
-        <td>Alle teknologier brukt i prosjektet</td>
+        <td>Kategoriseringsmotor</td>
+        <td>Fuzzy matching med Levenshtein-distanse i <code>categorizationEngine.ts</code>, temaer og nøkkelord</td>
       </tr>
     </tbody>
   </table>
 
+  <div class="info-box">
+    <strong>Relatert dokumentasjon:</strong> Det finnes et eget dokument, <code>dataflyt-teknisk.html</code>, som dekker
+    detaljert dataflytt med kodeeksempler, miljøvariabler, feilhåndtering og lokal utviklingsoppsett.
+  </div>
+
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Konfidensielt internt dokument</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Innholdsfortegnelse</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 1 ══ -->
+<!-- ═══════════════════════════════════════════════ SEKSJON 1 ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">1 · Systemet i et nøtteskall</span>
+    <span class="page-header-chapter">1 · Prosjektoversikt</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">1</div>
     <div>
       <div class="section-label">Introduksjon</div>
-      <h2 style="margin-top:0; border:none; padding:0">Systemet i et nøtteskall</h2>
+      <h2 style="margin-top:0; border:none; padding:0">Prosjektoversikt</h2>
     </div>
   </div>
 
   <p class="lead">
-    Sørblikket er et journalistisk sporingsverktøy for Agder-regionens øye på Stortinget.
-    Målet er enkelt: automatisk svare på spørsmålet "holder politikerne det de lovte?"
+    Sørblikket er et digitalt journalistikkverktøy som gjør det enkelt å følge med på hva
+    Agder-regionens stortingsrepresentanter faktisk gjør — ikke bare hva de lover.
   </p>
 
-  <h3>Kjernefunksjonaliteten</h3>
+  <h3>Formål</h3>
   <p>
-    Systemet leser partiprogrammer fra alle ni partier representert i Agderbenken,
-    trekker ut konkrete valgløfter ved hjelp av kunstig intelligens, og kobler
-    deretter disse løftene til faktiske saker behandlet på Stortinget.
-    Til slutt henter systemet voteringsdata for å avgjøre om partiet stemte for
-    eller mot sine egne løfter.
+    Stortingets åpne data er tilgjengelige på <code>data.stortinget.no</code>, men kun som rå XML-filer
+    uten søkefunksjon, filtrering eller visuell presentasjon. Sørblikket bygger bro mellom disse rådata
+    og en forståelig fremstilling for journalister og innbyggere i Agder. Appen henter, tolker og
+    presenterer data automatisk — slik at brukeren kan fokusere på det politiske innholdet.
+  </p>
+  <p>
+    Prosjektet er primært beregnet på bruk av lokalaviser og nyhetsredaksjoner i Agder-regionen som
+    vil ha effektiv tilgang til faktainformasjon om representantenes virksomhet på Stortinget.
   </p>
 
+  <h3>Målgruppe</h3>
   <div class="card-grid">
     <div class="card card-accent">
-      <div class="card-title">Problemet som løses</div>
-      <div class="card-body">Det er tidkrevende og vanskelig for journalister og innbyggere å manuelt følge med på om politikere holder løftene sine over en fireårsperiode.</div>
+      <div class="card-title">Journalister</div>
+      <div class="card-body">Regionalavisreportere som trenger rask tilgang til faktabasert informasjon om politisk aktivitet, voteringer og valgløfter.</div>
     </div>
     <div class="card card-green">
-      <div class="card-title">Løsningen</div>
-      <div class="card-body">Et automatisert system som kontinuerlig matcher løfter mot saker og oppdaterer status basert på faktiske stemmegivningsdata fra Stortinget.</div>
+      <div class="card-title">Innbyggere i Agder</div>
+      <div class="card-body">Folk som ønsker å forstå hva «sine» representanter gjør på Stortinget og om de stemmer i tråd med det de lovet i valgkampen.</div>
+    </div>
+    <div class="card card-yellow">
+      <div class="card-title">Studenter</div>
+      <div class="card-body">Statsvitenskap- og informasjonssystemstudenter som studerer politisk representasjon eller webapplikasjonsarkitektur.</div>
+    </div>
+    <div class="card card-purple">
+      <div class="card-title">Regionale organisasjoner</div>
+      <div class="card-body">Næringsforeninger, fagforeninger og interessegrupper med behov for løpende innsikt i saker av særlig betydning for Agder.</div>
     </div>
   </div>
 
-  <h3>Systemets tre hoveddeler</h3>
+  <h3>Sentralt arkitekturprinsipp: ingen server-proxy</h3>
+  <div class="info-box">
+    <strong>Alle API-kall går direkte fra brukerens nettleser.</strong> Det er ingen mellomserver som
+    Sørblikket drifter. Appen er ren statisk frontend og kan hostes gratis på Netlify, Vercel eller
+    GitHub Pages. Stortingets API er åpent for alle og støtter CORS, noe som gjør direkteoppkobling
+    mulig og forsvarlig. Appen fungerer så lenge Stortingets API er oppe — uavhengig av
+    driftkostnader for egne servere.
+  </div>
 
+  <h3>Dataflyten i fire steg</h3>
   <div class="flow">
     <div class="flow-step">
       <div class="flow-step-num">1</div>
-      <div class="flow-step-title">Ekstraksjon</div>
-      <div class="flow-step-body">Claude AI leser partiprogrammer og identifiserer alle konkrete valgløfter</div>
+      <div class="flow-step-title">Stortinget API</div>
+      <div class="flow-step-body">Åpent XML-API på data.stortinget.no. Ingen API-nøkkel. Inneholder saker, voteringer, representanter, biografier og komiteer.</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-step">
       <div class="flow-step-num">2</div>
-      <div class="flow-step-title">Matching</div>
-      <div class="flow-step-body">AI kobler løfter til relevante stortingssaker fra Stortingets åpne API</div>
+      <div class="flow-step-title">fetch() i nettleseren</div>
+      <div class="flow-step-body">Direkte HTTP GET fra React-appen. AbortController for kansellering. setInterval trigger re-fetch hvert 5. minutt.</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-step">
       <div class="flow-step-num">3</div>
-      <div class="flow-step-title">Statusoppdatering</div>
-      <div class="flow-step-body">Voteringsdata avgjør om partiet stemte FOR eller MOT hvert løfte</div>
+      <div class="flow-step-title">XML-parsing</div>
+      <div class="flow-step-body">DOMParser konverterer XML-streng til Document. Namespace-bevisste hjelpefunksjoner i xml.ts ekstraherer data til TypeScript-objekter.</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-step">
       <div class="flow-step-num">4</div>
-      <div class="flow-step-title">Presentasjon</div>
-      <div class="flow-step-body">Nettsiden viser status til alle — ingen innlogging nødvendig</div>
+      <div class="flow-step-title">React UI</div>
+      <div class="flow-step-body">Kategoriserte TypeScript-objekter lagres i useState. React re-rendrer kun endrede deler. Brukeren ser oppdatert innhold uten sideinnlasting.</div>
     </div>
-  </div>
-
-  <h3>Nøkkeltall</h3>
-  <div class="card-grid-3">
-    <div class="card" style="text-align:center; padding:24px 16px;">
-      <div style="font-size:28pt; font-weight:800; color:var(--accent)">9</div>
-      <div style="font-size:9pt; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em">Partier</div>
-    </div>
-    <div class="card" style="text-align:center; padding:24px 16px;">
-      <div style="font-size:28pt; font-weight:800; color:var(--green)">1 267</div>
-      <div style="font-size:9pt; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em">Stortingssaker/sesjon</div>
-    </div>
-    <div class="card" style="text-align:center; padding:24px 16px;">
-      <div style="font-size:28pt; font-weight:800; color:var(--purple)">32 000</div>
-      <div style="font-size:9pt; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em">AI-tokens per parti</div>
-    </div>
-  </div>
-
-  <div class="info-box">
-    <strong>Agderbenken:</strong> Betegnelsen på stortingsrepresentantene valgt fra Agder-fylket (tidligere Aust-Agder og Vest-Agder). Sørblikket følger alle partier med representanter fra denne valgkretsen.
   </div>
 
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 1 · Systemet i et nøtteskall</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 1 · Prosjektoversikt</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 2 ══ -->
+<!-- ═══════════════════════════════════════════════ SEKSJON 2 ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">2 · Systemarkitektur</span>
+    <span class="page-header-chapter">2 · Sideoversikt og ruter</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">2</div>
     <div>
-      <div class="section-label">Arkitektur</div>
-      <h2 style="margin-top:0; border:none; padding:0">Systemarkitektur — 5 lag</h2>
+      <div class="section-label">Routing</div>
+      <h2 style="margin-top:0; border:none; padding:0">Sideoversikt og ruter</h2>
     </div>
   </div>
 
-  <p class="lead">Sørblikket er bygget i fem tydelig adskilte lag, fra datakilder til brukerens nettleser.</p>
+  <p class="lead">
+    Sørblikket har syv ruter konfigurert med React Router v7.
+    Navigasjonsetiketten i menyen kan avvike fra filnavnet — tabellen nedenfor dokumenterer begge.
+  </p>
 
-  <div class="arch-diagram">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:120px">URL-sti</th>
+        <th style="width:140px">Navigasjonsetikett</th>
+        <th style="width:140px">Komponentfil</th>
+        <th>Funksjonalitet</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/</code></td>
+        <td>Hjem</td>
+        <td><code>Hjem.tsx</code></td>
+        <td>Forside med hero-seksjon, feature-kort som introduserer appens muligheter, og temaoversikt over tilgjengelige saksområder</td>
+      </tr>
+      <tr>
+        <td><code>/statistikk</code></td>
+        <td>Saker</td>
+        <td><code>Statistikk.tsx</code> + <code>StatistikkDashboard.tsx</code></td>
+        <td>Saksliste med fritekst-søk og temafilter. Statistikk-dashboard med oversikt over antall saker per tema og annen aggregert informasjon</td>
+      </tr>
+      <tr>
+        <td><code>/votering</code></td>
+        <td>Stemmegivning</td>
+        <td><code>Votering.tsx</code></td>
+        <td>Voteringer per sak med Agderbenkens stemmer fremhevet. Viser hvem som stemte for, imot og avsto per representant</td>
+      </tr>
+      <tr>
+        <td><code>/representanter</code></td>
+        <td>Representanter</td>
+        <td><code>Representanter.tsx</code></td>
+        <td>Profiler for alle Agder-representanter med parti, foto, komitétilknytning og biografi</td>
+      </tr>
+      <tr>
+        <td><code>/parti</code></td>
+        <td>Partiprogrammer</td>
+        <td><code>Parti.tsx</code></td>
+        <td>Lenker til partiprogrammer og en valgløfte-chatbot drevet av nøkkelordssøk mot Supabase</td>
+      </tr>
+      <tr>
+        <td><code>/om</code></td>
+        <td>Om Sørblikket</td>
+        <td><code>Om.tsx</code></td>
+        <td>Beskrivelse av prosjektet, datakilder, metodikk og ansvarsfraskrivelse</td>
+      </tr>
+      <tr>
+        <td><code>/personvern</code></td>
+        <td>Personvern</td>
+        <td><code>Personvern.tsx</code></td>
+        <td>Personvernerklæring. Dokumenterer at appen ikke samler inn personopplysninger om brukere, og hva localStorage brukes til</td>
+      </tr>
+    </tbody>
+  </table>
 
-    <div class="arch-layer">
-      <div class="arch-layer-header">LAG 1 — DATAKILDER (Eksterne)</div>
-      <div class="arch-layer-body">
-        <div class="arch-box">
-          <div class="arch-box-title">Partiprogrammer</div>
-          <div class="arch-box-detail">PDF og HTML<br>9 partier · 2025–2029<br>Alle nedlastet direkte fra<br>partiene sine nettsider</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">Stortinget Open API</div>
-          <div class="arch-box-detail">data.stortinget.no<br>XML-format · Ingen auth<br>/saker · /voteringer<br>/representanter</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">Regjeringen.no</div>
-          <div class="arch-box-detail">Regjeringens plan<br>for Norge 2025–29<br>HTML-side · Brukes som<br>kontekst for Ap-løfter</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">Lovdata API</div>
-          <div class="arch-box-detail">Valgfri datakilde<br>Krever API-nøkkel<br>Søker lover og vedtak<br>relevant for løftene</div>
-        </div>
-      </div>
-    </div>
+  <h3>Merk: Rute- vs. filnavn</h3>
+  <p>
+    Ruten <code>/statistikk</code> vises i navigasjonsmenyen som <strong>«Saker»</strong>.
+    Komponentfilen heter <code>Statistikk.tsx</code>, men dashboardet er splittet i en egen
+    underkomponent, <code>StatistikkDashboard.tsx</code>, som importeres inne i <code>Statistikk.tsx</code>.
+    Dette er det eneste tilfellet der en side er splittet på denne måten.
+  </p>
 
-    <div class="arch-arrow">▼ &nbsp;&nbsp; PDF/HTML · XML · fetch</div>
-
-    <div class="arch-layer">
-      <div class="arch-layer-header">LAG 2 — BACKEND-SKRIPT (Node.js · Kjøres manuelt)</div>
-      <div class="arch-layer-body">
-        <div class="arch-box">
-          <div class="arch-box-title">extract-promises.mjs</div>
-          <div class="arch-box-detail">Steg 1: Leser PDF/HTML<br>→ sender til Claude<br>→ mottar løfter som JSON<br>→ lagrer i Supabase</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">match-promises.mjs</div>
-          <div class="arch-box-detail">Steg 2: Henter løfter + saker<br>→ Claude matcher dem<br>→ lagrer kobling i DB<br>Partirollebevisst v3</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">update-status.mjs</div>
-          <div class="arch-box-detail">Steg 3: Henter voteringer<br>Teller FOR/MOT per parti<br>Beregner status uten AI<br>Oppdaterer databasen</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">retry-*.mjs</div>
-          <div class="arch-box-detail">Gjenprøver partier ved<br>nettverksfeil eller 429<br>Eksponentiell backoff<br>ved rate-limiting</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arch-arrow">▼ &nbsp;&nbsp; Supabase JS SDK (HTTPS)</div>
-
-    <div class="arch-layer">
-      <div class="arch-layer-header">LAG 3 — DATABASE (Supabase / PostgreSQL)</div>
-      <div class="arch-layer-body">
-        <div class="arch-box">
-          <div class="arch-box-title">valgløfte</div>
-          <div class="arch-box-detail">lofte_id (PK)<br>parti · tekst · kategori<br>program_periode<br>opprettet</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">lofte_sak</div>
-          <div class="arch-box-detail">id (PK)<br>lofte_id (FK)<br>sak_id · sak_tittel<br>status · notat</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arch-arrow">▼ &nbsp;&nbsp; Supabase REST API (HTTPS · Anon-nøkkel · kun lesing)</div>
-
-    <div class="arch-layer">
-      <div class="arch-layer-header">LAG 4 — FRONTEND (React 19 · TypeScript · Vite)</div>
-      <div class="arch-layer-body">
-        <div class="arch-box">
-          <div class="arch-box-title">App.tsx</div>
-          <div class="arch-box-detail">Tema · Språk · Ruting<br>Offline-banner · Footer</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">Hjem + Statistikk</div>
-          <div class="arch-box-detail">Forside · Live API-tall<br>Dashboard med grafer</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">Parti.tsx</div>
-          <div class="arch-box-detail">Løfteoversikt fra Supabase<br>Status per løfte + sak</div>
-        </div>
-        <div class="arch-box">
-          <div class="arch-box-title">Votering + Repr.</div>
-          <div class="arch-box-detail">Live fra Stortinget API<br>XML-parsing i nettleser</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arch-arrow">▼ &nbsp;&nbsp; HTTPS · Nettleser</div>
-
-    <div class="arch-layer">
-      <div class="arch-layer-header">LAG 5 — BRUKER</div>
-      <div class="arch-layer-body">
-        <div class="arch-box" style="flex:1">
-          <div class="arch-box-title">Alle nettlesere</div>
-          <div class="arch-box-detail">Chrome · Firefox · Safari · Brave · Mobil · Desktop · Ingen innlogging</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="info-box">
-    <strong>Viktig prinsipp:</strong> Lagene er løst koblet. Backend-skriptene kan kjøres uavhengig av frontend. Supabase fungerer som koblingspunktet mellom de to.
-  </div>
+  <h3>Navigasjonsmeny</h3>
+  <p>
+    Navigasjonsmenyen er implementert i <code>src/components/Navbar.tsx</code>.
+    På mobilskjerm vises en hamburger-meny. Temabytte (lys/mørk/system) og
+    lenke til Personvern er plassert i hamburgermenyen på alle skjermstørrelser.
+  </p>
 
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 2 · Arkitektur</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 2 · Sideoversikt og ruter</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 3 ══ -->
+<!-- ═══════════════════════════════════════════════ SEKSJON 3 ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">3 · Datakilder</span>
+    <span class="page-header-chapter">3 · Teknisk stack</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">3</div>
     <div>
-      <div class="section-label">Data</div>
-      <h2 style="margin-top:0; border:none; padding:0">Datakilder</h2>
+      <div class="section-label">Teknologi</div>
+      <h2 style="margin-top:0; border:none; padding:0">Teknisk stack</h2>
     </div>
   </div>
 
-  <h3>Partiprogrammer (primær datakilde)</h3>
-  <p>
-    Alle ni partier i Agderbenken har programmer for perioden 2025–2029.
-    Programmet hentes direkte fra partienes egne nettsider, enten som PDF-fil
-    eller som HTML-side, avhengig av hva partiet tilbyr.
+  <p class="lead">
+    Sørblikket er bygget på et moderne React-fundament med TypeScript gjennomgående.
+    Teknologivalgene er tatt for å holde appens kompleksitet lav og driftsbehovet minimalt.
   </p>
 
   <table>
     <thead>
       <tr>
-        <th>Parti</th>
-        <th>Format</th>
-        <th>Rolle i regjering</th>
-        <th>Merknad</th>
+        <th style="width:160px">Teknologi</th>
+        <th style="width:100px">Versjon</th>
+        <th>Rolle og begrunnelse</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><strong>Ap</strong> — Arbeiderpartiet</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-red">Regjering</span></td><td>Ap leder Støre-regjeringen</td></tr>
-      <tr><td><strong>H</strong> — Høyre</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td></td></tr>
-      <tr><td><strong>FrP</strong> — Fremskrittspartiet</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td></td></tr>
-      <tr><td><strong>Sp</strong> — Senterpartiet</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td></td></tr>
-      <tr><td><strong>SV</strong> — Sosialistisk Venstreparti</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td></td></tr>
-      <tr><td><strong>V</strong> — Venstre</td><td><span class="badge badge-green">HTML</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td>Ingen PDF-versjon tilgjengelig</td></tr>
-      <tr><td><strong>KrF</strong> — Kristelig Folkeparti</td><td><span class="badge badge-green">HTML</span></td><td><span class="badge badge-gray">Opposisjon</span></td><td>Ingen PDF-versjon tilgjengelig</td></tr>
-      <tr><td><strong>R</strong> — Rødt</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td>Alternativ URL ved 429-feil</td></tr>
-      <tr><td><strong>MDG</strong> — Miljøpartiet De Grønne</td><td><span class="badge badge-blue">PDF</span></td><td><span class="badge badge-yellow">Støtteparti</span></td><td></td></tr>
+      <tr>
+        <td><strong>React</strong></td>
+        <td>19</td>
+        <td>UI-rammeverk. Komponentbasert arkitektur gjør det enkelt å isolere ansvar per side. React 19 gir bedre ytelse og forbedret concurrent rendering.</td>
+      </tr>
+      <tr>
+        <td><strong>TypeScript</strong></td>
+        <td>5.x</td>
+        <td>Typesikkerhet gjennom hele kodebasen. Spesielt viktig ved XML-parsing der datastrukturer lett kan være uforutsigbare. Typer er definert i <code>src/types/sak.ts</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Vite</strong></td>
+        <td>6.x</td>
+        <td>Byggverktøy og utviklingsserver. Raskere enn Create React App og Webpack. ESM-basert hot module replacement gir rask utviklingssløyfe.</td>
+      </tr>
+      <tr>
+        <td><strong>React Router</strong></td>
+        <td>v7</td>
+        <td>Klient-side routing. Alle syv sider navigeres uten fullsideinnlasting. Konfigurert med <code>createBrowserRouter</code> og <code>RouterProvider</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Supabase</strong></td>
+        <td>2.x JS SDK</td>
+        <td>PostgreSQL-as-a-service. Brukes <em>kun</em> på Partiprogrammer-siden for valgløfte-tabellen. Resten av appen er fullstendig serverløs.</td>
+      </tr>
+      <tr>
+        <td><strong>DOMParser</strong></td>
+        <td>Web API (innebygd)</td>
+        <td>XML-parsing direkte i nettleseren. Ingen ekstra bibliotek. Bruker <code>getElementsByTagNameNS("*", tagname)</code> for namespace-uavhengig parsing.</td>
+      </tr>
+      <tr>
+        <td><strong>CSS (egendefinert)</strong></td>
+        <td>—</td>
+        <td>En CSS-fil per side under <code>src/styles/</code>. Ingen Tailwind eller CSS-in-JS. CSS-variabler for temabytte. Gir full kontroll uten abstraksjonslag.</td>
+      </tr>
     </tbody>
   </table>
 
-  <h3>Stortinget Open Data API</h3>
-  <p>
-    Stortinget tilbyr et åpent API uten autentisering på <code>data.stortinget.no</code>.
-    All data returneres i XML-format og parseres manuelt i skriptene.
-  </p>
-
-  <table>
-    <thead>
-      <tr><th>Endepunkt</th><th>Brukes til</th><th>Frekvens</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>/saker</code></td><td>Hente alle stortingssaker (1 267/sesjon)</td><td>Matching-steg</td></tr>
-      <tr><td><code>/voteringer?sakid=</code></td><td>Finne voteringer knyttet til en sak</td><td>Statusoppdatering</td></tr>
-      <tr><td><code>/voteringsresultat?voteringid=</code></td><td>Hente partienes stemmer per votering</td><td>Statusoppdatering</td></tr>
-      <tr><td><code>/representanter</code></td><td>Hente representanter fra Agder</td><td>Frontend live</td></tr>
-    </tbody>
-  </table>
-
-  <div class="warn-box">
-    <strong>Rate-limiting:</strong> Stortingets API har en grense for antall spørringer per minutt. Skriptene har innebygd retry-logikk med eksponentiell ventetid (4–16 sekunder) ved rate-limiting.
+  <h3>Bevisste valg om hva som ikke brukes</h3>
+  <div class="card-grid">
+    <div class="card card-red">
+      <div class="card-title">Ingen server-proxy</div>
+      <div class="card-body">Alle API-kall direkte fra nettleseren. Ingen Node/Express/Deno backend som Sørblikket drifter. Reduserer driftskompleksitet og kostnad til null for API-laget.</div>
+    </div>
+    <div class="card card-red">
+      <div class="card-title">Ingen Redux / Zustand</div>
+      <div class="card-body">State håndteres med innebygd <code>useState</code> og <code>useEffect</code> per side. Appen er ikke stor nok til å rettferdiggjøre et globalt state-bibliotek.</div>
+    </div>
+    <div class="card card-red">
+      <div class="card-title">Ingen React Query / SWR</div>
+      <div class="card-body">Datafetching og caching er implementert manuelt i <code>useStortingetData.ts</code>. Holder avhengighetslisten kort og gir eksplisitt kontroll over oppdateringslogikk.</div>
+    </div>
+    <div class="card card-red">
+      <div class="card-title">Ingen Tailwind CSS</div>
+      <div class="card-body">Egendefinerte CSS-filer per side gir bedre lesbarhet og fleksibilitet for et prosjekt med tydelig visuell identitet. CSS-variabler håndterer temabytte.</div>
+    </div>
   </div>
 
-  <h3>Regjeringen.no — Kontekstdokument</h3>
-  <p>
-    "Regjeringens plan for Norge 2025–2029" hentes fra regjeringen.no og brukes
-    som ekstra kontekst når Claude matcher Ap-løfter mot stortingssaker.
-    Dette er fordi regjeringens løfter og partiets løfter delvis overlapper.
-  </p>
-
-  <h3>Lovdata API (valgfri)</h3>
-  <p>
-    Lovdata tilbyr et søke-API som kan finne relevante lover og vedtak.
-    Denne datakilden er valgfri og krever en separat API-nøkkel.
-    Hvis nøkkelen mangler, hoppes Lovdata-søket over automatisk.
-  </p>
-
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 3 · Datakilder</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 3 · Teknisk stack</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 4 ══ -->
+<!-- ═══════════════════════════════════════════════ SEKSJON 4 ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">4 · Backend-pipeline</span>
+    <span class="page-header-chapter">4 · Systemarkitektur og datakilder</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">4</div>
     <div>
-      <div class="section-label">Backend</div>
-      <h2 style="margin-top:0; border:none; padding:0">Backend-pipeline</h2>
+      <div class="section-label">Arkitektur</div>
+      <h2 style="margin-top:0; border:none; padding:0">Systemarkitektur og datakilder</h2>
     </div>
   </div>
 
   <p class="lead">
-    Pipelinen består av tre Node.js-skript som kjøres i rekkefølge av en utvikler.
-    De er uavhengige av frontend og kommuniserer kun gjennom databasen.
+    Sørblikket bruker to datakilder og fire tydelig adskilte lag.
+    Data strømmer fra ekstern kilde, gjennom nettverket, via parsing til React-UI — uten mellomservere.
   </p>
 
-  <h3>Steg 1 — extract-promises.mjs</h3>
-  <div class="card card-accent" style="margin-bottom:16px">
-    <div class="card-title">Hva det gjør</div>
-    <div class="card-body">
-      For hvert av de ni partiene: (1) henter partiprogrammet som PDF eller HTML,
-      (2) koder PDF til base64, (3) sender hele dokumentet til Claude med instruksjon
-      om å finne ALLE løfter, (4) mottar strukturert JSON, (5) lagrer i Supabase.
+  <div class="arch-diagram">
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 1 — DATAKILDER (eksterne, ikke kontrollert av Sørblikket)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">Stortingets åpne XML API</div>
+          <div class="arch-box-detail">
+            data.stortinget.no/eksport/<br>
+            Ingen autentisering påkrevd<br>
+            All respons er XML (ikke JSON)<br>
+            Åpen for alle — gratis<br>
+            CORS-støtte for direkteoppkobling<br>
+            Brukt av alle sider unntatt /parti
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Supabase (PostgreSQL)</div>
+          <div class="arch-box-detail">
+            REST API over HTTPS<br>
+            Kun brukt på /parti-siden<br>
+            Tabell: valglofte (parti, tekst, kategori)<br>
+            Anon-nøkkel gir lesetilgang<br>
+            Row Level Security aktivert<br>
+            Populert offline av extract-scripts
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="kv-list">
-    <span class="kv-key">AI-modell:</span>      <span class="kv-val">claude-opus-4-6</span>
-    <span class="kv-key">Maks tokens:</span>    <span class="kv-val">32 000 (streaming påkrevet)</span>
-    <span class="kv-key">HTML-grense:</span>    <span class="kv-val">120 000 tegn</span>
-    <span class="kv-key">Streaming:</span>      <span class="kv-val">anthropic.messages.stream() → finalMessage()</span>
-    <span class="kv-key">Supabase-nøkkel:</span><span class="kv-val">SERVICE_KEY (full skrivetilgang)</span>
-  </div>
+    <div class="arch-arrow">▼ &nbsp; <span class="arch-arrow-label">fetch() direkte fra nettleser · HTTPS · ingen server-proxy</span></div>
 
-  <h3>Steg 2 — match-promises.mjs (v3)</h3>
-  <div class="card card-green" style="margin-bottom:16px">
-    <div class="card-title">Hva det gjør</div>
-    <div class="card-body">
-      Henter alle løfter fra databasen, henter alle 1 267 saker fra Stortingets API,
-      sender begge listene til Claude og ber AI-en matche løfter mot relevante saker.
-      Claude returnerer par (løfte_id → sak_id) med begrunnelse. Disse lagres som
-      lofte_sak-koblinger i databasen.
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 2 — NETTVERKSLAGET (nettleserens innebygde API)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">fetch() API</div>
+          <div class="arch-box-detail">
+            Innebygd i alle moderne nettlesere<br>
+            Sender HTTP GET-forespørsler<br>
+            Returnerer Promise&lt;Response&gt;<br>
+            Bruker signal for kansellering<br>
+            res.text() gir rå XML-streng
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">AbortController</div>
+          <div class="arch-box-detail">
+            Kansellerer pågående fetch-kall<br>
+            Ny controller per side-mount<br>
+            Ryddes opp i useEffect cleanup<br>
+            AbortError ignoreres stille<br>
+            Unngår state-oppdatering etter unmount
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">setInterval (5 min)</div>
+          <div class="arch-box-detail">
+            Auto-refresh hvert 5. minutt<br>
+            Startes i useEffect ved mount<br>
+            clearInterval i cleanup-funksjon<br>
+            Holder data ferske uten brukerhandling
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="kv-list">
-    <span class="kv-key">Partiroller:</span>    <span class="kv-val">Ap=regjering, Sp/SV/R/MDG=støtteparti, H/FrP/V/KrF=opposisjon</span>
-    <span class="kv-key">Dokumentgruppe:</span> <span class="kv-val">Parser &lt;dokumentgruppe&gt; fra XML (representantforslag, proposisjon, etc.)</span>
-    <span class="kv-key">Ekstra kontekst:</span><span class="kv-val">Regjeringens plan for Ap-løfter</span>
-    <span class="kv-key">Maks tokens:</span>    <span class="kv-val">8 192</span>
-    <span class="kv-key">Grense saker:</span>   <span class="kv-val">Ingen — alle 1 267 saker sendes</span>
-  </div>
+    <div class="arch-arrow">▼ &nbsp; <span class="arch-arrow-label">res.text() → rå XML-streng til parser</span></div>
 
-  <h3>Steg 3 — update-status.mjs</h3>
-  <div class="card card-yellow" style="margin-bottom:16px">
-    <div class="card-title">Hva det gjør</div>
-    <div class="card-body">
-      Ingen AI brukes i dette steget. Henter alle lofte_sak-koblinger fra databasen,
-      slår opp voteringsdata for hver sak via Stortingets API, teller partiets
-      FOR/MOT-stemmer, og oppdaterer status i databasen.
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 3 — PARSING OG KATEGORISERING (src/utils/ og src/lib/)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">xml.ts</div>
+          <div class="arch-box-detail">
+            DOMParser.parseFromString()<br>
+            getElementsByTagNameNS("*", tag)<br>
+            Namespace-uavhengig oppslag<br>
+            Hjelpefunksjoner: getText, getAttr<br>
+            Returnerer TypeScript-objekter
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">categorizationEngine.ts</div>
+          <div class="arch-box-detail">
+            Fuzzy matching med Levenshtein<br>
+            Scorer tittel mot temaets nøkkelord<br>
+            Åtte politiske temaer<br>
+            Fallback: «Annet»<br>
+            Brukes i useStortingetData.ts
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">dato.ts / status.ts</div>
+          <div class="arch-box-detail">
+            dato.ts: sesjon-ID-beregning<br>
+            Okt–des → ny sesjon (år+1)<br>
+            Jan–sep → inneværende år<br>
+            status.ts: statusetikett-logikk<br>
+            for saker og voteringer
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="arch-arrow">▼ &nbsp; <span class="arch-arrow-label">strukturerte TypeScript-objekter til React-tilstand</span></div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-header">LAG 4 — REACT UI (src/pages/ og src/components/)</div>
+      <div class="arch-layer-body">
+        <div class="arch-box">
+          <div class="arch-box-title">Custom Hooks</div>
+          <div class="arch-box-detail">
+            useStortingetData.ts<br>
+            useLokalLagring.ts<br>
+            useNettStatus.ts<br>
+            Kapsler datafetching og state<br>
+            Gjenbrukes på tvers av sider
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Pages</div>
+          <div class="arch-box-detail">
+            Hjem · Statistikk · Votering<br>
+            Representanter · Parti<br>
+            Om · Personvern<br>
+            Én fil per rute<br>
+            Importerer egne CSS-filer
+          </div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title">Navbar.tsx</div>
+          <div class="arch-box-detail">
+            Felles navigasjon<br>
+            Hamburger-meny på mobil<br>
+            Temabytte (lys/mørk/system)<br>
+            Personvern-lenke i hamburgermeny<br>
+            Tilstand i localStorage
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
+  <h3>Stortingets XML API — endepunkter i bruk</h3>
   <table>
     <thead>
-      <tr><th>Stemmer</th><th>Status satt</th></tr>
+      <tr>
+        <th style="width:280px">Endepunkt</th>
+        <th>Returnert data</th>
+        <th style="width:120px">Brukt av side</th>
+      </tr>
     </thead>
     <tbody>
-      <tr><td>Partiet stemte FOR i alle voteringer</td><td><span class="badge badge-green">fulfilled</span></td></tr>
-      <tr><td>Partiet stemte MOT i alle voteringer</td><td><span class="badge badge-red">broken</span></td></tr>
-      <tr><td>Blandet — noen for, noen mot</td><td><span class="badge badge-yellow">partial</span></td></tr>
-      <tr><td>Ingen voteringsdata funnet</td><td><span class="badge badge-gray">pending (uendret)</span></td></tr>
+      <tr>
+        <td><code>/saker</code></td>
+        <td>Liste over stortingssaker med tittel, type, sesjon og saksnummer</td>
+        <td>Statistikk</td>
+      </tr>
+      <tr>
+        <td><code>/voteringer</code></td>
+        <td>Voteringer knyttet til en sak, inkludert vedtakstype og dato</td>
+        <td>Votering</td>
+      </tr>
+      <tr>
+        <td><code>/voteringsresultat</code></td>
+        <td>Stemmegivning per representant per votering (for, mot, ingen)</td>
+        <td>Votering</td>
+      </tr>
+      <tr>
+        <td><code>/dagensrepresentanter</code></td>
+        <td>Alle nåværende stortingsrepresentanter med fylke, parti og ID</td>
+        <td>Representanter</td>
+      </tr>
+      <tr>
+        <td><code>/representantbiografi</code></td>
+        <td>Utvidet biografi for én representant, inkludert komiteer og verv</td>
+        <td>Representanter</td>
+      </tr>
     </tbody>
   </table>
 
-  <h3>Kjørekommandoer</h3>
-  <div style="background:#0f172a; border-radius:8px; padding:20px; font-family:'JetBrains Mono',monospace; font-size:9pt; color:#e2e8f0; line-height:2;">
-    <span style="color:#64748b"># Kjøres i denne rekkefølgen fra prosjektmappen:</span><br>
-    <span style="color:#4ade80">node</span> scripts/extract-promises.mjs<br>
-    <span style="color:#4ade80">node</span> scripts/match-promises.mjs<br>
-    <span style="color:#4ade80">node</span> scripts/update-status.mjs<br>
-    <br>
-    <span style="color:#64748b"># Ved feil på enkeltpartier:</span><br>
-    <span style="color:#4ade80">node</span> scripts/retry-sp-r.mjs<br>
-    <span style="color:#4ade80">node</span> scripts/retry-missing.mjs
+  <h3>Sesjon-ID-beregning</h3>
+  <p>
+    Stortinget organiserer arbeidet sitt i sesjoner som løper fra oktober til september. En sesjon
+    navngis etter det året den <em>starter</em>, altså høsten. Sesjon 2025 starter i oktober 2025
+    og avsluttes i september 2026. Sørblikket beregner gjeldende sesjon-ID fra systemklokkens dato:
+  </p>
+  <div class="kv-list">
+    <span class="kv-key">Oktober–desember:</span>
+    <span class="kv-val">Ny sesjon starter — sesjon-ID = inneværende år (f.eks. 2025)</span>
+    <span class="kv-key">Januar–september:</span>
+    <span class="kv-val">Inneværende sesjon startet forrige høst — sesjon-ID = forrige år (f.eks. 2025 for januar–september 2026)</span>
   </div>
+  <p>
+    Logikken er implementert i <code>src/utils/dato.ts</code> og eksportert som en
+    konstant som brukes i alle hook-kall mot Stortinget API.
+  </p>
 
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 4 · Backend-pipeline</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 4 · Systemarkitektur og datakilder</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 5+6 ══ -->
+<!-- ═══════════════════════════════════════════════ SEKSJON 5 ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">5–6 · AI og Database</span>
+    <span class="page-header-chapter">5 · Komponentstruktur</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">5</div>
     <div>
-      <div class="section-label">Kunstig intelligens</div>
-      <h2 style="margin-top:0; border:none; padding:0">Claude AI — Hva brukes den til?</h2>
+      <div class="section-label">Kodeorganisering</div>
+      <h2 style="margin-top:0; border:none; padding:0">Komponentstruktur</h2>
     </div>
   </div>
 
-  <p>Claude AI (claude-opus-4-6 fra Anthropic) brukes i to av de tre pipeline-stegene:</p>
-
-  <div class="card-grid">
-    <div class="card card-purple">
-      <div class="card-title">Oppgave 1 · Ekstraksjon</div>
-      <div class="card-body">
-        Claude leser et helt partiprogram (opptil 154 sider PDF) og identifiserer
-        <strong>alle konkrete løfter</strong> — inkludert tallfestede mål, forbudsløfter,
-        handlingsplaner og satsingsområder. Returnerer strukturert JSON med
-        <code>tekst</code> og <code>kategori</code> per løfte.
-      </div>
-    </div>
-    <div class="card card-purple">
-      <div class="card-title">Oppgave 2 · Matching</div>
-      <div class="card-body">
-        Claude mottar alle løfter fra ett parti og alle 1 267 stortingssaker,
-        og avgjør hvilke saker som er relevante for hvert løfte. Claude vet
-        om saken er et <em>representantforslag</em> (fremmet av partiet selv)
-        eller en <em>proposisjon</em> (fremmet av regjeringen).
-      </div>
-    </div>
-  </div>
-
-  <div class="warn-box">
-    <strong>Claude brukes IKKE i steg 3:</strong> Statusoppdateringen baseres utelukkende på faktiske stemmetall fra Stortingets API — ingen AI-tolkning av "holder løftet". Dette gir objektiv, etterprøvbar status.
-  </div>
-
-  <h3>Streaming — nødvendig for store svar</h3>
-  <p>
-    Når Claude skal lese hele partiprogrammer og returnere tusenvis av løfter, kan svaret
-    ta over 10 minutter. Anthropic krever da at streaming benyttes.
-    Koden bruker <code>anthropic.messages.stream()</code> etterfulgt av <code>await stream.finalMessage()</code>.
+  <p class="lead">
+    All applikasjonskode ligger under <code>my-app/src/</code>.
+    Mappestrukturen følger en ansvarsbasert inndeling: én mappe per lag.
   </p>
 
-  <div class="section-header" style="margin-top:40px">
-    <div class="section-num">6</div>
-    <div>
-      <div class="section-label">Lagring</div>
-      <h2 style="margin-top:0; border:none; padding:0">Database — Supabase / PostgreSQL</h2>
-    </div>
-  </div>
+  <h3>Mappestruktur</h3>
+  <pre>my-app/src/
+├── components/
+│   └── Navbar.tsx              <span class="c">// Felles navigasjon, hamburger, temabytte</span>
+├── config/
+│   ├── partier.ts              <span class="c">// Partinavn, forkortelser og farger</span>
+│   ├── sesjon.ts               <span class="c">// Eksporterer gjeldende sesjon-ID</span>
+│   └── temaer.ts               <span class="c">// Åtte temaer med nøkkelord (brukt av CategorizationEngine)</span>
+├── hooks/
+│   ├── useLokalLagring.ts      <span class="c">// localStorage-abstraksjon (tema, språk)</span>
+│   ├── useNettStatus.ts        <span class="c">// Overvåker nettverkstilkobling</span>
+│   └── useStortingetData.ts    <span class="c">// Datafetching, XML-parsing, auto-refresh</span>
+├── lib/
+│   ├── categorizationEngine.ts <span class="c">// Fuzzy matching / Levenshtein-kategorisering</span>
+│   └── supabase.ts             <span class="c">// Supabase-klient (anon-nøkkel fra env)</span>
+├── pages/
+│   ├── Hjem.tsx                <span class="c">// Forside: hero, feature-kort, temaoversikt</span>
+│   ├── Om.tsx                  <span class="c">// Om Sørblikket: prosjekt og datakilder</span>
+│   ├── Parti.tsx               <span class="c">// Partiprogrammer + valgløfte-chatbot</span>
+│   ├── Personvern.tsx          <span class="c">// Personvernerklæring</span>
+│   ├── Representanter.tsx      <span class="c">// Representantprofiler med biografi</span>
+│   ├── Statistikk.tsx          <span class="c">// Saksliste med søk og filter</span>
+│   ├── StatistikkDashboard.tsx <span class="c">// Dashboard-underkomponent for /statistikk</span>
+│   └── Votering.tsx            <span class="c">// Voteringer og stemmegivning</span>
+├── styles/
+│   ├── hjem.css
+│   ├── navbar.css
+│   ├── om.css
+│   ├── parti.css
+│   ├── personvern.css
+│   ├── representanter.css
+│   ├── statistikk.css
+│   └── votering.css
+├── types/
+│   └── sak.ts                  <span class="c">// TypeScript-typer for saker, voteringer og representanter</span>
+└── utils/
+    ├── dato.ts                 <span class="c">// Sesjon-ID-beregning basert på gjeldende dato</span>
+    ├── status.ts               <span class="c">// Statusetikett-logikk for saker</span>
+    └── xml.ts                  <span class="c">// DOMParser-hjelpefunksjoner for XML-parsing</span></pre>
 
-  <p>Databasen har to tabeller med en én-til-mange-relasjon:</p>
+  <h3>Filer i prosjektroten (ikke del av appen)</h3>
+  <p>
+    I <code>my-app/</code> finnes konfigurasjonsfiler for Vite (<code>vite.config.ts</code>),
+    TypeScript (<code>tsconfig.json</code>) og pakkebehandling (<code>package.json</code>).
+    Offline-datautvinningsskript ligger i prosjektroten (utenfor <code>my-app/</code>) — se seksjon 7.
+  </p>
 
-  <div class="card-grid">
-    <div class="card card-accent">
-      <div class="card-title">Tabell: valgløfte</div>
-      <div class="card-body" style="font-family:'JetBrains Mono',monospace; font-size:8.5pt; line-height:2">
-        lofte_id &nbsp;&nbsp;&nbsp; UUID (primærnøkkel)<br>
-        parti &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEXT (Ap, H, FrP…)<br>
-        tekst &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEXT (løftets ordlyd)<br>
-        kategori &nbsp;&nbsp; TEXT (Klima, Helse…)<br>
-        program_periode TEXT (2025–2029)<br>
-        opprettet &nbsp; TIMESTAMP
-      </div>
-    </div>
-    <div class="card card-green">
-      <div class="card-title">Tabell: lofte_sak</div>
-      <div class="card-body" style="font-family:'JetBrains Mono',monospace; font-size:8.5pt; line-height:2">
-        id &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; UUID (primærnøkkel)<br>
-        lofte_id &nbsp;&nbsp; UUID (→ valgløfte)<br>
-        sak_id &nbsp;&nbsp;&nbsp;&nbsp; TEXT (Stortingets ID)<br>
-        sak_tittel &nbsp; TEXT<br>
-        sak_dato &nbsp;&nbsp; DATE<br>
-        status &nbsp;&nbsp;&nbsp;&nbsp; ENUM (pending/fulfilled/<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;broken/partial)<br>
-        notat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEXT (AI-begrunnelse)
-      </div>
-    </div>
-  </div>
-
-  <h3>To nøkler med ulikt tilgangsnivå</h3>
+  <h3>Ansvarsfordeling mellom lagene</h3>
   <table>
     <thead>
-      <tr><th>Nøkkel</th><th>Tilgang</th><th>Brukes av</th></tr>
+      <tr>
+        <th>Lag / Mappe</th>
+        <th>Ansvar</th>
+        <th>Kommuniserer med</th>
+      </tr>
     </thead>
     <tbody>
       <tr>
-        <td><code>SUPABASE_SERVICE_KEY</code></td>
-        <td>Full lese- og skrivetilgang — ingen RLS</td>
-        <td>Backend-skript (aldri i nettleseren)</td>
+        <td><code>utils/</code></td>
+        <td>Rene hjelpefunksjoner uten bieffekter. Konvertering og beregning.</td>
+        <td>Importeres av hooks og pages</td>
       </tr>
       <tr>
-        <td><code>VITE_SUPABASE_ANON_KEY</code></td>
-        <td>Kun lesing — underlagt Row Level Security</td>
-        <td>Frontend React-app (synlig i nettleser)</td>
+        <td><code>lib/</code></td>
+        <td>Forretningslogikk: kategorisering og ekstern klientkonfigurasjon (Supabase)</td>
+        <td>Importeres av hooks og pages</td>
+      </tr>
+      <tr>
+        <td><code>config/</code></td>
+        <td>Statisk konfigurasjon: partier, temaer, sesjonsnummer</td>
+        <td>Importeres av hooks, pages og lib</td>
+      </tr>
+      <tr>
+        <td><code>hooks/</code></td>
+        <td>Datafetching, state-håndtering og sideeffekter. Kapsler useEffect-logikk.</td>
+        <td>Brukes av pages</td>
+      </tr>
+      <tr>
+        <td><code>pages/</code></td>
+        <td>Presentasjonslag. Mottar data fra hooks og rendrer UI.</td>
+        <td>Importerer hooks, components og styles</td>
+      </tr>
+      <tr>
+        <td><code>components/</code></td>
+        <td>Gjenbrukbare UI-komponenter (foreløpig kun Navbar)</td>
+        <td>Importeres av pages og App.tsx</td>
+      </tr>
+      <tr>
+        <td><code>types/</code></td>
+        <td>TypeScript-typedefinisjoner delt på tvers</td>
+        <td>Importeres av alle lag</td>
       </tr>
     </tbody>
   </table>
 
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 5–6 · AI og Database</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 5 · Komponentstruktur</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 7 ══ -->
+<!-- ═══════════════════════════════════════════════ SEKSJON 6 ══ -->
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">7 · Frontend</span>
+    <span class="page-header-chapter">6 · Chatbot-arkitektur</span>
+  </div>
+
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div>
+      <div class="section-label">Valgløfte-chatbot</div>
+      <h2 style="margin-top:0; border:none; padding:0">Chatbot-arkitektur</h2>
+    </div>
+  </div>
+
+  <p class="lead">
+    Partiprogrammer-siden (<code>/parti</code>) inneholder en valgløfte-chatbot.
+    Det er viktig å forstå nøyaktig hva denne er — og hva den ikke er.
+  </p>
+
+  <div class="warn-box">
+    <strong>Chatboten er ikke generativ KI.</strong> Den kaller ikke Claude API, OpenAI eller noen
+    annen stor språkmodell i sanntid. Den er et nøkkelordssøk mot en Supabase-database som inneholder
+    forhåndsuttrukne valgløfter. Brukeren skriver et spørsmål; appen søker etter relevante løfter
+    ved hjelp av ilike-filtrering og lokal relevansskåring.
+  </div>
+
+  <h3>Slik fungerer chatboten — steg for steg</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-step-num">1</div>
+      <div class="flow-step-title">Brukerinndata</div>
+      <div class="flow-step-body">Brukeren skriver en fritekstspørring, f.eks. «hva lover Høyre om barnehage?»</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">2</div>
+      <div class="flow-step-title">Tokenisering</div>
+      <div class="flow-step-body">Inndataen deles opp i enkeltord (tokens). Stoppord som «hva», «om» og «er» filtreres bort.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">3</div>
+      <div class="flow-step-title">Supabase-søk</div>
+      <div class="flow-step-body">For hvert meningsbærende token sendes en <code>ilike</code>-forespørsel mot valglofte-tabellen i Supabase. Filtrerer på parti og/eller kategori hvis oppgitt.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">4</div>
+      <div class="flow-step-title">Relevansskåring</div>
+      <div class="flow-step-body">Resultatene skåres lokalt i nettleseren basert på antall treff og nærhet til søkeordet. De mest relevante løftene vises øverst.</div>
+    </div>
+  </div>
+
+  <h3>Supabase-tabellstruktur</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Tabell</th>
+        <th>Kolonner</th>
+        <th>Innhold</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>valglofte</code></td>
+        <td><code>id</code>, <code>parti</code>, <code>tekst</code>, <code>kategori</code></td>
+        <td>Uttrukne valgløfter fra partiprogrammer. Populert offline av <code>extract-promises.mjs</code>.</td>
+      </tr>
+      <tr>
+        <td><code>agder_lofte</code></td>
+        <td><code>id</code>, <code>representant</code>, <code>tekst</code>, <code>kilde</code></td>
+        <td>Skriftlige spørsmål fra Agder-representanter. Populert offline av <code>extract-agder-promises.mjs</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Rolleavgrensning: Claude AI brukes kun offline</h3>
+  <p>
+    Claude AI (Anthropic) brukes <em>utelukkende</em> i det manuelle offline-skriptet
+    <code>extract-promises.mjs</code> for å tolke partiprogrammer og identifisere valgløfter.
+    Denne prosessen kjøres én gang av utvikleren og lagrer resultater i Supabase.
+    Deretter er Claude AI ikke involvert i appens kjøretid — verken i chatbot-svaret
+    eller noen annen del av appen som brukeren ser.
+  </p>
+
+  <div class="note-box">
+    <strong>Oppsummering:</strong> Claude AI (offline) → leser PDF/HTML-partiprogrammer → identifiserer løfter → lagrer i Supabase. Brukeren spør chatboten → nettleseren søker i Supabase med <code>ilike</code> → lokalt rangerer resultater → viser relevante løfter. Ingen generativ KI i sanntid.
+  </div>
+
+  <h3>Tilgang og sikkerhet</h3>
+  <p>
+    Supabase-klienten i <code>src/lib/supabase.ts</code> er konfigurert med
+    <em>anon</em>-nøkkelen (offentlig lesenøkkel). Denne nøkkelen er ikke hemmelig
+    — den tillater kun lesing av tabeller der Row Level Security er konfigurert til å tillate det.
+    Nøkkelen er lagret i miljøvariabelen <code>VITE_SUPABASE_ANON_KEY</code>.
+  </p>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 6 · Chatbot-arkitektur</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ SEKSJON 7 ══ -->
+<div class="page page-break">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">7 · Scripts og datainnsamling</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">7</div>
     <div>
-      <div class="section-label">React-app</div>
-      <h2 style="margin-top:0; border:none; padding:0">Frontend — React + Vite</h2>
+      <div class="section-label">Offline-verktøy</div>
+      <h2 style="margin-top:0; border:none; padding:0">Scripts og datainnsamling</h2>
     </div>
   </div>
 
   <p class="lead">
-    Nettsiden er bygget med React 19 og TypeScript, bundles med Vite,
-    og er en SPA (Single Page Application) med klientside-ruting.
+    Datautvinningsskriptene er ikke en del av React-appen og kjøres aldri automatisk.
+    De kjøres manuelt av utvikleren, typisk én gang per valgperiode eller ved behov for oppdatering.
   </p>
 
-  <h3>Sider</h3>
+  <div class="warn-box">
+    <strong>Disse skriptene er ikke del av appen brukerne ser.</strong> De er Node.js-skript (<code>.mjs</code>) som kjøres fra terminalen. De kaller Claude API og Stortingets API, og lagrer resultater i Supabase-databasen. Etter at de er kjørt, er databasen oppdatert og appen leser fra den som vanlig.
+  </div>
+
+  <h3>Aktive skript</h3>
   <table>
     <thead>
-      <tr><th>Side</th><th>URL</th><th>Datakilde</th><th>Beskrivelse</th></tr>
+      <tr>
+        <th style="width:220px">Skript</th>
+        <th>Funksjon</th>
+        <th style="width:130px">Målkilde</th>
+      </tr>
     </thead>
     <tbody>
-      <tr><td><strong>Forside</strong></td><td><code>/</code></td><td>—</td><td>Hero-seksjon og tematiske lenker</td></tr>
-      <tr><td><strong>Statistikk</strong></td><td><code>/statistikk</code></td><td>Stortinget API</td><td>Live tall, dashboard, grafer per tema</td></tr>
-      <tr><td><strong>Stemmegivning</strong></td><td><code>/votering</code></td><td>Stortinget API</td><td>Partienes stemmegivning i sanntid</td></tr>
-      <tr><td><strong>Representanter</strong></td><td><code>/representanter</code></td><td>Stortinget API</td><td>Alle representanter fra Agder</td></tr>
-      <tr><td><strong>Partiprogrammer</strong></td><td><code>/parti</code></td><td>Supabase</td><td>Løfter og status per parti</td></tr>
-      <tr><td><strong>Om</strong></td><td><code>/om</code></td><td>—</td><td>Om prosjektet og kildene</td></tr>
+      <tr>
+        <td><code>extract-promises.mjs</code></td>
+        <td>Laster ned partiprogrammer (PDF og HTML), sender dem til Claude AI for identifisering av valgløfter, og lagrer strukturerte løfter i Supabase-tabellen <code>valglofte</code>.</td>
+        <td>Supabase: <code>valglofte</code></td>
+      </tr>
+      <tr>
+        <td><code>extract-agder-promises.mjs</code></td>
+        <td>Henter skriftlige spørsmål fra Agder-representanter via Stortingets API, sender til Claude AI for oppsummering, og lagrer i <code>agder_lofte</code>-tabellen.</td>
+        <td>Supabase: <code>agder_lofte</code></td>
+      </tr>
+      <tr>
+        <td><code>retry-failed.mjs</code></td>
+        <td>Gjentar ekstraksjon for partier der forrige kjøring feilet. Leser feillogg fra forrige kjøring.</td>
+        <td>Supabase: <code>valglofte</code></td>
+      </tr>
+      <tr>
+        <td><code>retry-missing.mjs</code></td>
+        <td>Finner partier som mangler løfter i databasen og prøver ekstraksjon på nytt.</td>
+        <td>Supabase: <code>valglofte</code></td>
+      </tr>
+      <tr>
+        <td><code>retry-sp-r.mjs</code></td>
+        <td>Spesialisert retry for Senterpartiet og Rødt, som kan ha ikke-standard programformater.</td>
+        <td>Supabase: <code>valglofte</code></td>
+      </tr>
     </tbody>
   </table>
 
-  <h3>App-skallet (App.tsx)</h3>
-  <p>App-komponenten håndterer tre globale tilstander som gjelder for hele nettsiden:</p>
+  <h3>SQL-skjema</h3>
+  <p>
+    Databaseskjemaet for Supabase er dokumentert i <code>agder-lofte-tabell.sql</code>.
+    Dette SQL-skriptet oppretter <code>agder_lofte</code>-tabellen og tilhørende
+    Row Level Security-regler. Kjøres direkte i Supabase SQL Editor ved oppsett.
+  </p>
 
-  <div class="card-grid-3">
-    <div class="card card-accent">
-      <div class="card-title">Tema</div>
-      <div class="card-body">
-        Tre modi: lys / mørk / system.
-        System-modus bruker CSS <code>@media (prefers-color-scheme)</code>
-        — fungerer i alle nettlesere inkl. Brave uten JavaScript-events.
-        Lagres i <code>localStorage</code>.
-      </div>
-    </div>
-    <div class="card card-green">
-      <div class="card-title">Språk</div>
-      <div class="card-body">
-        Norsk (no) og engelsk (en).
-        Auto-detekteres fra <code>navigator.languages</code> — sjekker nb/nn/no.
-        Kan overstyres manuelt. Lagres i <code>localStorage</code>.
-      </div>
-    </div>
-    <div class="card card-yellow">
-      <div class="card-title">Offline-banner</div>
-      <div class="card-body">
-        Lytter på <code>window.online</code>/<code>offline</code>-events.
-        Viser rød banner når nett er borte, grønn "tilkoblet igjen"-melding
-        i 3 sekunder ved gjenoppkobling.
-      </div>
-    </div>
+  <h3>Skript som er fjernet</h3>
+  <div class="info-box">
+    <strong>Følgende skript finnes ikke lenger og skal ikke omtales som aktive funksjoner:</strong>
+    <ul style="margin-top:8px; margin-left:20px; line-height:2;">
+      <li><code>match-promises.mjs</code> — var koblingen mellom valgløfter og konkrete stortingssaker. Slettet.</li>
+      <li><code>update-status.mjs</code> — sporet om et valgløfte var innfridd, brutt eller under behandling. Slettet.</li>
+    </ul>
+    Som konsekvens: <strong>det finnes ingen kobling mellom valgløfter og stortingssaker i appen</strong>,
+    og <strong>det finnes ingen innfridd/brutt-statussporing</strong>. Valgløfte-chatboten viser kun rå
+    løftetekst fra partiprogrammene.
   </div>
 
-  <h3>Prosjektstruktur</h3>
-  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:20px; font-family:'JetBrains Mono',monospace; font-size:8.5pt; line-height:1.9; color:#334155;">
-    my-app/src/<br>
-    ├── <span style="color:#2563eb">App.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rot: tema, språk, ruting, footer<br>
-    ├── components/<br>
-    │ &nbsp;&nbsp; └── <span style="color:#2563eb">Navbar.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp; Desktop + hamburger-meny (mobil)<br>
-    ├── pages/<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Hjem.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Forside<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Statistikk.tsx</span> &nbsp; Live Stortingstall + dashboard<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Parti.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Løfteoversikt fra Supabase<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#2563eb">Votering.tsx</span> &nbsp;&nbsp;&nbsp; Stemmedata fra Stortinget<br>
-    │ &nbsp;&nbsp; └── <span style="color:#2563eb">Representanter.tsx</span> Agder-representanter<br>
-    ├── config/<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#16a34a">partier.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All partidata (navn, farge, logo)<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#16a34a">temaer.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Kategorikonfigurasjon<br>
-    │ &nbsp;&nbsp; └── <span style="color:#16a34a">sesjon.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Stortingssesjon-hjelper<br>
-    ├── lib/<br>
-    │ &nbsp;&nbsp; ├── <span style="color:#7c3aed">supabase.ts</span> &nbsp;&nbsp;&nbsp;&nbsp; Supabase-klient (anon-nøkkel)<br>
-    │ &nbsp;&nbsp; └── <span style="color:#7c3aed">categorizationEngine.ts</span><br>
-    ├── hooks/<br>
-    │ &nbsp;&nbsp; └── <span style="color:#d97706">useNettStatus.ts</span> &nbsp;Online/offline-deteksjon<br>
-    └── styles/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CSS per side (mobile-first)
-  </div>
+  <h3>Prototype-side som er fjernet</h3>
+  <p>
+    <code>Prototyper.tsx</code> var en eksperimentell side som ble slettet under utviklingen.
+    Den er ikke lenger registrert som en rute og skal ikke nevnes i dokumentasjon rettet mot brukere.
+  </p>
 
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 7 · Frontend</span>
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 7 · Scripts og datainnsamling</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════ SEKSJON 8-10 ══ -->
-<div class="page">
+<!-- ═══════════════════════════════════════════════ SEKSJON 8 ══ -->
+<div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">8–10 · Politisk kontekst, Status og Teknologi</span>
+    <span class="page-header-chapter">8 · Kategoriseringsmotor</span>
   </div>
 
   <div class="section-header">
     <div class="section-num">8</div>
     <div>
-      <div class="section-label">Kontekst</div>
-      <h2 style="margin-top:0; border:none; padding:0">Partiroller etter valget 2025</h2>
+      <div class="section-label">Fuzzy matching</div>
+      <h2 style="margin-top:0; border:none; padding:0">Kategoriseringsmotor</h2>
     </div>
   </div>
 
-  <p>Systemet er rollebevisst — det betyr noe om partiet sitter i regjering, gir støtte, eller er i opposisjon:</p>
-
-  <div class="parti-grid">
-    <div class="parti-pill" style="background:#fef2f2; color:#991b1b">
-      <div class="parti-pill-name">Ap</div>
-      <div class="parti-pill-role">Regjering</div>
-    </div>
-    <div class="parti-pill" style="background:#fefce8; color:#78350f">
-      <div class="parti-pill-name">Sp</div>
-      <div class="parti-pill-role">Støtteparti</div>
-    </div>
-    <div class="parti-pill" style="background:#fefce8; color:#78350f">
-      <div class="parti-pill-name">SV</div>
-      <div class="parti-pill-role">Støtteparti</div>
-    </div>
-    <div class="parti-pill" style="background:#fefce8; color:#78350f">
-      <div class="parti-pill-name">R</div>
-      <div class="parti-pill-role">Støtteparti</div>
-    </div>
-    <div class="parti-pill" style="background:#fefce8; color:#78350f">
-      <div class="parti-pill-name">MDG</div>
-      <div class="parti-pill-role">Støtteparti</div>
-    </div>
-    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
-      <div class="parti-pill-name">H</div>
-      <div class="parti-pill-role">Opposisjon</div>
-    </div>
-    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
-      <div class="parti-pill-name">FrP</div>
-      <div class="parti-pill-role">Opposisjon</div>
-    </div>
-    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
-      <div class="parti-pill-name">V</div>
-      <div class="parti-pill-role">Opposisjon</div>
-    </div>
-    <div class="parti-pill" style="background:#f1f5f9; color:#1e293b">
-      <div class="parti-pill-name">KrF</div>
-      <div class="parti-pill-role">Opposisjon</div>
-    </div>
-  </div>
-
-  <p>
-    Ap leder en mindretallsregjering (Støre-regjeringen). Sp, SV, R og MDG gir
-    parlamentarisk støtte uten å sitte i regjering. H, FrP, V og KrF er i opposisjon
-    og fremmer egne representantforslag.
+  <p class="lead">
+    Stortingssaker har titler, men ingen forhåndsdefinerte temaetiketter.
+    Sørblikket kategoriserer saker automatisk ved hjelp av fuzzy matching basert på
+    Levenshtein-distanse i <code>src/lib/categorizationEngine.ts</code>.
   </p>
 
-  <div class="section-header" style="margin-top:36px">
-    <div class="section-num">9</div>
-    <div>
-      <div class="section-label">Status</div>
-      <h2 style="margin-top:0; border:none; padding:0">Statusmodellen</h2>
+  <h3>Hva er Levenshtein-distanse?</h3>
+  <p>
+    Levenshtein-distanse er et mål på hvor mange enkeltbokstav-operasjoner (innsetting,
+    sletting eller erstatning) som trengs for å gjøre én streng til en annen.
+    Distansen mellom «klima» og «klime» er 1 (én erstatning). Distansen mellom
+    «helse» og «velferd» er større og indikerer at ordene er ulike konsepter.
+    Fuzzy matching bruker dette til å finne saksord som er <em>nær</em> et nøkkelord,
+    selv om de ikke er identiske — f.eks. på grunn av bøying eller skrivefeil.
+  </p>
+
+  <h3>Scoringsalgoritme</h3>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-step-num">1</div>
+      <div class="flow-step-title">Tokeniser sakstittel</div>
+      <div class="flow-step-body">Del tittelen opp i enkeltord. Konverter til lowercase. Fjern tegnsetting.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">2</div>
+      <div class="flow-step-title">For hvert tema</div>
+      <div class="flow-step-body">Iterer over alle åtte temaer og deres nøkkelordslister fra <code>temaer.ts</code>.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">3</div>
+      <div class="flow-step-title">Beregn distanse</div>
+      <div class="flow-step-body">For hvert saksord og hvert nøkkelord: beregn Levenshtein-distanse. Eksakt treff gir høyest skår.</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-step-num">4</div>
+      <div class="flow-step-title">Velg beste tema</div>
+      <div class="flow-step-body">Temaet med høyest samlet skår vinner. Hvis ingen skår overstiger terskelverdien: tema = «Annet».</div>
     </div>
   </div>
 
+  <h3>Temaer og nøkkelord (utvalg)</h3>
   <table>
     <thead>
-      <tr><th style="width:130px">Status</th><th>Betydning</th><th>Betingelse</th></tr>
+      <tr>
+        <th style="width:160px">Tema</th>
+        <th>Eksempel-nøkkelord</th>
+      </tr>
     </thead>
     <tbody>
       <tr>
-        <td><span class="badge badge-gray">⏳ pending</span></td>
-        <td>Saken er matchet, men ikke votert ennå</td>
-        <td>Ingen voteringsdata funnet</td>
+        <td>Helse og omsorg</td>
+        <td>helse, sykehus, lege, psykisk, omsorg, pleie, pasient, legemiddel, apotek</td>
       </tr>
       <tr>
-        <td><span class="badge badge-green">✅ fulfilled</span></td>
-        <td>Løftet er holdt — partiet stemte for</td>
-        <td>FOR-stemmer > MOT i alle voteringer</td>
+        <td>Klima og miljø</td>
+        <td>klima, miljø, utslipp, fornybar, CO2, energi, natur, biologisk mangfold</td>
       </tr>
       <tr>
-        <td><span class="badge badge-red">❌ broken</span></td>
-        <td>Løftet er brutt — partiet stemte mot</td>
-        <td>MOT-stemmer > FOR i alle voteringer</td>
+        <td>Økonomi og næringsliv</td>
+        <td>skatt, avgift, næringsliv, bedrift, eksport, industri, økonomi, budsjett</td>
       </tr>
       <tr>
-        <td><span class="badge badge-yellow">🟡 partial</span></td>
-        <td>Blandet resultat — delvis holdt</td>
-        <td>Noen FOR, noen MOT voteringer</td>
+        <td>Utdanning og forskning</td>
+        <td>skole, utdanning, forskning, universitet, barnehage, lærer, student</td>
+      </tr>
+      <tr>
+        <td>Samferdsel og infrastruktur</td>
+        <td>vei, jernbane, bane, kollektiv, transport, samferdsel, flyplass, havn</td>
+      </tr>
+      <tr>
+        <td>Justis og sikkerhet</td>
+        <td>politi, kriminalitet, rettssikkerhet, domstol, fengsel, sikkerhet, forsvar</td>
+      </tr>
+      <tr>
+        <td>Arbeid og velferd</td>
+        <td>arbeid, trygd, pensjon, NAV, velferd, arbeidsledighet, lønn, fagforening</td>
+      </tr>
+      <tr>
+        <td>Internasjonale saker</td>
+        <td>NATO, EU, EØS, utenriks, bistand, flyktning, asyl, diplomati</td>
       </tr>
     </tbody>
   </table>
 
-  <div class="section-header" style="margin-top:36px">
-    <div class="section-num">10</div>
-    <div>
-      <div class="section-label">Teknologi</div>
-      <h2 style="margin-top:0; border:none; padding:0">Teknologioversikt</h2>
-    </div>
+  <h3>Begrensninger</h3>
+  <p>
+    Fuzzy matching er ikke perfekt. Saker med generelle titler som «Representantforslag fra
+    stortingsrepresentantene om ...» kan være vanskelige å kategorisere uten at selve lovteksten
+    analyseres. I slike tilfeller faller saken i kategorien «Annet». Kategoriseringen er et
+    hjelpemiddel for navigasjon og filtrering — den erstatter ikke redaksjonell vurdering.
+  </p>
+
+  <div class="page-footer">
+    <span>Sørblikket — Systemarkitektur Oversikt</span>
+    <span>Seksjon 8 · Kategoriseringsmotor</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ AVSLUTNING ══ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-brand">Sørblikket</span>
+    <span class="page-header-chapter">Dokumentsammendrag</span>
   </div>
 
-  <div class="card-grid">
-    <div class="card">
-      <div class="card-title">Frontend</div>
-      <div class="card-body">
-        React 19 · TypeScript · Vite<br>
-        React Router (SPA-ruting)<br>
-        CSS custom properties (ingen rammeverk)<br>
-        Mobile-first responsivt design
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Backend</div>
-      <div class="card-body">
-        Node.js (ES-moduler · .mjs)<br>
-        Anthropic SDK (@anthropic-ai/sdk)<br>
-        Supabase JS SDK<br>
-        Ingen web-server — ren scripting
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Database og hosting</div>
-      <div class="card-body">
-        Supabase (PostgreSQL + REST API)<br>
-        Row Level Security (RLS)<br>
-        Supabase Edge Functions (ikke i bruk ennå)
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">AI</div>
-      <div class="card-body">
-        Anthropic Claude API<br>
-        Modell: claude-opus-4-6<br>
-        Streaming for lange svar<br>
-        Maks 32 000 tokens per kall
-      </div>
-    </div>
+  <h1>Dokumentsammendrag</h1>
+  <p class="lead">
+    Dette dokumentet har gjennomgått Sørblikkets arkitektur i sin helhet.
+    Nedenfor er de viktigste punktene oppsummert.
+  </p>
+
+  <h3>Kjernearkitektur</h3>
+  <ul class="doc-list">
+    <li>Ren klientside-applikasjon — ingen server-proxy, ingen backend driftet av Sørblikket</li>
+    <li>Alle kall til Stortingets API (<code>data.stortinget.no</code>) skjer direkte fra nettleseren via <code>fetch()</code></li>
+    <li>All API-respons fra Stortinget er XML — ingen JSON. Parsing via <code>DOMParser</code> med namespace-bevisste hjelpefunksjoner</li>
+    <li>Auto-refresh hvert 5. minutt med <code>setInterval</code>. Cleanup via <code>clearInterval</code> og <code>AbortController</code></li>
+    <li>Sesjon-ID beregnes fra systemklokkens dato: oktober–desember gir ny sesjon, januar–september gir forrige års sesjon</li>
+  </ul>
+
+  <h3>Supabase brukes kun til én ting</h3>
+  <ul class="doc-list">
+    <li>Supabase er i bruk <em>kun</em> på <code>/parti</code>-siden for valgløfte-chatboten</li>
+    <li>Tabellene <code>valglofte</code> og <code>agder_lofte</code> populeres offline av manuelt kjørte skript</li>
+    <li>Chatboten er nøkkelordssøk med <code>ilike</code>-filtrering — ikke generativ KI i sanntid</li>
+    <li>Claude AI brukes kun i det offline skriptet <code>extract-promises.mjs</code>, aldri i appen selv</li>
+  </ul>
+
+  <h3>Hva som er fjernet</h3>
+  <ul class="doc-list">
+    <li><code>Prototyper.tsx</code> er slettet og ikke lenger en aktiv rute</li>
+    <li><code>match-promises.mjs</code> er slettet — det finnes ingen kobling mellom valgløfter og stortingssaker</li>
+    <li><code>update-status.mjs</code> er slettet — det finnes ingen innfridd/brutt-statussporing</li>
+  </ul>
+
+  <h3>Nøkkelfiler å kjenne til</h3>
+  <div class="kv-list">
+    <span class="kv-key"><code>src/lib/categorizationEngine.ts</code></span>
+    <span class="kv-val">Fuzzy matching med Levenshtein-distanse for kategorisering av saker</span>
+    <span class="kv-key"><code>src/hooks/useStortingetData.ts</code></span>
+    <span class="kv-val">Sentral datafetching-hook med auto-refresh og XML-parsing</span>
+    <span class="kv-key"><code>src/utils/xml.ts</code></span>
+    <span class="kv-val">DOMParser-hjelpefunksjoner for namespace-uavhengig XML-parsing</span>
+    <span class="kv-key"><code>src/utils/dato.ts</code></span>
+    <span class="kv-val">Sesjon-ID-beregning basert på gjeldende dato</span>
+    <span class="kv-key"><code>src/lib/supabase.ts</code></span>
+    <span class="kv-val">Supabase-klient med anon-nøkkel fra miljøvariabel</span>
+    <span class="kv-key"><code>src/config/temaer.ts</code></span>
+    <span class="kv-val">Åtte temaer med nøkkelordslister — brukt av kategoriseringsmotoren</span>
+    <span class="kv-key"><code>extract-promises.mjs</code></span>
+    <span class="kv-val">Offline-skript: laster ned partiprogrammer, kaller Claude AI, lagrer i Supabase</span>
+  </div>
+
+  <div class="info-box" style="margin-top:32px">
+    <strong>Videre lesing:</strong> For detaljert dataflytt med kodeeksempler, miljøvariabeloppsett,
+    feilhåndtering per side og lokal utviklingsguide, se <code>dataflyt-teknisk.html</code>.
   </div>
 
   <div class="page-footer">
-    <span>Sørblikket — Systemarkitektur</span>
-    <span>Seksjon 8–10 · Kontekst, Status og Teknologi</span>
+    <span>Sørblikket — Systemarkitektur Oversikt · v2.0 · April 2026</span>
+    <span>Sørblikket – Agderbenken</span>
   </div>
 </div>
 

@@ -103,12 +103,6 @@ function getCurrentSession(): string {
   return `${year - 1}-${year}`
 }
 
-function getPreviousSession(): string {
-  const cur = getCurrentSession()
-  const startYear = parseInt(cur.split("-")[0], 10)
-  return `${startYear - 1}-${startYear}`
-}
-
 // Tilgjengelige sesjoner (siste 4)
 function getAvailableSessions(): string[] {
   const cur = getCurrentSession()
@@ -388,17 +382,6 @@ function VoteIcon({ vote }: { vote: "for" | "mot" | "ikke_tilstede" }) {
       <path d="M6 10h8" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
     </svg>
   )
-}
-
-type ThemeKey = "klima" | "energi" | "samferdsel" | "levekår"
-
-function guessVoteringTheme(title: string): ThemeKey | null {
-  const t = title.toLowerCase()
-  if (t.includes("klima") || t.includes("utslipp") || t.includes("natur") || t.includes("miljø")) return "klima"
-  if (t.includes("strøm") || t.includes("energi") || t.includes("kraft") || t.includes("fornybar")) return "energi"
-  if (t.includes("vei") || t.includes("tog") || t.includes("bane") || t.includes("transport") || t.includes("kollektiv") || t.includes("jernbane")) return "samferdsel"
-  if (t.includes("helse") || t.includes("velferd") || t.includes("arbeid") || t.includes("trygd") || t.includes("skole") || t.includes("utdanning") || t.includes("barnehage")) return "levekår"
-  return null
 }
 
 export default function Votering({ lang }: VoteringProps) {
@@ -729,7 +712,6 @@ export default function Votering({ lang }: VoteringProps) {
             {filteredSaker.length === 0 ? (
               <p className="vsl-list-empty">{t.noResults}</p>
             ) : filteredSaker.map((sak) => {
-              const th = guessVoteringTheme(sak.kortTittel || sak.tittel)
               const isActive = selectedSakId === sak.id
               return (
                 <button

@@ -6,9 +6,9 @@
  * Viser partier representert på Agderbenken, med partiprogrammer og
  * valgløfter. Bruker Supabase for å laste valgløftedata.
  *
- * Faner per parti:
- *   - "Partiprogram" — lenke til partiets offisielle program
- *   - "Valgløfter"  — løfter fra Supabase med oppfyllelsesstatus
+ * Faner:
+ *   - "Partiprogrammer" — direktelenker til partienes offisielle programmer
+ *   - "Spør chatboten"  — chatbot som søker i valgløfte-databasen fra Supabase
  *
  * Konfigurasjon:
  *   - Partidata (navn, farge, logo, lenker) er i src/config/partier.ts
@@ -28,20 +28,6 @@ import { AGDER_PARTIER } from "../config/partier"
 // Partidata importeres fra src/config/partier.ts — legg til/fjern partier der.
 
 type Lang = "no" | "en"
-
-// ── Supabase-typer ────────────────────────────────────────────────────────────
-
-type LofteSak = {
-  id: string
-  lofte_id: string
-  sak_id: string
-  sak_tittel: string | null
-  sak_dato: string | null
-  notat: string | null
-  status: "pending" | "fulfilled" | "broken" | "partial"
-}
-
-
 
 // ── Chatbot-typer ─────────────────────────────────────────────────────────────
 
@@ -215,17 +201,6 @@ export default function Parti({ lang }: PartiProps) {
           open: "Åpne program",
           read: "Les partiprogram",
           tabPrograms: "Partiprogrammer",
-          tabPromises: "Løfter vs. handling",
-          tabAgder: "Agderbenken",
-          promisesIntro: "Velg et parti for å se hva de lovet i sitt program — og om de har fulgt opp.",
-          selectParty: "Velg parti",
-          loading: "Laster løfter…",
-          noPromises: "Ingen løfter registrert for dette partiet ennå.",
-          linkedCases: "Relaterte saker",
-          noCases: "Ingen saker koblet ennå.",
-          status: "Status",
-          note: "Notat",
-          caseLink: "Se sak",
         }
       : {
           title: "Party Programs",
@@ -233,21 +208,9 @@ export default function Parti({ lang }: PartiProps) {
           open: "Open program",
           read: "Read party program",
           tabPrograms: "Party Programs",
-          tabPromises: "Promises vs. action",
-          tabAgder: "Agder Bench",
-          promisesIntro: "Select a party to see what they promised — and whether they followed through.",
-          selectParty: "Select party",
-          loading: "Loading promises…",
-          noPromises: "No promises registered for this party yet.",
-          linkedCases: "Related cases",
-          noCases: "No cases linked yet.",
-          status: "Status",
-          note: "Note",
-          caseLink: "View case",
         }
 
   const [tab, setTab] = useState<"programs" | "chatbot">("programs")
-  const [selectedParti, setSelectedParti] = useState<string | null>(null)
 
   // Chatbot state
   const [chatInput, setChatInput] = useState("")

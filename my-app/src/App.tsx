@@ -60,7 +60,7 @@ function Footer({ lang }: { lang: "no" | "en" }) {
           <NavLink to="/votering" className="site-footer-link">{no ? "Stemmegivning" : "Voting"}</NavLink>
           <NavLink to="/representanter" className="site-footer-link">{no ? "Representanter" : "Representatives"}</NavLink>
           <NavLink to="/parti" className="site-footer-link">{no ? "Partiprogrammer" : "Party Programs"}</NavLink>
-          <NavLink to="/om" className="site-footer-link">{no ? "Om Agderbenken" : "About"}</NavLink>
+          <NavLink to="/om" className="site-footer-link">{no ? "Om Sørblikket" : "About"}</NavLink>
           <NavLink to="/personvern" className="site-footer-link">{no ? "Personvern" : "Privacy"}</NavLink>
         </nav>
 
@@ -235,7 +235,7 @@ export default function App() {
         <Route path="/om"           element={<Om lang={lang} />} />
         <Route path="/votering"     element={<Votering lang={lang} />} />
         <Route path="/personvern"   element={<Personvern lang={lang} />} />
-{/* Ukjente URL-er sendes tilbake til forsiden */}
+        {/* Ukjente URL-er sendes tilbake til forsiden */}
         <Route path="*"             element={<Navigate to="/" replace />} />
       </Routes>
 

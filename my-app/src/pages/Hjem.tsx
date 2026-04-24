@@ -152,7 +152,7 @@ export default function Hjem({ lang }: HjemProps) {
           </div>
           <div className="fp-feature-body">
             <p className="fp-feature-label">01</p>
-            <h2 className="fp-feature-title">{no ? "Statistikk" : "Statistics"}</h2>
+            <h2 className="fp-feature-title">{no ? "Saker og statistikk" : "Cases and statistics"}</h2>
             <p className="fp-feature-desc">
               {no
                 ? "Nøkkeltall, temafordeling og aktivitetstrender for Agderbenkens saker på Stortinget."
@@ -218,8 +218,8 @@ export default function Hjem({ lang }: HjemProps) {
             <h2 className="fp-feature-title">{no ? "Partiprogrammer" : "Party Programs"}</h2>
             <p className="fp-feature-desc">
               {no
-                ? "Hva lovet partiene velgerne? Programmer og valgløfter opp mot faktisk handling."
-                : "What did parties promise voters? Programs and pledges vs. actual action."}
+                ? "Hva lovet partiene velgerne? Utforsk partiprogrammer og søk blant valgløfter."
+                : "What did parties promise voters? Browse party programs and search election pledges."}
             </p>
           </div>
           <span className="fp-feature-arrow">

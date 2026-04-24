@@ -31,11 +31,11 @@ type NavbarProps = {
 
 const LENKER = [
   { to: "/",                labelNo: "Forside",         labelEn: "Home" },
-  { to: "/statistikk",     labelNo: "Statistikk",      labelEn: "Statistics" },
+  { to: "/statistikk",     labelNo: "Saker",            labelEn: "Cases" },
   { to: "/votering",       labelNo: "Stemmegivning",   labelEn: "Voting" },
   { to: "/representanter", labelNo: "Representanter",  labelEn: "Representatives" },
   { to: "/parti",          labelNo: "Partiprogrammer", labelEn: "Party Programs" },
-  { to: "/om",             labelNo: "Om Agderbenken",  labelEn: "About" },
+  { to: "/om",             labelNo: "Om Sørblikket",   labelEn: "About" },
 ]
 
 // ── SVG-ikoner ────────────────────────────────────────────────────────────────

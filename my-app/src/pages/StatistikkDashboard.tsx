@@ -22,14 +22,13 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   categorizeCases,
   getAllThemes,
-  getThemeStats,
   searchCases,
   type CaseItem,
   type ThemeKey,
 } from "../lib/categorizationEngine"
 
 type Lang = "no" | "en"
-type ForsideProps = { lang: Lang }
+type Props = { lang: Lang }
 type CaseDetail = {
   title: string
   shortTitle: string
@@ -41,9 +40,6 @@ type CaseDetail = {
 
 const TEXT: Record<Lang, Record<string, string>> = {
   no: {
-    title: "Agder · Stortinget",
-    subtitle: "Oversikt over saker fra Stortinget",
-    statsHeading: "Statistikk",
     statsLead: "Denne siden samler alle saker fra Stortingets API i én oversikt. Du kan søke, velge tema, åpne enkeltsaker og få rask innsikt i status og utvikling.",
     howToUse: "Slik bruker du siden",
     introStep1Title: "Finn saker raskt",
@@ -51,106 +47,32 @@ const TEXT: Record<Lang, Record<string, string>> = {
     introStep2Title: "Velg tema og sammenlign",
     introStep2Text: "Bytt mellom temaene for å se hva som dominerer og hvilke saker som hører sammen.",
     introStep3Title: "Forstå helheten",
-    introStep3Text: "Nederst ser du nøkkeltall, statusfordeling, komitéaktivitet og datakvalitet.",
+    introStep3Text: "Nederst ser du nøkkeltall, statusfordeling og komitéaktivitet.",
     cases: "saker",
     session: "Sesjon",
     updated: "Sist oppdatert",
-    source: "Kilde",
-    sourceValue: "Stortingets åpne data (XML API)",
-    language: "English",
-    dark: "Mørk",
-    light: "Lys",
     searchPlaceholder: "Søk i alle saker (tittel, komité, type, status eller saksnummer)...",
-    allCasesLabel: "Søk i alle saker",
-    searchAcrossAll: "Søker i alle saker",
-    searchModeLabel: "Søkemodus: alle saker",
-    themeModeLabel: "Temavalg og saker i tema",
-    clearSearch: "Nullstill",
-    creativeDashboards: "Innsiktsdashboards",
-    creativeDashboardsDesc: "Topp 3-oversikt for tema, komité og aktivitetsnivå.",
-    themeCards: "Temakort",
-    activityTrend: "Aktivitet siste måneder",
-    topCommittees: "Mest aktive komiteer",
-    latestCase: "Nyeste sak",
-    latestCaseDesc: "Siste registrerte sak fra Stortingets API",
-    shareOfAllCases: "andel av alle saker",
-    shareOfSelectedTheme: "av valgt tema",
-    largestTheme: "Største tema",
-    topCommittee: "Mest aktiv komité",
-    avgPerMonth: "Snitt saker/måned",
-    found: "funnet",
-    inTheme: "i",
     loading: "Laster saker...",
     noCases: "Ingen saker funnet",
     selectCase: "Velg en sak",
     status: "Status",
     type: "Type",
     date: "Dato",
-    totalInTheme: "Saker i valgt tema",
-    treated: "Behandlet",
-    inProgress: "Til behandling",
-    received: "Mottatt",
-    otherStatus: "Andre saker",
-    statusOverview: "Statusoversikt",
-    statusHelp: "Fordeling av saksstatus i hele datasettet. Prosenten regnes av totalt antall hentede saker.",
-    typeOverview: "Sakstyper",
-    typeHelp: "De vanligste sakstypene i aktiv sesjon.",
-    explorerHelp: "Start med søk i alle saker, eller velg et tema for en mer fokusert liste.",
     selectedCaseHelp: "Her ser du detaljer for saken du har valgt, med lenke til originalkilden.",
-    kpiHelp: "Nøkkeltall som viser hvordan saker i valgt tema fordeler seg på status.",
-    creativeHelp: "Alternative visninger som raskt viser hva som dominerer i datasettet.",
-    qualitySectionHelp: "Datagrunnlag og komitéaktivitet samlet på ett sted.",
-    themeBalance: "Temabalanse",
-    themeHelp: "Hvor stor andel av alle saker hvert tema utgjør.",
-    monthTrend: "Månedstrend",
-    monthHelp: "Antall registrerte saker per måned basert på saksdato.",
-    quality: "Datakvalitet",
-    qualityHelp: "Kontrollkort for sesjon, volum og oppdateringsfrekvens.",
-    votingSummary: "Voteringsoppsummering",
-    votingHelp: "Enkel visning av hva de stemte over og hvem som stemte for eller mot.",
-    votingDecisions: "Hva skjedde i voteringene?",
-    noVoting: "Ingen voteringsdata tilgjengelig",
-    caseInfoTitle: "Sammendrag av saken",
-    quickRead: "Kort fortalt",
     openCase: "Åpne saken hos Stortinget",
     caseId: "Saksnummer",
+    caseInfoTitle: "Sammendrag av saken",
     caseInfoLoading: "Laster mer info om saken...",
     caseInfoMissing: "Fant ikke mer info om denne saken.",
-    recommendation: "Forslag fra komiteen",
+    quickRead: "Kort fortalt",
+    reference: "Hentet fra",
     decisionText: "Dette ble bestemt",
     shortDecision: "Kort forklart",
-    reference: "Hentet fra",
-    decisions: "vedtak",
-    forVotes: "For",
-    againstVotes: "Mot",
-    absentVotes: "Ikke til stede",
-    voteBalance: "Stemmebalanse",
-    majority: "Flertall",
-    proposalsTitle: "Forslag i denne voteringen",
-    simpleExplanation: "Kort forklart",
-    whatTheyVotedOn: "Hva stemte de over?",
-    forMeans: "Stemte for forslaget",
-    againstMeans: "Stemte mot forslaget",
-    whatWasDecided: "Hva ble bestemt?",
-    noDecisions: "Det finnes ingen vedtakstekst for denne voteringen enda.",
-    proposalType: "Forslagstype",
-    proposalLabel: "Forslag",
-    proposalText: "Forslagstekst",
-    noProposals: "Ingen forslagstekst registrert",
+    latestCase: "Nyeste sak",
+    latestCaseDesc: "Siste registrerte sak fra Stortingets API",
     footer: "Data hentet fra Stortinget",
-    passed: "Vedtatt",
-    rejected: "Ikke vedtatt",
-    tie: "Uavgjort",
-    resultForKids: "Kort resultat",
-    simpleSteps: "Slik leser du dette",
-    step1: "Se hva de stemte over.",
-    step2: "Se hvem som fikk flest stemmer.",
-    step3: "Les hva som ble bestemt.",
   },
   en: {
-    title: "Agder · Stortinget",
-    subtitle: "Overview of cases from Parliament",
-    statsHeading: "Statistics",
     statsLead: "This page gathers all cases from the Storting API in one overview. You can search, select a theme, open individual cases and quickly understand status and trends.",
     howToUse: "How to use this page",
     introStep1Title: "Find cases quickly",
@@ -158,101 +80,30 @@ const TEXT: Record<Lang, Record<string, string>> = {
     introStep2Title: "Select a theme and compare",
     introStep2Text: "Switch between themes to see what dominates and which cases belong together.",
     introStep3Title: "Understand the full picture",
-    introStep3Text: "Further down you get key numbers, status distribution, committee activity and data quality.",
+    introStep3Text: "Further down you get key numbers, status distribution and committee activity.",
     cases: "cases",
     session: "Session",
     updated: "Last updated",
-    source: "Source",
-    sourceValue: "Storting open data (XML API)",
-    language: "Norsk",
-    dark: "Dark",
-    light: "Light",
     searchPlaceholder: "Search all cases (title, committee, type, status or case ID)...",
-    allCasesLabel: "Search all cases",
-    searchAcrossAll: "Searching across all cases",
-    searchModeLabel: "Search mode: all cases",
-    themeModeLabel: "Theme selection and themed cases",
-    clearSearch: "Clear",
-    creativeDashboards: "Insight dashboards",
-    creativeDashboardsDesc: "Top 3 overview of themes, committees and activity level.",
-    themeCards: "Theme cards",
-    activityTrend: "Activity in recent months",
-    topCommittees: "Most active committees",
-    latestCase: "Latest case",
-    latestCaseDesc: "Most recently registered case from the Storting API",
-    shareOfAllCases: "share of all cases",
-    shareOfSelectedTheme: "of selected theme",
-    largestTheme: "Largest theme",
-    topCommittee: "Most active committee",
-    avgPerMonth: "Avg cases/month",
-    found: "found",
-    inTheme: "in",
     loading: "Loading cases...",
     noCases: "No cases found",
     selectCase: "Select a case",
     status: "Status",
     type: "Type",
     date: "Date",
-    totalInTheme: "Cases in selected theme",
-    treated: "Processed",
-    inProgress: "In progress",
-    received: "Received",
-    otherStatus: "Other cases",
-    statusOverview: "Status overview",
-    statusHelp: "Case status distribution for the full dataset. Percentages are based on total fetched cases.",
-    typeOverview: "Case types",
-    typeHelp: "Most common case types in the active session.",
-    explorerHelp: "Start by searching all cases, or select a theme for a focused list.",
     selectedCaseHelp: "Details for the selected case, including a direct link to the source.",
-    kpiHelp: "Key numbers showing how the selected theme is distributed by status.",
-    creativeHelp: "Alternative views that quickly show what dominates the dataset.",
-    qualitySectionHelp: "Dataset quality and committee activity in one place.",
-    themeBalance: "Theme balance",
-    themeHelp: "Each theme's share of all fetched cases.",
-    monthTrend: "Monthly trend",
-    monthHelp: "Number of registered cases per month based on case date.",
-    quality: "Data quality",
-    qualityHelp: "Control cards for session, data volume and refresh timing.",
-    votingSummary: "Voting summary",
-    votingHelp: "Simple view of what they voted on and who voted for or against.",
-    votingDecisions: "What happened in the votes?",
-    noVoting: "No voting data available",
-    caseInfoTitle: "Case summary",
-    quickRead: "In short",
     openCase: "Open case at Stortinget",
     caseId: "Case number",
+    caseInfoTitle: "Case summary",
     caseInfoLoading: "Loading more case info...",
     caseInfoMissing: "Could not find more info for this case.",
-    recommendation: "Proposal from committee",
+    quickRead: "In short",
+    reference: "Fetched from",
     decisionText: "This was decided",
     shortDecision: "In short",
-    reference: "Fetched from",
-    decisions: "decisions",
-    forVotes: "For",
-    againstVotes: "Against",
-    absentVotes: "Absent",
-    voteBalance: "Vote balance",
-    majority: "Majority",
-    proposalsTitle: "Proposals in this vote",
-    simpleExplanation: "In simple words",
-    whatTheyVotedOn: "What did they vote on?",
-    forMeans: "Voted for the proposal",
-    againstMeans: "Voted against the proposal",
-    whatWasDecided: "What was decided?",
-    noDecisions: "No decision text is available for this vote yet.",
-    proposalType: "Proposal type",
-    proposalLabel: "Proposal",
-    proposalText: "Proposal text",
-    noProposals: "No proposal text registered",
+    latestCase: "Latest case",
+    latestCaseDesc: "Most recently registered case from the Storting API",
     footer: "Data from Stortinget",
-    passed: "Passed",
-    rejected: "Rejected",
-    tie: "Tie",
-    resultForKids: "Simple result",
-    simpleSteps: "How to read this",
-    step1: "See what they voted on.",
-    step2: "See who got most votes.",
-    step3: "Read what was decided.",
   },
 }
 
@@ -356,21 +207,6 @@ function normalizeStatus(value: string): string {
   return String(value || "").toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_")
 }
 
-function compactLabel(value: string, max = 30): string {
-  const text = String(value || "").trim()
-  if (text.length <= max) return text
-  return `${text.slice(0, max - 1).trimEnd()}…`
-}
-
-function formatMonthLabel(value: string, lang: Lang): string {
-  const [year, month] = String(value || "").split("-")
-  if (!year || !month) return value
-  const d = new Date(`${year}-${month}-01T00:00:00`)
-  if (Number.isNaN(d.getTime())) return value
-  const locale = lang === "no" ? "nb-NO" : "en-GB"
-  return d.toLocaleDateString(locale, { month: "short", year: "numeric" })
-}
-
 function friendlyStatus(status: string, lang: Lang): string {
   const key = normalizeStatus(status)
   const mapNo: Record<string, string> = {
@@ -390,80 +226,6 @@ function friendlyStatus(status: string, lang: Lang): string {
     bortfalt: "No longer active",
   }
   return (lang === "no" ? mapNo[key] : mapEn[key]) || status
-}
-
-function StatCard({
-  label,
-  value,
-  accent,
-  total,
-  t,
-}: {
-  label: string
-  value: number
-  accent: string
-  total?: number
-  t: (key: string) => string
-}) {
-  const pct = total && total > 0 ? Math.round((value / total) * 100) : null
-  return (
-    <article className="home-stat">
-      <p>{label}</p>
-      <strong style={{ color: accent }}>{value}</strong>
-      {pct !== null && <small>{pct}% {t("shareOfSelectedTheme")}</small>}
-    </article>
-  )
-}
-
-function MetricBars({ rows, total }: { rows: Array<{ label: string; value: number }>; total: number }) {
-  return (
-    <div className="home-metric-list">
-      {rows.map((row) => {
-        const pct = total > 0 ? Math.round((row.value / total) * 100) : 0
-        return (
-          <div key={row.label} className="home-metric-row">
-            <div className="home-metric-meta">
-              <span>{row.label}</span>
-              <small>
-                {row.value} ({pct}%)
-              </small>
-            </div>
-            <div className="home-metric-track">
-              <div className="home-metric-fill" style={{ width: `${Math.min(100, pct)}%` }} />
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-type DashboardIconType = "theme" | "committee" | "trend"
-
-function DashboardIcon({ type }: { type: DashboardIconType }) {
-  if (type === "theme") {
-    return (
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-        <path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2L12 3z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M5 4v2M4 5h2M19 18v2M18 19h2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    )
-  }
-  if (type === "committee") {
-    return (
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-        <rect x="3" y="8" width="7" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
-        <rect x="10" y="4" width="11" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
-        <path d="M13 8h4M13 12h4M13 16h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    )
-  }
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-      <path d="M4 16l6-6 4 4 6-6" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16 8h4v4" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
 }
 
 function ThemeSymbol({ theme }: { theme: ThemeKey }) {
@@ -523,46 +285,6 @@ function ThemeSymbol({ theme }: { theme: ThemeKey }) {
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
       <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z" fill="none" stroke="currentColor" strokeWidth="2" />
     </svg>
-  )
-}
-
-function PodiumMini({
-  title,
-  items,
-  iconType,
-}: {
-  title: string
-  items: Array<{ label: string; value: number }>
-  iconType: DashboardIconType
-}) {
-  if (items.length === 0) return null
-  const max = Math.max(...items.map((i) => i.value), 1)
-  const ordered = [items[1], items[0], items[2]].filter(Boolean) as Array<{ label: string; value: number }>
-
-  return (
-    <article className="home-podium-card">
-      <div className="home-podium-head">
-        <span className="home-title-icon">
-          <DashboardIcon type={iconType} />
-        </span>
-        <small>{title}</small>
-      </div>
-      <div className="home-podium-stage">
-        {ordered.map((item, i) => {
-          const place = i === 1 ? 1 : i === 0 ? 2 : 3
-          const height = Math.max(54, Math.round((item.value / max) * 100))
-          return (
-            <div key={`${title}-${place}-${item.label}`} className={`home-podium-col place-${place}`}>
-              <div className="home-podium-bar" style={{ height: `${height}px` }}>
-                <b>#{place}</b>
-                <strong>{item.value}</strong>
-              </div>
-              <span title={item.label}>{item.label}</span>
-            </div>
-          )
-        })}
-      </div>
-    </article>
   )
 }
 
@@ -639,7 +361,7 @@ function caseTypeIcon(type: string): { cls: string; svg: React.ReactNode } {
   }
 }
 
-export default function StatistikkDashboard({ lang }: ForsideProps) {
+export default function StatistikkDashboard({ lang }: Props) {
   const [selectedTheme, setSelectedTheme] = useState<ThemeKey | null>(null)
   const [stripTheme, setStripTheme] = useState<ThemeKey>("klima")
   const [searchTerm, setSearchTerm] = useState("")
@@ -682,7 +404,6 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
 
   const t = (key: string) => TEXT[lang][key] || key
   const themes = getAllThemes()
-  const stats = getThemeStats(Object.values(categorizedCases).flat(), stripTheme)
 
   useEffect(() => {
     async function fetchCases() {
@@ -752,7 +473,6 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
   const globalAktive = allCases.filter(c => String(c.status || "").toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_") === "til_behandling").length
   const globalMottatt = allCases.filter(c => String(c.status || "").toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_") === "mottatt").length
 
-  const otherStatus = Math.max(0, stats.total - stats.statusCounts.behandlet - stats.statusCounts.til_behandling - stats.statusCounts.mottatt)
   const themeCards = useMemo(() => {
     const safeTotal = Math.max(1, totalCases)
     return (Object.keys(themes) as ThemeKey[]).map((key) => ({
@@ -828,76 +548,6 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
     [allCases]
   )
 
-  const statusOverview = useMemo(() => {
-    const labels: Record<string, string> =
-      lang === "no"
-        ? {
-            behandlet: "Behandlet",
-            til_behandling: "Til behandling",
-            mottatt: "Mottatt",
-            varslet: "Varslet",
-            trukket: "Trukket",
-            bortfalt: "Bortfalt",
-            ukjent: "Ukjent",
-          }
-        : {
-            behandlet: "Processed",
-            til_behandling: "In progress",
-            mottatt: "Received",
-            varslet: "Notified",
-            trukket: "Withdrawn",
-            bortfalt: "Expired",
-            ukjent: "Unknown",
-          }
-
-    const map = new Map<string, number>()
-    allCases.forEach((c) => {
-      const key = normalizeStatus(c.status) || "ukjent"
-      map.set(key, (map.get(key) || 0) + 1)
-    })
-
-    return Array.from(map.entries())
-      .map(([key, value]) => ({ label: labels[key] || key, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6)
-  }, [allCases, lang])
-
-  const typeOverview = useMemo(() => {
-    const map = new Map<string, number>()
-    allCases.forEach((c) => {
-      const key = c.type || (lang === "no" ? "ukjent" : "unknown")
-      map.set(key, (map.get(key) || 0) + 1)
-    })
-
-    return Array.from(map.entries())
-      .map(([label, value]) => ({ label, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6)
-  }, [allCases, lang])
-
-  const podiumTheme = useMemo(
-    () =>
-      [...themeCards]
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 3)
-        .map((x) => ({ label: compactLabel(x.name, 26), value: x.count })),
-    [themeCards]
-  )
-
-  const podiumCommittees = useMemo(
-    () => topCommittees.slice(0, 3).map(([label, value]) => ({ label: compactLabel(label, 34), value })),
-    [topCommittees]
-  )
-
-  const podiumMonths = useMemo(
-    () =>
-      [...monthTrend]
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 3)
-        .map((x) => ({ label: formatMonthLabel(x.label, lang), value: x.value })),
-    [monthTrend, lang]
-  )
-
   useEffect(() => {
     if (!selectedCase?.id) {
       setSelectedCaseDetail(null)
@@ -932,37 +582,6 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
 
   return (
     <main className="home-page">
-      <section className="home-hero">
-        <div>
-          <p className="home-kicker">Regionens øye på Stortinget</p>
-          <h1>{lang === "no" ? "Sørblikket" : "Sørblikket"}</h1>
-          <p className="home-hero-sub">{lang === "no" ? "Oversikt over saker, stemmegivning og valgløfter fra Agderbenkens representanter på Stortinget." : "Overview of cases, votes and election promises from Agder's representatives in the Storting."}</p>
-          <div className="home-hero-meta">
-            <span>{totalCases} {t("cases")}</span>
-            <span>{t("session")}: {sessionId || "-"}</span>
-            <span>{t("updated")}: {updatedAt ? updatedAt.toLocaleTimeString(lang === "no" ? "no-NO" : "en-GB") : "-"}</span>
-          </div>
-          <button type="button" className="home-howto-btn" onClick={openHowTo} aria-label="Slik bruker du siden" style={{marginTop:"14px"}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            {lang === "no" ? "Slik bruker du siden" : "How to use"}
-          </button>
-        </div>
-        <div className="home-hero-stats">
-          <div className="home-hero-stat">
-            <strong>{totalCases}</strong>
-            <span>{lang === "no" ? "Saker" : "Cases"}</span>
-          </div>
-          <div className="home-hero-stat">
-            <strong>{globalBehandlet}</strong>
-            <span>{lang === "no" ? "Behandlet" : "Processed"}</span>
-          </div>
-          <div className="home-hero-stat">
-            <strong>{globalAktive}</strong>
-            <span>{lang === "no" ? "Aktive" : "Active"}</span>
-          </div>
-        </div>
-      </section>
-
       <section className="home-theme-strip">
         {themeCards.map((card) => (
           <article
@@ -1073,6 +692,11 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
           </div>
         </section>
       )}
+
+      <div className="page-section-divider">
+        <h2 className="page-section-heading">{lang === "no" ? "Saker" : "Cases"}</h2>
+        <span className="page-section-count">{combinedCases.length} {lang === "no" ? "saker" : "cases"}</span>
+      </div>
 
       <section className="home-unified-explorer home-dashboard-block">
         <div className="home-unified-search">
@@ -1233,6 +857,11 @@ export default function StatistikkDashboard({ lang }: ForsideProps) {
       </section>
 
       {/* ═══ SIGNAL DASHBOARD ═══ */}
+      <div className="page-section-divider">
+        <h2 className="page-section-heading">{lang === "no" ? "Statistikk" : "Statistics"}</h2>
+        <span className="page-section-count">{lang === "no" ? `Sesjon ${sessionId}` : `Session ${sessionId}`}</span>
+      </div>
+
       <div className="sig-dashboard">
 
         {/* KPI row */}

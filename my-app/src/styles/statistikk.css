@@ -1,5 +1,27 @@
 /* ── Statistikk — signal-dashboard, cookie, howto (sig-*, home-*) */
 
+/* ── Section dividers (Saker / Statistikk) ──────────────────────────── */
+.page-section-divider {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 36px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--line, #e5e7eb);
+}
+.page-section-heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.page-section-count {
+  font-size: 0.85rem;
+  color: var(--muted, #6b7280);
+  font-weight: 500;
+}
+
 .home-dashboard-block{margin-top:4px}
 .home-section-note{
   margin:0 2px 4px;

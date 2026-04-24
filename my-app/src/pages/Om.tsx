@@ -40,9 +40,9 @@ const partners: Partner[] = [
 const T: Record<Lang, Record<string, string>> = {
   no: {
     heroTitle: "Om Sørblikket",
-    sbP1: "Prosjektet er utviklet som en bacheloroppgave i samarbeid med Digin. Målet er en digital løsning som viser hvordan Sørblikket leverer for regionen med bruk av åpne data, KI og visualisering.",
-    sbP2: "Løsningen viser stemmemønstre, prioriteringer og forholdet mellom løfter og handling. Dette skal gjøre politikken mer forståelig for innbyggere, unge velgere, journalister og regionale aktører.",
-    sbP3: "Data hentes fra Stortingets åpne API, Valgdirektoratet, partiprogrammer og andre offentlige kilder.",
+    sbP1: "Sørblikket er et digitalt innsiktsverktøy som gjør det enkelt å følge med på hva Agderbenkens stortingsrepresentanter faktisk gjør — ikke bare hva de lover.",
+    sbP2: "Dashboardet samler saker, stemmeoversikter og partiinformasjon på ett sted. Du kan søke i alle saker fra Stortinget, se hvem som stemte for eller mot, og sjekke hva partiene lovet velgerne opp mot hva de faktisk har stemt for.",
+    sbP3: "Alt bygger på åpne data fra Stortingets API. Prosjektet er utviklet som en bacheloroppgave i samarbeid med Digin.",
     abTitle: "Om Agderbenken",
     abIntro: "Agderbenken består av stortingsrepresentantene som er valgt inn fra Agder fylke. De representerer ulike politiske partier, men har et felles ansvar for å ivareta interessene til innbyggerne i regionen. I saker som er spesielt viktige for Agder, samarbeider de på tvers av partigrenser. Agderbenken spiller derfor en sentral rolle i å løfte regionale utfordringer og muligheter opp på nasjonalt nivå.",
     v1h: "Innovasjon", v1d: "Vi søker nye løsninger på Agders utfordringer.",
@@ -63,9 +63,9 @@ const T: Record<Lang, Record<string, string>> = {
   },
   en: {
     heroTitle: "About Sørblikket",
-    sbP1: "This project was developed as a bachelor thesis in collaboration with Digin. The goal is a digital solution showing how Sørblikket delivers for the region using open data, AI, and visualization.",
-    sbP2: "The solution highlights voting patterns, priorities, and the relationship between promises and actions. This helps make politics easier to understand for citizens, young voters, journalists, and regional stakeholders.",
-    sbP3: "Data is sourced from Stortinget open API, the Norwegian Election Directorate, party programs, and other public sources.",
+    sbP1: "Sørblikket is a digital insight tool that makes it easy to follow what Agder's parliamentary representatives actually do — not just what they promise.",
+    sbP2: "The dashboard gathers cases, voting records and party information in one place. Search all Storting cases, see who voted for or against, and compare party promises with actual voting records.",
+    sbP3: "Everything is built on open data from the Storting API. The project was developed as a bachelor thesis in collaboration with Digin.",
     abTitle: "About the Agder Bench",
     abIntro: "The Agder Bench consists of parliamentary representatives elected from Agder county. They represent different political parties, but share a common responsibility to serve the interests of the region's citizens. On matters especially important to Agder, they collaborate across party lines. The Agder Bench therefore plays a central role in raising regional challenges and opportunities to the national level.",
     v1h: "Innovation", v1d: "We seek new solutions to Agder's challenges.",

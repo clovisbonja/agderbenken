@@ -494,19 +494,6 @@ export default function Representanter({ lang }: RepresentanterProps) {
         </div>
         <div className="ed-page-hero-panel" aria-hidden />
       </section>
-      <div className="rp-hero" style={{display:"none"}}>
-        <div className="rp-hero-inner">
-          <div className="rp-hero-left">
-          </div>
-          {!loading && !error && (
-            <div className="rp-hero-stat">
-              <span className="rp-hero-stat-num">{sortedRepresentanter.length}</span>
-              <span className="rp-hero-stat-lbl">{lang === "no" ? "representanter" : "representatives"}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* ── BODY ── */}
       <div className="rp-body">
         {loading && (

@@ -261,7 +261,7 @@
     <div class="cover-toc-item"><span class="cover-toc-num">B</span>AI-prompter forklart</div>
     <div class="cover-toc-item"><span class="cover-toc-num">C</span>Miljøvariabler</div>
     <div class="cover-toc-item"><span class="cover-toc-num">D</span>Feilhåndtering</div>
-    <div class="cover-toc-item"><span class="cover-toc-num">E</span>Frontend-detaljer</div>
+    <div class="cover-toc-item"><span class="cover-toc-num">E</span>Frontend og navigasjon</div>
     <div class="cover-toc-item"><span class="cover-toc-num">F</span>Driftsanvisning</div>
   </div>
 </div>
@@ -349,12 +349,12 @@
       <div class="flow-conn">+<div class="flow-conn-label">live</div></div>
       <div class="flow-node">
         <div class="flow-node-label">Stortinget API (live)</div>
-        <div class="flow-node-detail">/representanter · /voteringer (direkte fra nettleser)</div>
+        <div class="flow-node-detail">/saker · /voteringer · /representanter · /sak (direkte fra nettleser)</div>
       </div>
       <div class="flow-conn">→<div class="flow-conn-label">React<br>render</div></div>
       <div class="flow-node">
         <div class="flow-node-label">Sørblikket nettside</div>
-        <div class="flow-node-detail">SPA · Alle sider · Mobil + desktop</div>
+        <div class="flow-node-detail">SPA · 7 sider · Auto-refresh 5 min · Mobil + desktop</div>
       </div>
     </div>
   </div>
@@ -705,10 +705,10 @@
 <div class="page page-break">
   <div class="page-header">
     <span class="page-header-brand">Sørblikket</span>
-    <span class="page-header-chapter">E · Frontend-detaljer</span>
+    <span class="page-header-chapter">E · Frontend og navigasjon</span>
   </div>
 
-  <h1>E — Frontend-detaljer</h1>
+  <h1>E — Frontend og navigasjon</h1>
 
   <h2>Temahåndtering — Brave-kompatibel mørk modus</h2>
   <p>
@@ -767,6 +767,31 @@
     </div>
   </div>
 
+  <h2>Sidestruktur — Saker og statistikk</h2>
+  <p>
+    Sider-siden (<code>/statistikk</code>) er delt i to tydelige seksjoner med egne overskrifter:
+  </p>
+  <div class="card-row">
+    <div class="card card-l">
+      <div class="card-title">Øverst — Saker</div>
+      <div style="font-size:9.5pt; line-height:1.75; color:#374151">
+        Søkefelt, temafiltre og saksliste.<br>
+        Henter fra <code>/eksport/saker</code>.<br>
+        Klikk på sak → detaljer ved siden av.<br>
+        Fuzzy-kategorisering i <code>categorizationEngine.ts</code>.
+      </div>
+    </div>
+    <div class="card card-green">
+      <div class="card-title">Nedenfor — Statistikk</div>
+      <div style="font-size:9.5pt; line-height:1.75; color:#374151">
+        KPI-kort (totalt, behandlet, til behandling, i kø).<br>
+        Sesjonsfremdriftsbar.<br>
+        Temafordeling og månedsgraf.<br>
+        Alle tall fra samme <code>/eksport/saker</code>-kall.
+      </div>
+    </div>
+  </div>
+
   <h2>Språkdeteksjon</h2>
   <p>
     Systemet auto-detekterer brukerens språk fra nettleseren og maskinen,
@@ -786,7 +811,7 @@
   <h2>Mobilnavigasjon — Hamburgermeny</h2>
   <p>
     På skjermer smalere enn 768px skjules den horisontale navbaren og erstattes
-    av en hamburgermeny. Menyen lukkes automatisk ved:
+    av en hamburgermeny. Navigasjonslenker: Forside, Saker, Stemmegivning, Representanter, Partiprogrammer, Om Sørblikket. Menyen lukkes automatisk ved:
   </p>
 
   <div class="card-row-3">

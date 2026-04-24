@@ -99,7 +99,7 @@ export default function Statistikk({ lang }: StatistikkProps) {
       <section className="ed-page-hero">
         <div className="ed-page-hero-content">
           <p className="ed-page-hero-kicker">Stortinget · Agder</p>
-          <h1 className="ed-page-hero-heading">{no ? "Statistikk" : "Statistics"}</h1>
+          <h1 className="ed-page-hero-heading">{no ? "Saker og statistikk" : "Cases and statistics"}</h1>
           <p className="ed-page-hero-lead">
             {no
               ? "Nøkkeltall, temafordeling og aktivitetstrender for Agderbenkens saker på Stortinget."

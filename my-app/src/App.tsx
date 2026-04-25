@@ -56,7 +56,7 @@ function Footer({ lang }: { lang: "no" | "en" }) {
         <nav className="site-footer-nav" aria-label={no ? "Sidelenker" : "Page links"}>
           <span className="site-footer-nav-label">{no ? "Sider" : "Pages"}</span>
           <NavLink to="/" end className="site-footer-link">{no ? "Forside" : "Home"}</NavLink>
-          <NavLink to="/statistikk" className="site-footer-link">{no ? "Statistikk" : "Statistics"}</NavLink>
+          <NavLink to="/statistikk" className="site-footer-link">{no ? "Saker" : "Cases"}</NavLink>
           <NavLink to="/votering" className="site-footer-link">{no ? "Stemmegivning" : "Voting"}</NavLink>
           <NavLink to="/representanter" className="site-footer-link">{no ? "Representanter" : "Representatives"}</NavLink>
           <NavLink to="/parti" className="site-footer-link">{no ? "Partiprogrammer" : "Party Programs"}</NavLink>
@@ -64,14 +64,22 @@ function Footer({ lang }: { lang: "no" | "en" }) {
           <NavLink to="/personvern" className="site-footer-link">{no ? "Personvern" : "Privacy"}</NavLink>
         </nav>
 
-        {/* Datakilder og samarbeidspartnere */}
+        {/* Datakilder */}
         <div className="site-footer-meta">
           <span className="site-footer-nav-label">{no ? "Datakilder" : "Data sources"}</span>
           <a className="site-footer-link" href="https://data.stortinget.no" target="_blank" rel="noopener noreferrer">
             {no ? "Stortingets åpne data API" : "Storting Open Data API"}
           </a>
-          <a className="site-footer-link" href="https://data.stortinget.no" target="_blank" rel="noopener noreferrer">
-            {no ? "Samarbeidspartner: Digin AS" : "Partner: Digin AS"}
+        </div>
+
+        {/* Samarbeidspartnere */}
+        <div className="site-footer-meta">
+          <span className="site-footer-nav-label">{no ? "Samarbeidspartnere" : "Partners"}</span>
+          <a className="site-footer-link" href="https://www.fvn.no" target="_blank" rel="noopener noreferrer">
+            Fædrelandsvennen
+          </a>
+          <a className="site-footer-link" href="https://digin.no" target="_blank" rel="noopener noreferrer">
+            Digin AS
           </a>
         </div>
       </div>

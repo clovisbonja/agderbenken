@@ -727,7 +727,8 @@
 .fp-about-partner-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 10px 16px;
   margin-top: 10px;
 }
 .fp-about-partner-name {

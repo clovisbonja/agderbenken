@@ -75,12 +75,11 @@ function Footer({ lang }: { lang: "no" | "en" }) {
         {/* Samarbeidspartnere */}
         <div className="site-footer-meta">
           <span className="site-footer-nav-label">{no ? "Samarbeidspartnere" : "Partners"}</span>
-          <a className="site-footer-link" href="https://www.fvn.no" target="_blank" rel="noopener noreferrer">
-            Fædrelandsvennen
-          </a>
-          <a className="site-footer-link" href="https://digin.no" target="_blank" rel="noopener noreferrer">
-            Digin AS
-          </a>
+          <a className="site-footer-link" href="https://www.fvn.no" target="_blank" rel="noopener noreferrer">Fædrelandsvennen</a>
+          <a className="site-footer-link" href="https://digin.no" target="_blank" rel="noopener noreferrer">Digin AS</a>
+          <a className="site-footer-link" href="https://bolgenbks.no/" target="_blank" rel="noopener noreferrer">Bølgen Bærekraft</a>
+          <a className="site-footer-link" href="https://www.uia.no" target="_blank" rel="noopener noreferrer">Universitetet i Agder</a>
+          <a className="site-footer-link" href="https://www.kinaa.no/" target="_blank" rel="noopener noreferrer">Ki Nå</a>
         </div>
       </div>
 

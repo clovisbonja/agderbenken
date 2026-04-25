@@ -312,6 +312,12 @@ export default function Hjem({ lang }: HjemProps) {
             <span className="fp-about-partner-name">Fædrelandsvennen</span>
             <span className="fp-about-partner-sep">·</span>
             <span className="fp-about-partner-name">Digin AS</span>
+            <span className="fp-about-partner-sep">·</span>
+            <span className="fp-about-partner-name">Bølgen Bærekraft</span>
+            <span className="fp-about-partner-sep">·</span>
+            <span className="fp-about-partner-name">Universitetet i Agder</span>
+            <span className="fp-about-partner-sep">·</span>
+            <span className="fp-about-partner-name">Ki Nå</span>
           </div>
         </div>
       </section>

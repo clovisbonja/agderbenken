@@ -667,6 +667,34 @@ export default function Votering({ lang }: VoteringProps) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
+      <details className="vsl-ordliste">
+        <summary className="vsl-ordliste-summary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+          </svg>
+          {lang === "no" ? "Hva betyr ordene?" : "What do the words mean?"}
+        </summary>
+        <dl className="vsl-ordliste-body">
+          <div className="vsl-ordliste-item">
+            <dt>{lang === "no" ? "Votering" : "Vote"}</dt>
+            <dd>{lang === "no" ? "En avstemning der representantene stemmer for eller mot et forslag." : "A vote where representatives vote for or against a proposal."}</dd>
+          </div>
+          <div className="vsl-ordliste-item">
+            <dt>{lang === "no" ? "Sesjon" : "Session"}</dt>
+            <dd>{lang === "no" ? "Et stortingsår fra oktober til september. Nåværende sesjon er 2025–2026." : "A parliamentary year from October to September."}</dd>
+          </div>
+          <div className="vsl-ordliste-item">
+            <dt>{lang === "no" ? "Representantforslag" : "Private member's bill"}</dt>
+            <dd>{lang === "no" ? "Forslag fra én eller flere representanter — ikke fra regjeringen." : "A proposal by one or more MPs — not from the government."}</dd>
+          </div>
+          <div className="vsl-ordliste-item">
+            <dt>{lang === "no" ? "Innstillingens tilråding" : "Committee recommendation"}</dt>
+            <dd>{lang === "no" ? "Det komiteen anbefaler at Stortinget vedtar. Flertallet stemmer vanligvis for." : "What the committee recommends. The majority usually votes yes."}</dd>
+          </div>
+        </dl>
+      </details>
+
       </div>
 
       {/* Status-filter */}

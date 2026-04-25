@@ -769,7 +769,12 @@ export default function StatistikkDashboard({ lang }: Props) {
                     </div>
                     <div className="home-case-btn-meta">
                       <span className="home-case-btn-committee">{item.committee}</span>
-                      <span className="home-case-btn-date">{fmtDate(item.date, lang)}</span>
+                      <div className="home-case-btn-meta-right">
+                        <span className={`home-case-status-badge home-case-status--${normalizeStatus(item.status)}`}>
+                          {friendlyStatus(item.status, lang)}
+                        </span>
+                        <span className="home-case-btn-date">{fmtDate(item.date, lang)}</span>
+                      </div>
                     </div>
                   </div>
                 </button>

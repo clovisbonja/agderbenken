@@ -2685,3 +2685,33 @@ p.home-section-note + .home-grid { margin-top: 8px !important; }
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ── Status badges in case list ──────────────────────────────────────── */
+.home-case-btn-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.home-case-status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: .02em;
+}
+.home-case-status--behandlet   { background: rgba(22,163,74,.13);  color: #15803d; }
+.home-case-status--til_behandling { background: rgba(59,130,246,.13); color: #1d4ed8; }
+.home-case-status--mottatt     { background: rgba(245,158,11,.13); color: #92400e; }
+.home-case-status--varslet     { background: rgba(148,163,184,.15); color: var(--muted); }
+.home-case-status--trukket,
+.home-case-status--bortfalt    { background: rgba(239,68,68,.11);  color: #b91c1c; }
+[data-theme="dark"] .home-case-status--behandlet    { background: rgba(22,163,74,.22);  color: #4ade80; }
+[data-theme="dark"] .home-case-status--til_behandling { background: rgba(59,130,246,.22); color: #93c5fd; }
+[data-theme="dark"] .home-case-status--mottatt      { background: rgba(245,158,11,.22); color: #fcd34d; }
+[data-theme="dark"] .home-case-status--trukket,
+[data-theme="dark"] .home-case-status--bortfalt     { background: rgba(239,68,68,.2);   color: #fca5a5; }

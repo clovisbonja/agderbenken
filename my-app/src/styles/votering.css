@@ -2430,3 +2430,56 @@ input.vsl-search::placeholder {
     gap: 10px !important;
   }
 }
+
+/* ── Ordliste / glossary panel ───────────────────────────────────────── */
+.vsl-ordliste {
+  margin: 8px 0 0;
+  border: 1px solid var(--line2, rgba(148,163,184,.18));
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--card);
+}
+.vsl-ordliste-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color .15s;
+}
+.vsl-ordliste-summary::-webkit-details-marker { display: none; }
+.vsl-ordliste-summary::marker { display: none; }
+.vsl-ordliste-summary:hover { color: var(--text); }
+.vsl-ordliste[open] .vsl-ordliste-summary { color: var(--text); }
+.vsl-ordliste-body {
+  margin: 0;
+  padding: 0 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--line2, rgba(148,163,184,.15));
+  padding-top: 10px;
+}
+.vsl-ordliste-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vsl-ordliste-item dt {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--accent);
+}
+.vsl-ordliste-item dd {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}

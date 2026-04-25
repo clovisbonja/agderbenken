@@ -677,3 +677,71 @@
   .fp-topic-pill { padding: 10px 4px 8px; gap: 5px; }
   .fp-topic-pill span:last-child { font-size: 9px; }
 }
+
+/* ══ GLOSSARY SECTION ═══════════════════════════════════════════════ */
+.fp-glossary {
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+}
+.fp-glossary-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+.fp-glossary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.fp-glossary-item {
+  background: var(--card);
+  padding: 18px 20px;
+}
+.fp-glossary-item strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.fp-glossary-item p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ══ PARTNERS ROW ════════════════════════════════════════════════════ */
+.fp-about-partners {
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.fp-about-partner-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+.fp-about-partner-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.fp-about-partner-sep {
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 700px) {
+  .fp-glossary-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 400px) {
+  .fp-glossary-row { grid-template-columns: 1fr; }
+}

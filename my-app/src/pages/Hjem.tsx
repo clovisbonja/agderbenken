@@ -229,6 +229,29 @@ export default function Hjem({ lang }: HjemProps) {
         </NavLink>
       </section>
 
+      {/* ══ GLOSSARY ════════════════════════════════════════════════ */}
+      <section className="fp-glossary">
+        <p className="fp-glossary-label">{no ? "Forstå nøkkelordene" : "Key terms"}</p>
+        <div className="fp-glossary-row">
+          <article className="fp-glossary-item">
+            <strong>{no ? "Votering" : "Vote"}</strong>
+            <p>{no ? "En avstemning der representantene stemmer for eller mot et forslag." : "A vote where representatives vote for or against a proposal."}</p>
+          </article>
+          <article className="fp-glossary-item">
+            <strong>{no ? "Sesjon" : "Session"}</strong>
+            <p>{no ? "Et stortingsår fra oktober til september. Nåværende sesjon er 2025–2026." : "A parliamentary year from October to September."}</p>
+          </article>
+          <article className="fp-glossary-item">
+            <strong>{no ? "Representantforslag" : "Private bill"}</strong>
+            <p>{no ? "Forslag fra stortingsrepresentanter, ikke fra regjeringen." : "A proposal from MPs, not the government."}</p>
+          </article>
+          <article className="fp-glossary-item">
+            <strong>{no ? "Vedtatt" : "Passed"}</strong>
+            <p>{no ? "En sak Stortinget har stemt over og godkjent. Rød betyr forkastet." : "A case Parliament has voted on and approved. Red means rejected."}</p>
+          </article>
+        </div>
+      </section>
+
       {/* ══ TOPICS STRIP ═════════════════════════════════════════════ */}
       <section className="fp-topics-section">
         <p className="fp-topics-label">{no ? "Temaer vi dekker" : "Topics we cover"}</p>
@@ -282,6 +305,14 @@ export default function Hjem({ lang }: HjemProps) {
                 : "MPs elected from Agder. Sørblikket makes their work more open and easy to follow."}
             </p>
           </article>
+        </div>
+        <div className="fp-about-partners">
+          <p className="fp-about-kicker">{no ? "Samarbeidspartnere" : "Partners"}</p>
+          <div className="fp-about-partner-row">
+            <span className="fp-about-partner-name">Fædrelandsvennen</span>
+            <span className="fp-about-partner-sep">·</span>
+            <span className="fp-about-partner-name">Digin AS</span>
+          </div>
         </div>
       </section>
 

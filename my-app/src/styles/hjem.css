@@ -745,3 +745,10 @@
 @media (max-width: 400px) {
   .fp-glossary-row { grid-template-columns: 1fr; }
 }
+
+/* ── Aktiv-tilstand (trykkfeedback på mobil) ────────────────────────────── */
+.landing-btn:active,
+.fp-hero-cta:active,
+.fp-feature:active,
+.fp-hero-topic:active,
+.fp-topic-pill:active         { transform: scale(0.97); }

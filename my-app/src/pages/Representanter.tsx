@@ -23,7 +23,7 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 // Live-endepunkt for "dagens representanter" fra Stortinget.
 const API_URL = "https://data.stortinget.no/eksport/dagensrepresentanter"
@@ -329,6 +329,8 @@ export default function Representanter({ lang }: RepresentanterProps) {
   const [selectedRepresentativeId, setSelectedRepresentativeId] = useState<string | null>(
     null
   )
+  // Ref til detaljpanelet — brukes for å scrolle opp dit når et kort klikkes.
+  const detailRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // AbortController gjør at vi kan avbryte hentingen hvis brukeren forlater siden.
@@ -533,7 +535,7 @@ export default function Representanter({ lang }: RepresentanterProps) {
 
             {/* Detail panel — above the grid so it's visible immediately */}
             {selectedRepresentative && (
-              <div className="rp-detail" aria-live="polite">
+              <div ref={detailRef} className="rp-detail" aria-live="polite">
                 <div className="rp-detail-inner">
                   <div className="rp-detail-photo-col">
                     <img
@@ -629,11 +631,25 @@ export default function Representanter({ lang }: RepresentanterProps) {
                       className={`rp-card${isSelected ? " rp-card-active" : ""}`}
                       role="button"
                       tabIndex={0}
-                      onClick={() => setSelectedRepresentativeId(isSelected ? null : rep.id)}
+                      onClick={() => {
+                        const next = isSelected ? null : rep.id
+                        setSelectedRepresentativeId(next)
+                        if (next) {
+                          setTimeout(() => {
+                            detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                          }, 50)
+                        }
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault()
-                          setSelectedRepresentativeId(isSelected ? null : rep.id)
+                          const next = isSelected ? null : rep.id
+                          setSelectedRepresentativeId(next)
+                          if (next) {
+                            setTimeout(() => {
+                              detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                            }, 50)
+                          }
                         }
                       }}
                     >

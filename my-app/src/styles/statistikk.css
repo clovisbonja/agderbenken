@@ -2628,3 +2628,19 @@ p.home-section-note + .home-grid { margin-top: 8px !important; }
 [data-theme="dark"] .home-case-status--mottatt      { background: rgba(245,158,11,.22); color: #fcd34d; }
 [data-theme="dark"] .home-case-status--trukket,
 [data-theme="dark"] .home-case-status--bortfalt     { background: rgba(239,68,68,.2);   color: #fca5a5; }
+
+/* ── Aktiv-tilstand (trykkfeedback på mobil) ────────────────────────────── */
+.home-case-btn:active,
+.home-case-link:active,
+.home-case-list-compact button:active,
+.home-case-list button:active,
+.home-podium-card:active,
+.home-theme-card:active,
+.home-theme-strip-card:active { transform: scale(0.97); }
+
+.sig-theme-bar-row:active,
+.sig-monthly-col:active,
+.sig-committee-row:active,
+.sig-type-row:active          { opacity: 0.65; }
+
+.sig-howto-trigger:active     { filter: brightness(0.88); }

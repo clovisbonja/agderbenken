@@ -508,3 +508,7 @@
   font-weight: 600;
   margin: 4px 0 8px;
 }
+
+/* ── Aktiv-tilstand (trykkfeedback på mobil) ────────────────────────────── */
+.rep-card:active              { transform: scale(0.97); }
+.rep-bio-toggle:active        { opacity: 0.65; }

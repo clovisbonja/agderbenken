@@ -106,8 +106,8 @@ export default function Hjem({ lang }: HjemProps) {
           </p>
           <p className="fp-hero-lead">
             {no
-              ? "Vi følger Agderbenkens representanter på Stortinget — deres saker, stemmer og valgløfter — og gjør den politiske hverdagen lettere å forstå for alle."
-              : "We track Agder's representatives in the Storting — their cases, votes and election promises — making parliamentary work easier to understand for everyone."}
+              ? "Sørblikket samler informasjon om Agderbenkens representanter på Stortinget. Saker de behandler, stemmer de avgir og løfter de ga velgerne."
+              : "Sørblikket gathers information about Agder's representatives in the Storting. Cases they handle, votes they cast and promises they made to voters."}
           </p>
 
           <div className="fp-hero-meta">
@@ -197,8 +197,8 @@ export default function Hjem({ lang }: HjemProps) {
             <h2 className="fp-feature-title">{no ? "Stemmegivning" : "Voting"}</h2>
             <p className="fp-feature-desc">
               {no
-                ? "Se hva det ble stemt over og hvem som stemte for eller mot — votering for votering."
-                : "See what was voted on and who voted for or against — vote by vote."}
+                ? "Se hva det ble stemt over og hvem som stemte for eller mot, votering for votering."
+                : "See what was voted on and who voted for or against, vote by vote."}
             </p>
           </div>
           <span className="fp-feature-arrow">
@@ -276,8 +276,8 @@ export default function Hjem({ lang }: HjemProps) {
           <h2 className="fp-about-heading">{no ? "Hva er Sørblikket?" : "What is Sørblikket?"}</h2>
           <p className="fp-about-lead">
             {no
-              ? "Sørblikket er et journalistisk verktøy som gjør Stortingets arbeid mer tilgjengelig for innbyggerne i Agder."
-              : "Sørblikket is a journalistic tool that makes the Storting's work more accessible to residents of Agder."}
+              ? "Sørblikket er et journalistisk verktøy for innsyn i Stortingets arbeid, rettet mot innbyggere i Agder."
+              : "Sørblikket is a journalistic tool for transparency in the Storting's work, aimed at residents of Agder."}
           </p>
         </div>
         <div className="fp-about-grid">
@@ -301,8 +301,8 @@ export default function Hjem({ lang }: HjemProps) {
             <strong>AGDERBENKEN</strong>
             <p>
               {no
-                ? "Representantene valgt fra Agder. Sørblikket gjør arbeidet deres mer åpent og lett å følge."
-                : "MPs elected from Agder. Sørblikket makes their work more open and easy to follow."}
+                ? "Representantene valgt fra Agder. Her kan du følge arbeidet deres på Stortinget."
+                : "MPs elected from Agder. Here you can follow their work in Parliament."}
             </p>
           </article>
         </div>

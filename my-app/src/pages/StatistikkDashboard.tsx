@@ -394,13 +394,7 @@ export default function StatistikkDashboard({ lang }: Props) {
     return () => window.removeEventListener("open-howto", handler)
   }, [])
 
-  const [cookieAccepted, setCookieAccepted] = useState<boolean>(() => {
-    try { return localStorage.getItem("agder-cookies-ok") === "true" } catch { return false }
-  })
-  function acceptCookies() {
-    setCookieAccepted(true)
-    try { localStorage.setItem("agder-cookies-ok", "true") } catch {}
-  }
+
 
   const t = (key: string) => TEXT[lang][key] || key
   const themes = getAllThemes()
@@ -1160,30 +1154,6 @@ export default function StatistikkDashboard({ lang }: Props) {
         </div>
       )}
 
-      {/* ═══ COOKIE BANNER ═══ */}
-      {!cookieAccepted && (
-        <div className="cookie-banner" role="region" aria-label="Informasjonskapsler">
-          <div className="cookie-banner-inner">
-            <div className="cookie-banner-icon">🍪</div>
-            <div className="cookie-banner-text">
-              <strong>{lang === "no" ? "Informasjonskapsler" : "Cookies"}</strong>
-              <p>
-                {lang === "no"
-                  ? "Denne siden bruker localStorage for å huske dine innstillinger (tema, språk, veiledning). Data hentes direkte fra Stortingets åpne API og lagres ikke hos oss."
-                  : "This site uses localStorage to remember your settings (theme, language, guide). Data is fetched directly from Stortinget's open API and not stored by us."}
-              </p>
-            </div>
-            <div className="cookie-banner-actions">
-              <button type="button" className="cookie-btn cookie-btn--accept" onClick={acceptCookies}>
-                {lang === "no" ? "Godta" : "Accept"}
-              </button>
-              <button type="button" className="cookie-btn cookie-btn--decline" onClick={acceptCookies}>
-                {lang === "no" ? "Kun nødvendige" : "Necessary only"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   )
 }

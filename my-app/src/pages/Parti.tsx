@@ -67,10 +67,74 @@ function parseQuery(query: string): { parti: string | null; keywords: string[] }
   for (const w of words) {
     const mapped = PARTI_ALIAS[w]
     if (mapped && !parti) { parti = mapped; continue }
-    const skipWords = new Set(["hva", "hvem", "hvilke", "lover", "lovet", "om", "for", "og", "er", "har", "de", "en", "et", "i", "til", "fra", "med", "på", "av", "som"])
+    const skipWords = new Set([
+      "hva", "hvem", "hvilke", "hvilken", "hvilkett", "lover", "lovet", "loves",
+      "om", "for", "og", "er", "har", "de", "en", "et", "i", "til", "fra", "med",
+      "på", "av", "som", "ikke", "kan", "vil", "skal", "bør", "må", "meg", "deg",
+      "seg", "sin", "sitt", "sine", "den", "det", "disse", "dem", "denne",
+      "forskjell", "forskjellen", "mellom", "forklare", "forklaring", "definer",
+      "hjelp", "svar", "fortell", "beskriv", "vis", "finn", "søk",
+    ])
     if (!skipWords.has(w) && w.length > 2) keywords.push(w)
   }
   return { parti, keywords }
+}
+
+// ── Politisk intentfilter ─────────────────────────────────────────────────────
+// Minst ett nøkkelord må være et kjent politisk emne, eller spørsmålet må
+// inneholde et partinavn — ellers avvises det med tydelig tilbakemelding.
+
+const POLITISKE_ORD = new Set([
+  // Løfter / politikk generelt
+  "løfte", "løfter", "politikk", "valg", "program", "partiprogram", "partiene", "partiet",
+  "stortinget", "regjering", "regjeringen", "storting", "representant",
+  // Økonomi og skatt
+  "skatt", "skatter", "avgift", "avgifter", "bompenge", "bompenger", "moms",
+  "økonomi", "budsjett", "bevilge", "bevilgning", "subsidie", "støtte",
+  // Helse
+  "helse", "sykehus", "lege", "fastlege", "tannlege", "psykisk", "psykiatri",
+  "rus", "rusreform", "sykdom", "behandling", "pleie", "omsorg", "eldreomsorg",
+  // Utdanning
+  "utdanning", "skole", "barnehage", "universitet", "høyskole", "studiestøtte",
+  "lærling", "lærer", "student", "forskning",
+  // Bolig
+  "bolig", "boliger", "leie", "husleie", "eie", "studentbolig", "bostøtte",
+  // Arbeid
+  "arbeid", "jobb", "jobber", "lønn", "arbeidsplasser", "permittering",
+  "nav", "arbeidsledig", "fagforening",
+  // Pensjon og trygd
+  "pensjon", "trygd", "uføre", "alderspensjon", "velferd",
+  // Innvandring
+  "innvandring", "asyl", "flyktning", "integrering", "innvandrer",
+  // Forsvar og sikkerhet
+  "forsvar", "militær", "nato", "hær", "beredskap", "politi",
+  "kriminalitet", "justis", "fengsel", "domstol",
+  // Næring og industri
+  "næring", "industri", "bedrift", "gründer", "olje", "gass", "petroleum",
+  "landbruk", "bonde", "jordbruk", "fisk", "havbruk", "oppdrett",
+  // Klima og miljø
+  "klima", "klimamål", "utslipp", "miljø", "natur", "energi", "strøm",
+  "vindkraft", "solenergi", "fornybar", "co2", "klimaendring",
+  // Samferdsel
+  "samferdsel", "vei", "veier", "bane", "jernbane", "tog", "fly", "buss", "sykkel",
+  // Distrikt og regional
+  "distrikt", "sentralisering", "kommune", "region", "bygd",
+  // Familie og sosial
+  "familie", "barn", "ungdom", "eldre", "sosial", "fattigdom", "ulikhet",
+  // Andre temaer
+  "bistand", "utenriks", "abort", "kirke", "demokrati", "digitalisering",
+  "teknologi", "innovasjon", "frivillighet", "innvandrer",
+])
+
+function erPolitiskSpørsmål(keywords: string[], parti: string | null): boolean {
+  if (parti) return true
+  return keywords.some(k => POLITISKE_ORD.has(k.toLowerCase()))
+}
+
+function ikkePolitiskSvar(lang: Lang, query: string): string {
+  return lang === "no"
+    ? `"${query}" ser ikke ut som et spørsmål om partiprogrammer.\n\nChatboten søker kun i valgløfter fra de ni partienes programmer for 2025–2029. Prøv for eksempel:\n• "Hva lover FrP om skatter?"\n• "Klima-løfter fra SV"\n• "Hva lover partiene om helse?"\n• "Høyres løfter om utdanning"`
+    : `"${query}" doesn't look like a question about party programs.\n\nThe chatbot only searches election pledges from the nine parties' programs for 2025–2029. Try for example:\n• "What does FrP promise on taxes?"\n• "Climate pledges from SV"\n• "What do parties promise on health?"\n• "Høyre's pledges on education"`
 }
 
 const SUGGESTED_QUERIES_NO = [
@@ -250,33 +314,40 @@ export default function Parti({ lang }: PartiProps) {
     }
 
     const { parti, keywords } = parseQuery(query)
+
+    // Politisk intentsjekk — avvis spørsmål uten politisk relevans
+    if (!erPolitiskSpørsmål(keywords, parti)) {
+      setChatMessages(prev => prev.map(m =>
+        m.id === botPlaceholder.id ? { ...m, text: ikkePolitiskSvar(lang, query), loading: false } : m
+      ))
+      return
+    }
+
     let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
     if (parti) q = q.eq("parti", parti)
     if (keywords.length > 0) {
-      // ilike på hvert keyword kombinert
       const filter = keywords.map(k => `tekst.ilike.%${k}%`).join(",")
       q = q.or(filter)
     }
     const { data, error: err } = await q
 
-    const rawResults = (data ?? []) as ChatResultLofte[]
-
-    // Ranger etter relevans — best treff øverst
-    const results = [...rawResults].sort((a, b) =>
-      scoreResult(b, keywords, query) - scoreResult(a, keywords, query)
-    )
+    // Beregn relevansscorer, filtrer bort nulltreff og sorter beste øverst
+    const results = (data ?? [])
+      .map(r => ({ r: r as ChatResultLofte, score: scoreResult(r as ChatResultLofte, keywords, query) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ r }) => r)
 
     let botText = ""
     if (err) {
       botText = lang === "no" ? "Beklager, noe gikk galt med søket." : "Sorry, something went wrong."
     } else if (results.length === 0) {
-      // Bedre "no results" melding med forslag
       const suggestions = lang === "no"
-        ? "Tips: Prøv et annet ord, eller spørr om ett parti om gangen."
-        : "Tip: Try a different word or ask about one party at a time."
+        ? "Tips: Prøv et mer spesifikt emne, eller kombiner parti og tema — f.eks. \"Hva lover Høyre om skole?\""
+        : "Tip: Try a more specific topic, or combine party and theme — e.g. \"What does H promise on school?\""
       botText = lang === "no"
-        ? `Fant ingen løfter for "${query}".\n${suggestions}`
-        : `No pledges found for "${query}".\n${suggestions}`
+        ? `Fant ingen relevante løfter for "${query}".\n\n${suggestions}`
+        : `No relevant pledges found for "${query}".\n\n${suggestions}`
     } else {
       // Bedre resultatsammendrag med kategorier
       const byParti: Record<string, ChatResultLofte[]> = {}

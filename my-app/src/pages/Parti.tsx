@@ -297,82 +297,47 @@ export default function Parti({ lang }: PartiProps) {
   }, [chatMessages])
 
   async function sendChatMessage(query: string) {
-    if (!query.trim() || !supabase) return
+    if (!query.trim()) return
     const userMsg: ChatMessage = { id: Date.now().toString(), role: "user", text: query }
     const botPlaceholder: ChatMessage = { id: Date.now().toString() + "_bot", role: "bot", text: "", loading: true }
     setChatMessages(prev => [...prev, userMsg, botPlaceholder])
     setChatInput("")
 
-    // GDPR validation — blokkér sensitive queries
+    // GDPR-validering kjøres fremdeles klientsiden — ingen nettverkskall nødvendig
     const gdprCheck = validateGDPR(query)
     if (!gdprCheck.valid) {
-      const gdprResponse = getGDPRResponse(lang, gdprCheck.reason)
       setChatMessages(prev => prev.map(m =>
-        m.id === botPlaceholder.id ? { ...m, text: gdprResponse, loading: false } : m
+        m.id === botPlaceholder.id ? { ...m, text: getGDPRResponse(lang, gdprCheck.reason), loading: false } : m
       ))
       return
     }
 
-    const { parti, keywords } = parseQuery(query)
+    try {
+      // Kall backend Edge Function — all logikk (intent, søk, Claude) skjer server-side
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, lang }),
+        }
+      )
 
-    // Politisk intentsjekk — avvis spørsmål uten politisk relevans
-    if (!erPolitiskSpørsmål(keywords, parti)) {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+      const { response, results } = await res.json() as { response: string; results: ChatResultLofte[] }
+
       setChatMessages(prev => prev.map(m =>
-        m.id === botPlaceholder.id ? { ...m, text: ikkePolitiskSvar(lang, query), loading: false } : m
+        m.id === botPlaceholder.id ? { ...m, text: response, results: results ?? [], loading: false } : m
       ))
-      return
+    } catch {
+      const feil = lang === "no"
+        ? "Beklager, noe gikk galt. Prøv igjen."
+        : "Sorry, something went wrong. Try again."
+      setChatMessages(prev => prev.map(m =>
+        m.id === botPlaceholder.id ? { ...m, text: feil, results: [], loading: false } : m
+      ))
     }
-
-    let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
-    if (parti) q = q.eq("parti", parti)
-    if (keywords.length > 0) {
-      const filter = keywords.map(k => `tekst.ilike.%${k}%`).join(",")
-      q = q.or(filter)
-    }
-    const { data, error: err } = await q
-
-    // Beregn relevansscorer, filtrer bort nulltreff og sorter beste øverst
-    const results = (data ?? [])
-      .map(r => ({ r: r as ChatResultLofte, score: scoreResult(r as ChatResultLofte, keywords, query) }))
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map(({ r }) => r)
-
-    let botText = ""
-    if (err) {
-      botText = lang === "no" ? "Beklager, noe gikk galt med søket." : "Sorry, something went wrong."
-    } else if (results.length === 0) {
-      const suggestions = lang === "no"
-        ? "Tips: Prøv et mer spesifikt emne, eller kombiner parti og tema — f.eks. \"Hva lover Høyre om skole?\""
-        : "Tip: Try a more specific topic, or combine party and theme — e.g. \"What does H promise on school?\""
-      botText = lang === "no"
-        ? `Fant ingen relevante løfter for "${query}".\n\n${suggestions}`
-        : `No relevant pledges found for "${query}".\n\n${suggestions}`
-    } else {
-      // Bedre resultatsammendrag med kategorier
-      const byParti: Record<string, ChatResultLofte[]> = {}
-      const byCategory: Record<string, number> = {}
-      results.forEach(r => {
-        if (!byParti[r.parti]) byParti[r.parti] = []
-        byParti[r.parti].push(r)
-        if (r.kategori) byCategory[r.kategori] = (byCategory[r.kategori] ?? 0) + 1
-      })
-
-      const partiList = Object.entries(byParti).map(([p, items]) => `${p} (${items.length})`).join(", ")
-      const topCategories = Object.entries(byCategory)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([cat]) => cat)
-        .join(", ")
-
-      botText = lang === "no"
-        ? `Fant ${results.length} løfte${results.length !== 1 ? "r" : ""}${parti ? ` fra ${parti}` : ""} – ${partiList}${topCategories ? ` • Tema: ${topCategories}` : ""}`
-        : `Found ${results.length} pledge${results.length !== 1 ? "s" : ""}${parti ? ` from ${parti}` : ""} – ${partiList}${topCategories ? ` • Topics: ${topCategories}` : ""}`
-    }
-
-    setChatMessages(prev => prev.map(m =>
-      m.id === botPlaceholder.id ? { ...m, text: botText, results, loading: false } : m
-    ))
   }
 
   return (

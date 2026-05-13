@@ -303,7 +303,7 @@ export default function Parti({ lang }: PartiProps) {
     setChatMessages(prev => [...prev, userMsg, botPlaceholder])
     setChatInput("")
 
-    // GDPR-validering kjøres fremdeles klientsiden — ingen nettverkskall nødvendig
+    // GDPR-validering klientsiden — ingen nettverkskall nødvendig
     const gdprCheck = validateGDPR(query)
     if (!gdprCheck.valid) {
       setChatMessages(prev => prev.map(m =>
@@ -312,8 +312,21 @@ export default function Parti({ lang }: PartiProps) {
       return
     }
 
+    // År-spørsmål — databasen har ikke årstalls-metadata
+    const årstallMatch = query.match(/\b(202[5-9]|2030)\b/)
+    if (årstallMatch) {
+      const år = årstallMatch[1]
+      const årsText = lang === "no"
+        ? `Chatboten kan ikke svare på hva som skjer i ${år} spesifikt.\n\nPartiprogrammene dekker hele perioden 2025–2029 uten å angi konkrete årstall for hvert løfte. Prøv heller: "Hva lover FrP om skatt?" eller "Hva lover partiene om samferdsel?"`
+        : `The chatbot cannot answer what happens specifically in ${år}.\n\nParty programs cover the full 2025–2029 period without specifying exact years for each pledge. Try instead: "What does FrP promise on tax?" or "What do parties promise on transport?"`
+      setChatMessages(prev => prev.map(m =>
+        m.id === botPlaceholder.id ? { ...m, text: årsText, results: [], loading: false } : m
+      ))
+      return
+    }
+
+    // Forsøk 1: kall backend Edge Function (Claude-genererte svar)
     try {
-      // Kall backend Edge Function — all logikk (intent, søk, Claude) skjer server-side
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
         {
@@ -322,22 +335,76 @@ export default function Parti({ lang }: PartiProps) {
           body: JSON.stringify({ query, lang }),
         }
       )
-
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
       const { response, results } = await res.json() as { response: string; results: ChatResultLofte[] }
-
       setChatMessages(prev => prev.map(m =>
         m.id === botPlaceholder.id ? { ...m, text: response, results: results ?? [], loading: false } : m
       ))
+      return
     } catch {
-      const feil = lang === "no"
-        ? "Beklager, noe gikk galt. Prøv igjen."
-        : "Sorry, something went wrong. Try again."
+      // Edge Function ikke tilgjengelig — fall tilbake til direkte Supabase-søk
+    }
+
+    // Forsøk 2: direkte Supabase + klientside-logikk (fallback)
+    if (!supabase) {
+      const feil = lang === "no" ? "Chatboten er ikke tilgjengelig akkurat nå." : "The chatbot is unavailable right now."
       setChatMessages(prev => prev.map(m =>
         m.id === botPlaceholder.id ? { ...m, text: feil, results: [], loading: false } : m
       ))
+      return
     }
+
+    const { parti, keywords } = parseQuery(query)
+
+    if (!erPolitiskSpørsmål(keywords, parti)) {
+      setChatMessages(prev => prev.map(m =>
+        m.id === botPlaceholder.id ? { ...m, text: ikkePolitiskSvar(lang, query), loading: false } : m
+      ))
+      return
+    }
+
+    let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
+    if (parti) q = q.eq("parti", parti)
+    if (keywords.length > 0) {
+      const filter = keywords.map(k => `tekst.ilike.%${k}%`).join(",")
+      q = q.or(filter)
+    }
+    const { data, error: err } = await q
+
+    const results = err ? [] : (data ?? [])
+      .map(r => ({ r: r as ChatResultLofte, score: scoreResult(r as ChatResultLofte, keywords, query) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ r }) => r)
+
+    let botText = ""
+    if (err) {
+      botText = lang === "no" ? "Beklager, noe gikk galt med søket." : "Sorry, something went wrong."
+    } else if (results.length === 0) {
+      const hint = lang === "no"
+        ? "Tips: Prøv et mer spesifikt emne, eller kombiner parti og tema — f.eks. \"Hva lover Høyre om skole?\""
+        : "Tip: Try a more specific topic — e.g. \"What does H promise on school?\""
+      botText = lang === "no"
+        ? `Fant ingen relevante løfter for "${query}".\n\n${hint}`
+        : `No relevant pledges found for "${query}".\n\n${hint}`
+    } else {
+      const byParti: Record<string, ChatResultLofte[]> = {}
+      const byCategory: Record<string, number> = {}
+      results.forEach(r => {
+        if (!byParti[r.parti]) byParti[r.parti] = []
+        byParti[r.parti].push(r)
+        if (r.kategori) byCategory[r.kategori] = (byCategory[r.kategori] ?? 0) + 1
+      })
+      const partiList = Object.entries(byParti).map(([p, items]) => `${p} (${items.length})`).join(", ")
+      const topCats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c]) => c).join(", ")
+      botText = lang === "no"
+        ? `Fant ${results.length} løfte${results.length !== 1 ? "r" : ""}${parti ? ` fra ${parti}` : ""} – ${partiList}${topCats ? ` • Tema: ${topCats}` : ""}`
+        : `Found ${results.length} pledge${results.length !== 1 ? "s" : ""}${parti ? ` from ${parti}` : ""} – ${partiList}${topCats ? ` • Topics: ${topCats}` : ""}`
+    }
+
+    setChatMessages(prev => prev.map(m =>
+      m.id === botPlaceholder.id ? { ...m, text: botText, results, loading: false } : m
+    ))
   }
 
   return (

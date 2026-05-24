@@ -1,0 +1,1 @@
+{"respons_dato_tid":"\/Date(1779530906952+0200)\/","versjon":"1.6","sak_id":103956,"sak_votering_liste":[]}

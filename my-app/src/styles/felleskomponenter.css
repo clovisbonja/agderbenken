@@ -4,7 +4,8 @@
 .site-footer{
   margin-top:auto;
   border-top: 3px solid var(--accent);
-  background: var(--card);
+  background: var(--hero-bg);
+  color: rgba(255, 255, 255, 0.7);
 }
 .site-footer::before{ display: none; }
 .site-footer-inner{
@@ -12,7 +13,7 @@
   margin:0 auto;
   padding:40px 24px 32px;
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap:32px;
 }
 .site-footer-brand{
@@ -25,7 +26,7 @@
   font-size: 20px;
   font-weight: 900;
   letter-spacing: -.02em;
-  color: var(--text);
+  color: #ffffff;
   -webkit-text-fill-color: unset;
   background: none;
   background-clip: unset;
@@ -34,7 +35,7 @@
 .site-footer-tagline{
   margin:0;
   font-size:13px;
-  color:var(--muted);
+  color:rgba(255, 255, 255, 0.55);
   line-height:1.65;
   max-width:240px;
 }
@@ -49,33 +50,31 @@
   font-weight:700;
   letter-spacing:.07em;
   text-transform:uppercase;
-  color:var(--muted);
+  color:rgba(255, 255, 255, 0.45);
   margin-bottom:4px;
-  opacity:.7;
 }
 .site-footer-link{
   font-size:13px;
-  color:var(--muted);
+  color:rgba(255, 255, 255, 0.65);
   text-decoration:none;
   transition:color .15s;
   width:fit-content;
 }
 .site-footer-link:hover,
 .site-footer-link.active{
-  color:var(--accent);
+  color: var(--dark-accent, #4d91ff);
 }
 .site-footer-bottom{
   max-width:1100px;
   margin:0 auto;
   padding:14px 24px;
-  border-top:1px solid var(--glass);
+  border-top:1px solid rgba(255, 255, 255, 0.08);
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:12px;
   font-size:12px;
-  color:var(--muted);
-  opacity:.7;
+  color:rgba(255, 255, 255, 0.5);
   flex-wrap:wrap;
 }
 @media(max-width:760px){
@@ -111,7 +110,6 @@
   align-items: center;
   min-height: 180px;
 }
-/* Break out of .page padding (0 20px) to reach full width */
 .page .ed-page-hero {
   margin-left: -20px;
   margin-right: -20px;
@@ -148,8 +146,6 @@
   .ed-page-hero-panel { display: none; }
 }/* ── Ed page hero — bigger, more dramatic ───────────────────────────── */
 .ed-page-hero {
-  padding: 52px 36px 48px;
-  min-height: 200px;
   grid-template-columns: 1fr 140px;
 }
 .ed-page-hero-heading {
@@ -160,7 +156,7 @@
 
 /* ── Footer — editorial ─────────────────────────────────────────────── */
 .site-footer {
-  border-top: 2px solid var(--text) !important;
+  border-top: 3px solid var(--accent) !important;
 }
 .ed-page-hero { margin-bottom: 0 !important; }
 
@@ -303,8 +299,6 @@
     min-height: unset;
     grid-template-columns: 1fr;
   }
-
-  /* Brekk ut av .page padding på mobil */
   .page .ed-page-hero {
     margin-left: -16px;
     margin-right: -16px;

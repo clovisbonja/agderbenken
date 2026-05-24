@@ -11,8 +11,8 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import type { CSSProperties } from "react"
 import { useState } from "react"
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
 
 type Lang = "no" | "en"
 
@@ -64,14 +64,14 @@ function StorageResetButton({ lang, resetText, successText }: { lang: Lang; rese
       }}
       onMouseEnter={(e) => {
         if (!isResetting) {
-          (e.target as HTMLElement).style.backgroundColor = "#efefef"
-          (e.target as HTMLElement).style.borderColor = "#999"
+          (e.target as HTMLElement).style.backgroundColor = "#efefef";
+          (e.target as HTMLElement).style.borderColor = "#999";
         }
       }}
       onMouseLeave={(e) => {
         if (!isResetting) {
-          (e.target as HTMLElement).style.backgroundColor = "#f5f5f5"
-          (e.target as HTMLElement).style.borderColor = "#ddd"
+          (e.target as HTMLElement).style.backgroundColor = "#f5f5f5";
+          (e.target as HTMLElement).style.borderColor = "#ddd";
         }
       }}
     >
@@ -205,6 +205,14 @@ const ALLOWED_SEARCHES = [
 ]
 
 export default function Personvern({ lang }: { lang: Lang }) {
+  const no = lang === "no"
+  useDocumentSEO(
+    no ? "Personvern og informasjonskapsler | Sørblikket" : "Privacy Policy and Cookies | Sørblikket",
+    no
+      ? "Les om hvordan Sørblikket ivaretar personvernet ditt, og om sikkerhetstiltak i vår partiprogram-søkeboks."
+      : "Read about how Sørblikket safeguards your privacy, and about security measures in our party program search chatbot."
+  )
+
   const t =
     lang === "no"
       ? {
@@ -368,6 +376,19 @@ export default function Personvern({ lang }: { lang: Lang }) {
           <section className="pv-section pv-blocked">
             <h2>{t.blockedHeader}</h2>
             <p className="pv-subheader">{t.blockedSubheader}</p>
+
+            <div className="pv-blocked-grid">
+              {BLOCKED_CATEGORIES.map((cat, idx) => (
+                <div key={idx} className="pv-blocked-card">
+                  <h3>{lang === "no" ? cat.title_no : cat.title_en}</h3>
+                  <ul className="pv-blocked-list">
+                    {(lang === "no" ? cat.items_no : cat.items_en).map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* Allowed Searches */}

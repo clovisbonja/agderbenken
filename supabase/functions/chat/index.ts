@@ -153,7 +153,7 @@ Regler:
     : `Brukerens spørsmål: "${query}"\n\nRelevante valgløfter:\n${ctx}`
 
   const msg = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-3-5-haiku-20241022",
     max_tokens: 512,
     system,
     messages: [{ role: "user", content: user }],
@@ -188,12 +188,14 @@ Deno.serve(async (req: Request) => {
       return Response.json({ response: svar, results: [] }, { headers: CORS })
     }
 
-    // 2. Databasesøk
+    // 2. Databasesøk med Postgres Full-Text Search (norsk konfigurasjon)
     let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
     if (parti) q = q.eq("parti", parti)
-    if (keywords.length > 0) {
-      const filter = keywords.map(k => `tekst.ilike.%${k}%`).join(",")
-      q = q.or(filter)
+    if (query) {
+      q = q.textSearch("tekst", query, {
+        type: "websearch",
+        config: "norwegian",
+      })
     }
     const { data, error: dbErr } = await q
 
@@ -205,8 +207,10 @@ Deno.serve(async (req: Request) => {
 
     // 3. Ranger og filtrer nulltreff
     const results = (data ?? [])
-      .map(r => ({ ...r, _s: scoreResult(r.tekst, r.kategori, keywords, query) }))
-      .filter(r => r._s > 0)
+      .map(r => {
+        const score = scoreResult(r.tekst, r.kategori, keywords, query)
+        return { ...r, _s: score > 0 ? score : 1 }
+      })
       .sort((a, b) => b._s - a._s)
       .map(({ _s: _, ...rest }) => rest)
 

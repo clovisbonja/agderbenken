@@ -17,6 +17,8 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
+
 type Lang = "no" | "en"
 type OmProps = { lang: Lang }
 
@@ -87,6 +89,15 @@ const T: Record<Lang, Record<string, string>> = {
 }
 
 export default function Om({ lang }: OmProps) {
+  const no = lang === "no"
+
+  useDocumentSEO(
+    no ? "Om Sørblikket | Samarbeid for politisk innsyn" : "About Sørblikket | Collaboration for transparency",
+    no
+      ? "Sørblikket er et samarbeidsprosjekt mellom Fædrelandsvennen og Digin om politisk innsyn og åpenhet i Agder."
+      : "Sørblikket is a collaboration project between Fædrelandsvennen and Digin for political transparency in Agder."
+  )
+
   const t = T[lang]
   const heroImage = "/om-hero.avif"
 
@@ -98,23 +109,24 @@ export default function Om({ lang }: OmProps) {
 
   return (
     <main className="om">
-      <section className="ed-page-hero">
-        <div className="ed-page-hero-content">
+      {/* ─── MERGED HERO BANNER WITH BACKGROUND IMAGE ─── */}
+      <section className="om-page-hero" style={{ backgroundImage: `url(${heroImage})` }}>
+        <div className="om-hero-overlay" />
+        <div className="om-page-hero-content">
           <p className="ed-page-hero-kicker">Fædrelandsvennen × Digin</p>
           <h1 className="ed-page-hero-heading">{lang === "no" ? "Om Sørblikket" : "About Sørblikket"}</h1>
-          <p className="ed-page-hero-lead">{lang === "no" ? "Et samarbeidsprosjekt mellom Fædrelandsvennen og Digin om politisk innsyn i Agder." : "A collaboration between Fædrelandsvennen and Digin on political transparency in Agder."}</p>
-        </div>
-        <div className="ed-page-hero-panel" aria-hidden />
-      </section>
+          <p className="ed-page-hero-lead">
+            {lang === "no"
+              ? "Et samarbeidsprosjekt mellom Fædrelandsvennen og Digin om politisk innsyn i Agder."
+              : "A collaboration between Fædrelandsvennen and Digin on political transparency in Agder."}
+          </p>
+          
+          <div className="om-hero-intro">
+            <p>{t.sbP1}</p>
+            <p>{t.sbP2}</p>
+            <p>{t.sbP3}</p>
+          </div>
 
-      {/* ─── HERO BANNER ─── */}
-      <section className="om-hero" style={{ backgroundImage: `url(${heroImage})` }}>
-        <div className="om-hero-overlay" />
-        <div className="om-hero-text">
-          <h1 className="om-hero-h1">{t.heroTitle}</h1>
-          <p>{t.sbP1}</p>
-          <p>{t.sbP2}</p>
-          <p>{t.sbP3}</p>
           <div className="om-facts">
             {([
               [t.f1l, t.f1v],

@@ -24,6 +24,10 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import { categorizeSak } from "../lib/categorizationEngine"
+import { TEMA_KONFIG } from "../config/temaer"
+import type { TemaKey } from "../types/sak"
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
 
 // Stortinget API-endepunkter
 const SAKER_URL = "https://data.stortinget.no/eksport/saker"
@@ -42,6 +46,8 @@ type Sak = {
   type: string
   dato: string
   status: string
+  komite?: string
+  tema?: TemaKey
 }
 
 type Votering = {
@@ -126,16 +132,42 @@ function parseSaker(xmlText: string): Sak[] {
   const nodes = findAll(doc, "sak")
 
   return nodes
-    .map((sak): Sak => ({
-      // Alle felt hentes som direkte barn — unngår å plukke emne-IDs o.l.
-      id: getDirectChild(sak, "id"),
-      tittel: getDirectChild(sak, "tittel") || getDirectChild(sak, "korttittel"),
-      kortTittel: getDirectChild(sak, "korttittel"),
-      sesjonId: getDirectChild(sak, "sesjon_id") || getDirectChild(sak, "behandlet_sesjon_id"),
-      type: getDirectChild(sak, "type"),
-      dato: getDirectChild(sak, "dato") || getDirectChild(sak, "mottatt_dato") || getDirectChild(sak, "sist_oppdatert_dato"),
-      status: getDirectChild(sak, "status"),
-    }))
+    .map((sak): Sak => {
+      const id = getDirectChild(sak, "id")
+      const tittel = getDirectChild(sak, "tittel") || getDirectChild(sak, "korttittel")
+      const kortTittel = getDirectChild(sak, "korttittel")
+      const sesjonId = getDirectChild(sak, "sesjon_id") || getDirectChild(sak, "behandlet_sesjon_id")
+      const type = getDirectChild(sak, "type")
+      const dato = getDirectChild(sak, "dato") || getDirectChild(sak, "mottatt_dato") || getDirectChild(sak, "sist_oppdatert_dato")
+      const status = getDirectChild(sak, "status")
+      
+      const komiteNode = Array.from(sak.children).find((c) => c.localName === "komite")
+      const komite = komiteNode ? (komiteNode.querySelector("navn")?.textContent?.trim() || getTextByLocalName(komiteNode, "navn")) : ""
+
+      // Create a temp CaseItem for categorization
+      const tempCase = {
+        id,
+        title: tittel,
+        shortTitle: kortTittel,
+        type,
+        status,
+        date: dato,
+        committee: komite,
+      }
+      const cat = categorizeSak(tempCase)
+
+      return {
+        id,
+        tittel,
+        kortTittel,
+        sesjonId,
+        type,
+        dato,
+        status,
+        komite,
+        tema: cat.primary,
+      }
+    })
     .filter((s) => s.id && s.tittel)
 }
 
@@ -385,6 +417,15 @@ function VoteIcon({ vote }: { vote: "for" | "mot" | "ikke_tilstede" }) {
 }
 
 export default function Votering({ lang }: VoteringProps) {
+  const no = lang === "no"
+
+  useDocumentSEO(
+    no ? "Stemmegivning og voteringer | Sørblikket" : "Voting and Decisions | Sørblikket",
+    no
+      ? "Se nøyaktig hva Stortinget stemte over og hvordan representantene fra Agder har stemt i enkeltsaker."
+      : "See exactly what Parliament voted on and how Agder's representatives voted on individual bills."
+  )
+
   const t =
     lang === "no"
       ? {
@@ -466,6 +507,7 @@ export default function Votering({ lang }: VoteringProps) {
   const detailRef = useRef<HTMLElement>(null)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<"alle" | "behandlet" | "venter_votering">("alle")
+  const [selectedCategory, setSelectedCategory] = useState<TemaKey | null>(null)
   const [expandedForslag, setExpandedForslag] = useState<Set<string>>(new Set())
 
   const [loadingSaker, setLoadingSaker] = useState(true)
@@ -482,6 +524,7 @@ export default function Votering({ lang }: VoteringProps) {
     setRepVoter([])
     setForslag([])
     setSelectedVoteringId(null)
+    setSelectedCategory(null)
     setLoadingSaker(true)
     setErrorSaker(null)
 
@@ -580,6 +623,10 @@ export default function Votering({ lang }: VoteringProps) {
     if (statusFilter === "behandlet") result = result.filter(s => s.status === "behandlet")
     else if (statusFilter === "venter_votering") result = result.filter(s => s.status === "venter_votering")
     else result = result.filter(s => s.status === "behandlet" || s.status === "venter_votering")
+    // Kategori-filter
+    if (selectedCategory) {
+      result = result.filter(s => s.tema === selectedCategory)
+    }
     // Tekstsøk
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -590,8 +637,18 @@ export default function Votering({ lang }: VoteringProps) {
           s.id.toLowerCase().includes(q)
       )
     }
-    return result
-  }, [saker, search, statusFilter])
+    // Sort: Treated cases (with voting data) first, then by date newest first
+    return [...result].sort((a, b) => {
+      const aHasData = a.status === "behandlet" ? 1 : 0
+      const bHasData = b.status === "behandlet" ? 1 : 0
+      if (aHasData !== bHasData) {
+        return bHasData - aHasData // 1 (has data) comes before 0 (no data)
+      }
+      const aDate = a.dato ? new Date(a.dato).getTime() : 0
+      const bDate = b.dato ? new Date(b.dato).getTime() : 0
+      return bDate - aDate
+    })
+  }, [saker, search, statusFilter, selectedCategory])
 
   const selectedSak = useMemo(
     () => saker.find((s) => s.id === selectedSakId) ?? null,
@@ -610,6 +667,34 @@ export default function Votering({ lang }: VoteringProps) {
     const absentCount = repVoter.filter((v) => v.vote === "ikke_tilstede").length
     return { forCount, motCount, absentCount }
   }, [repVoter])
+
+  const partyBreakdown = useMemo(() => {
+    const breakdown: Record<string, { for: number; mot: number; ikke_tilstede: number; reps: RepVote[] }> = {}
+    repVoter.forEach((rv) => {
+      const p = rv.parti
+      if (!breakdown[p]) {
+        breakdown[p] = { for: 0, mot: 0, ikke_tilstede: 0, reps: [] }
+      }
+      breakdown[p].reps.push(rv)
+      if (rv.vote === "for") breakdown[p].for++
+      else if (rv.vote === "mot") breakdown[p].mot++
+      else breakdown[p].ikke_tilstede++
+    })
+    return breakdown
+  }, [repVoter])
+
+  const agreementStats = useMemo(() => {
+    if (!selectedVotering || repVoter.length === 0) return null
+    const majorityChoice = selectedVotering.vedtatt ? "for" : "mot"
+    const matchingReps = repVoter.filter(rv => rv.vote === majorityChoice)
+    const pct = Math.round((matchingReps.length / repVoter.length) * 100)
+    return {
+      pct,
+      matchingCount: matchingReps.length,
+      totalCount: repVoter.length,
+      majorityChoice,
+    }
+  }, [selectedVotering, repVoter])
 
   // Bruker vedtatt (boolean) + resultatTekst fra det faktiske API-formatet
   const vedtakLabel = (v: Votering) => {
@@ -697,6 +782,33 @@ export default function Votering({ lang }: VoteringProps) {
 
       </div>
 
+      {/* Category filters */}
+      <div className="vsl-category-filters">
+        <button
+          type="button"
+          className={`vsl-category-btn${selectedCategory === null ? " vsl-category-btn--active" : ""}`}
+          onClick={() => setSelectedCategory(null)}
+        >
+          📂 {lang === "no" ? "Alle temaer" : "All themes"}
+        </button>
+        {(Object.keys(TEMA_KONFIG) as TemaKey[]).map((catKey) => {
+          const tema = TEMA_KONFIG[catKey]
+          const label = lang === "no" ? tema.navn : tema.navnEn
+          const isActive = selectedCategory === catKey
+          return (
+            <button
+              key={catKey}
+              type="button"
+              className={`vsl-category-btn${isActive ? " vsl-category-btn--active" : ""}`}
+              onClick={() => setSelectedCategory(catKey)}
+            >
+              <span>{tema.ikon}</span>
+              <span>{label}</span>
+            </button>
+          )
+        })}
+      </div>
+
       {/* Status-filter */}
       <div className="vsl-status-filters">
         {(["alle", "behandlet", "venter_votering"] as const).map((sf) => {
@@ -754,11 +866,21 @@ export default function Votering({ lang }: VoteringProps) {
                   }}
                 >
                   <div className="vsl-item-main">
+                    {sak.tema && (
+                      <span className="vsl-item-theme-icon" title={TEMA_KONFIG[sak.tema]?.navn}>
+                        {TEMA_KONFIG[sak.tema]?.ikon}
+                      </span>
+                    )}
                     <span className="vsl-item-title">{sak.kortTittel || sak.tittel}</span>
                   </div>
                   <span className="vsl-item-meta">
                     <span className="vsl-item-type">{sak.type}</span>
                     <span className="vsl-item-date">{sak.dato ? sak.dato.slice(0, 10) : ""}</span>
+                    <span className={`vsl-item-status-badge vsl-item-status-${sak.status}`}>
+                      {sak.status === "behandlet"
+                        ? (lang === "no" ? "Votert" : "Voted")
+                        : (lang === "no" ? "Venter" : "Pending")}
+                    </span>
                   </span>
                 </button>
               )
@@ -931,6 +1053,68 @@ export default function Votering({ lang }: VoteringProps) {
                             </div>
                           </>
                         )}
+                      </div>
+
+                      {agreementStats && (
+                        <div className="vsl-agreement-card">
+                          <div className="vsl-agreement-pct-circle">
+                            <svg viewBox="0 0 36 36" className="vsl-circular-chart">
+                              <path className="vsl-circle-bg"
+                                d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                              />
+                              <path className="vsl-circle"
+                                strokeDasharray={`${agreementStats.pct}, 100`}
+                                d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                              />
+                              <text x="18" y="20.35" className="vsl-percentage">{agreementStats.pct}%</text>
+                            </svg>
+                          </div>
+                          <div className="vsl-agreement-info">
+                            <h4>{lang === "no" ? "Enighet med Stortingets vedtak" : "Agreement with Parliament"}</h4>
+                            <p>
+                              {lang === "no"
+                                ? `${agreementStats.matchingCount} av ${agreementStats.totalCount} Agder-representanter stemte i tråd med Stortingets flertall (${agreementStats.majorityChoice === "for" ? "ja-siden" : "nei-siden"}).`
+                                : `${agreementStats.matchingCount} out of ${agreementStats.totalCount} Agder representatives voted in line with the parliamentary majority (${agreementStats.majorityChoice === "for" ? "yes side" : "no side"}).`}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="vsl-party-breakdown">
+                        <h4>{lang === "no" ? "Partivis stemmegivning i Agderbenken" : "Party voting breakdown in Agderbenken"}</h4>
+                        <div className="vsl-party-breakdown-grid">
+                          {Object.entries(partyBreakdown).map(([party, stats]) => {
+                            return (
+                              <div key={party} className="vsl-party-breakdown-card">
+                                <div className="vsl-party-breakdown-header">
+                                  <span className="vsl-party-breakdown-dot" style={{ backgroundColor: getPartyColor(party) }} />
+                                  <span className="vsl-party-breakdown-name">{party}</span>
+                                </div>
+                                <div className="vsl-party-breakdown-stats">
+                                  {stats.for > 0 && (
+                                    <span className="vsl-party-badge vsl-party-badge--for">
+                                      {stats.for} {lang === "no" ? "for" : "for"}
+                                    </span>
+                                  )}
+                                  {stats.mot > 0 && (
+                                    <span className="vsl-party-badge vsl-party-badge--mot">
+                                      {stats.mot} {lang === "no" ? "mot" : "against"}
+                                    </span>
+                                  )}
+                                  {stats.ikke_tilstede > 0 && (
+                                    <span className="vsl-party-badge vsl-party-badge--absent">
+                                      {stats.ikke_tilstede} {lang === "no" ? "fraværende" : "absent"}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
 
                       <div className="vsl-rep-grid">

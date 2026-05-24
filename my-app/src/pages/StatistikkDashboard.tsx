@@ -386,7 +386,6 @@ export default function StatistikkDashboard({ lang }: Props) {
     setShowHowTo(false)
     try { localStorage.setItem("sorblikket-howto-seen", "true") } catch {}
   }
-  function openHowTo() { setShowHowTo(true) }
 
   useEffect(() => {
     const handler = () => setShowHowTo(true)

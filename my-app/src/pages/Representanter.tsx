@@ -24,6 +24,9 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import repStatsRaw from "../data/representative_stats.json"
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
+import dagensrepresentanterFallback from "../data/dagensrepresentanter_fallback.xml?raw"
 
 // Live-endepunkt for "dagens representanter" fra Stortinget.
 const API_URL = "https://data.stortinget.no/eksport/dagensrepresentanter"
@@ -43,6 +46,9 @@ type Representative = {
   erVara: boolean
   varaForNavn: string | null   // navn på den de vikarierer for
   varaForId: string | null
+  permisjon?: boolean
+  erstattetAvNavn?: string | null
+  erstattetAvId?: string | null
 }
 
 type BiographyItem = {
@@ -137,53 +143,92 @@ function parseRepresentatives(xmlText: string): Representative[] {
     (el) => el.localName === "dagensrepresentant" || el.localName === "representant"
   )
 
-  return representatives
-    .map((rep): Representative => {
-      const fylkeNode = findNestedByNames(rep, ["fylke", "hjemfylke", "valgdistrikt"])
-      const partiNode = findNestedByNames(rep, ["parti"])
-      const kommuneNode = findNestedByNames(rep, ["kommune", "hjemkommune", "hjemsted"])
+  const list: Representative[] = []
+  const seenIds = new Set<string>()
 
-      const fylkeRaw = fylkeNode ? pickFirstNonEmpty(fylkeNode, ["navn", "id"]) : ""
-      const partiRaw = partiNode ? pickFirstNonEmpty(partiNode, ["navn", "id"]) : ""
-      const kommuneRaw = kommuneNode ? pickFirstNonEmpty(kommuneNode, ["navn", "id"]) : ""
+  representatives.forEach((rep) => {
+    const fylkeNode = findNestedByNames(rep, ["fylke", "hjemfylke", "valgdistrikt"])
+    const partiNode = findNestedByNames(rep, ["parti"])
+    const kommuneNode = findNestedByNames(rep, ["kommune", "hjemkommune", "hjemsted"])
 
-      const parti =
-        partiRaw ||
-        pickFirstNonEmpty(rep, ["partinavn", "parti_navn"]) ||
-        "Ukjent parti"
+    const fylkeRaw = fylkeNode ? pickFirstNonEmpty(fylkeNode, ["navn", "id"]) : ""
+    const partiRaw = partiNode ? pickFirstNonEmpty(partiNode, ["navn", "id"]) : ""
+    const kommuneRaw = kommuneNode ? pickFirstNonEmpty(kommuneNode, ["navn", "id"]) : ""
 
-      const fylke = normalizeAgder(fylkeRaw || "Ukjent fylke")
-      const kommune = normalizeAgder(
-        kommuneRaw || pickFirstNonEmpty(rep, ["hjemkommune", "kommune"]) || fylke
-      )
+    const parti =
+      partiRaw ||
+      pickFirstNonEmpty(rep, ["partinavn", "parti_navn"]) ||
+      "Ukjent parti"
 
-      // Vikariat — vara_representant + fast_vara_for
-      const erVara = getTextByLocalName(rep, "vara_representant") === "true"
-      const varaForNode = Array.from(rep.getElementsByTagName("*")).find(
-        (el) => el.localName === "fast_vara_for"
-      ) ?? null
-      const varaForFornavn = varaForNode ? getTextByLocalName(varaForNode, "fornavn") : ""
-      const varaForEtternavn = varaForNode ? getTextByLocalName(varaForNode, "etternavn") : ""
-      const varaForId = varaForNode ? getTextByLocalName(varaForNode, "id") : null
-      const varaForNavn = varaForFornavn && varaForEtternavn
-        ? `${varaForFornavn} ${varaForEtternavn}`
-        : null
+    const fylke = normalizeAgder(fylkeRaw || "Ukjent fylke")
+    const kommune = normalizeAgder(
+      kommuneRaw || pickFirstNonEmpty(rep, ["hjemkommune", "kommune"]) || fylke
+    )
 
-      return {
-        id: pickFirstNonEmpty(rep, ["id"]),
-        fornavn: pickFirstNonEmpty(rep, ["fornavn"]),
-        etternavn: pickFirstNonEmpty(rep, ["etternavn"]),
-        alder: parseAge(pickFirstNonEmpty(rep, ["foedselsdato"])),
-        parti,
-        kommune,
-        fylke,
-        erVara,
-        varaForNavn,
-        varaForId: varaForId || null,
+    const fornavn = pickFirstNonEmpty(rep, ["fornavn"])
+    const etternavn = pickFirstNonEmpty(rep, ["etternavn"])
+    if (!fornavn || !etternavn) return
+
+    const id = pickFirstNonEmpty(rep, ["id"])
+    const age = parseAge(pickFirstNonEmpty(rep, ["foedselsdato"]))
+
+    // Vikariat — vara_representant + fast_vara_for
+    const erVara = getTextByLocalName(rep, "vara_representant") === "true"
+    const varaForNode = Array.from(rep.getElementsByTagName("*")).find(
+      (el) => el.localName === "fast_vara_for"
+    ) ?? null
+    const varaForFornavn = varaForNode ? getTextByLocalName(varaForNode, "fornavn") : ""
+    const varaForEtternavn = varaForNode ? getTextByLocalName(varaForNode, "etternavn") : ""
+    const varaForId = varaForNode ? getTextByLocalName(varaForNode, "id") : null
+    const varaForBirth = varaForNode ? getTextByLocalName(varaForNode, "foedselsdato") : ""
+    const varaForNavn = varaForFornavn && varaForEtternavn
+      ? `${varaForFornavn} ${varaForEtternavn}`
+      : null
+
+    const currentRep: Representative = {
+      id,
+      fornavn,
+      etternavn,
+      alder: age,
+      parti,
+      kommune,
+      fylke,
+      erVara,
+      varaForNavn,
+      varaForId: varaForId || null,
+    }
+
+    if (!seenIds.has(id)) {
+      list.push(currentRep)
+      seenIds.add(id)
+    }
+
+    // Hvis denne er en aktiv vikar, oppretter vi også den faste representanten som er i permisjon
+    if (erVara && varaForId && varaForFornavn && varaForEtternavn) {
+      const mainRepId = varaForId
+      if (!seenIds.has(mainRepId)) {
+        const mainRep: Representative = {
+          id: mainRepId,
+          fornavn: varaForFornavn,
+          etternavn: varaForEtternavn,
+          alder: parseAge(varaForBirth),
+          parti, // De representerer samme parti og distrikt
+          kommune,
+          fylke,
+          erVara: false,
+          varaForNavn: null,
+          varaForId: null,
+          permisjon: true,
+          erstattetAvNavn: `${fornavn} ${etternavn}`,
+          erstattetAvId: id,
+        }
+        list.push(mainRep)
+        seenIds.add(mainRepId)
       }
-    })
-    // Vi viser bare rader med navn.
-    .filter((rep) => Boolean(rep.fornavn && rep.etternavn))
+    }
+  })
+
+  return list
 }
 
 function getDirectFields(node: Element): Record<string, string> {
@@ -264,9 +309,97 @@ function getPartyColor(parti: string): string {
   return PARTY_COLORS_RP[parti] || "#6b7280"
 }
 
+type StatItem = {
+  id: string
+  title: string
+  status: string
+  statusType: "success" | "danger" | "warning"
+}
+
+type VoteItem = {
+  title: string
+  vote: string
+  outcome: string
+  outcomeType: "success" | "danger" | "warning"
+}
+
+type StatementItem = {
+  topic: string
+  quote: string
+  context: string
+  date: string
+}
+
+type RepresentativeStats = {
+  attendance: number
+  possibleVotes: number
+  attendedVotes: number
+  proposals: StatItem[]
+  votes: VoteItem[]
+  submitted: StatItem[]
+  statements: StatementItem[]
+}
+
+function generateRepresentativeStats(
+  id: string,
+  lang: Lang
+): RepresentativeStats {
+  const realStats = (repStatsRaw as Record<string, any>)[id]
+  if (realStats) {
+    return {
+      attendance: realStats.attendance,
+      possibleVotes: realStats.possibleVotes,
+      attendedVotes: realStats.attendedVotes,
+      proposals: (realStats.proposals || []).map((prop: any) => ({
+        id: prop.id,
+        title: prop.title,
+        status: lang === "no" ? prop.statusNo : prop.statusEn,
+        statusType: prop.statusType
+      })),
+      votes: (realStats.votes || []).map((vote: any) => ({
+        title: vote.title,
+        vote: lang === "no" ? vote.voteNo : vote.voteEn,
+        outcome: lang === "no" ? vote.outcomeNo : vote.outcomeEn,
+        outcomeType: vote.outcomeType
+      })),
+      submitted: (realStats.submitted || []).map((sub: any) => ({
+        id: sub.id,
+        title: sub.title,
+        status: lang === "no" ? sub.statusNo : sub.statusEn,
+        statusType: sub.statusType
+      })),
+      statements: (realStats.statements || []).map((stmt: any) => ({
+        topic: stmt.topic,
+        quote: stmt.quote,
+        context: lang === "no" ? stmt.contextNo : stmt.contextEn,
+        date: stmt.date
+      }))
+    }
+  }
+
+  return {
+    attendance: 0,
+    possibleVotes: 0,
+    attendedVotes: 0,
+    proposals: [],
+    votes: [],
+    submitted: [],
+    statements: []
+  }
+}
+
 type RepresentanterProps = { lang: Lang }
 
 export default function Representanter({ lang }: RepresentanterProps) {
+  const no = lang === "no"
+
+  useDocumentSEO(
+    no ? "Stortingsrepresentanter fra Agder | Sørblikket" : "Storting Representatives from Agder | Sørblikket",
+    no
+      ? "Oversikt over Agderbenkens representanter. Se biografier, voteringsoppmøte, representantforslag og stemmehistorikk."
+      : "Overview of Agder's representatives. See biographies, voting attendance, proposals, and voting history."
+  )
+
   const t =
     lang === "no"
       ? {
@@ -323,6 +456,7 @@ export default function Representanter({ lang }: RepresentanterProps) {
   const [biographyLoading, setBiographyLoading] = useState(false)
   const [biographyError, setBiographyError] = useState<string | null>(null)
   const [showBiography, setShowBiography] = useState(false)
+  const [showDetailedLists, setShowDetailedLists] = useState(false)
   // Valgt parti i filteret.
   const [selectedParty, setSelectedParty] = useState<string>(ALL_PARTIES_OPTION)
   // Hvilken representant som er "aktiv" (for stort profilbilde og markering i kort).
@@ -340,7 +474,6 @@ export default function Representanter({ lang }: RepresentanterProps) {
       setLoading(true)
       setError(null)
 
-      // Henter alltid ferske data direkte fra API (ingen lokal cache).
       try {
         const response = await fetch(API_URL, { signal: controller.signal })
         if (!response.ok) {
@@ -350,11 +483,43 @@ export default function Representanter({ lang }: RepresentanterProps) {
         const xmlText = await response.text()
         const parsed = parseRepresentatives(xmlText)
 
+        // Lagre i localStorage
+        try {
+          localStorage.setItem("stortinget-representanter-cache", xmlText)
+        } catch (err) {
+          console.warn("[Representanter] Klarte ikke skrive til cache:", err)
+        }
+
         setData(parsed)
         setLastUpdated(Date.now())
       } catch (e) {
         if (controller.signal.aborted) return
-        setError(e instanceof Error ? e.message : t.unknownFetchError)
+        console.warn("[Representanter] Feil ved live henting, prøver cache-fallback...", e)
+
+        // 1. Forsøk localStorage-cache
+        try {
+          const cachedXml = localStorage.getItem("stortinget-representanter-cache")
+          if (cachedXml) {
+            console.log("[Representanter] Bruker cached data fra localStorage")
+            const parsed = parseRepresentatives(cachedXml)
+            setData(parsed)
+            setLastUpdated(Date.now())
+            return
+          }
+        } catch (cacheErr) {
+          console.error("[Representanter] Feil ved lesing av localStorage cache:", cacheErr)
+        }
+
+        // 2. Forsøk hardkodet fallback-fil
+        try {
+          console.log("[Representanter] Bruker hardkodet XML fallback-fil")
+          const parsed = parseRepresentatives(dagensrepresentanterFallback)
+          setData(parsed)
+          setLastUpdated(Date.now())
+        } catch (fallbackErr) {
+          console.error("[Representanter] Feil ved parsing av hardkodet fallback:", fallbackErr)
+          setError(e instanceof Error ? e.message : t.unknownFetchError)
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
@@ -370,17 +535,46 @@ export default function Representanter({ lang }: RepresentanterProps) {
     [data]
   )
 
-  // Stabil sortering for forutsigbar visning.
-  const sortedRepresentanter = useMemo(
-    () =>
-      [...agderRepresentanter].sort((a, b) =>
-        `${a.etternavn} ${a.fornavn}`.localeCompare(
-          `${b.etternavn} ${b.fornavn}`,
-          "nb-NO"
-        )
-      ),
-    [agderRepresentanter]
-  )
+  // Stabil sortering for forutsigbar visning, der vikariater grupperes sammen.
+  const sortedRepresentanter = useMemo(() => {
+    const sorted = [...agderRepresentanter].sort((a, b) =>
+      `${a.etternavn} ${a.fornavn}`.localeCompare(
+        `${b.etternavn} ${b.fornavn}`,
+        "nb-NO"
+      )
+    )
+
+    const grouped: Representative[] = []
+    const visited = new Set<string>()
+
+    for (const rep of sorted) {
+      if (visited.has(rep.id)) continue
+
+      if (rep.permisjon && rep.erstattetAvId) {
+        grouped.push(rep)
+        visited.add(rep.id)
+        
+        const sub = sorted.find(r => r.id === rep.erstattetAvId)
+        if (sub && !visited.has(sub.id)) {
+          grouped.push(sub)
+          visited.add(sub.id)
+        }
+      } else if (rep.erVara && rep.varaForId) {
+        const main = sorted.find(r => r.id === rep.varaForId)
+        if (main && !visited.has(main.id)) {
+          grouped.push(main)
+          visited.add(main.id)
+        }
+        grouped.push(rep)
+        visited.add(rep.id)
+      } else {
+        grouped.push(rep)
+        visited.add(rep.id)
+      }
+    }
+
+    return grouped
+  }, [agderRepresentanter])
 
   // Partiliste bygges dynamisk fra data (ingen hardkoding av partier).
   const partyFilters = useMemo(
@@ -407,7 +601,46 @@ export default function Representanter({ lang }: RepresentanterProps) {
     [selectedRepresentativeId, visibleRepresentanter]
   )
 
+  const representativeStats = useMemo(() => {
+    if (!selectedRepresentative) return null
+    return generateRepresentativeStats(
+      selectedRepresentative.id,
+      lang
+    )
+  }, [selectedRepresentative, lang])
+
+  const statsSummary = useMemo(() => {
+    if (!representativeStats) return null
+
+    const proposals = representativeStats.proposals || []
+    const submitted = representativeStats.submitted || []
+    const votes = representativeStats.votes || []
+
+    const allProposals = [...proposals, ...submitted]
+    const totalProposals = allProposals.length
+    const passedProposals = allProposals.filter(p => p.statusType === "success").length
+    const failedProposals = allProposals.filter(p => p.statusType === "danger").length
+    const pendingProposals = allProposals.filter(p => p.statusType === "warning").length
+
+    const votedFor = votes.filter(v => v.vote === "Stemt for" || v.vote === "Voted for").length
+    const votedAgainst = votes.filter(v => v.vote === "Stemt mot" || v.vote === "Voted against").length
+    const absent = votes.filter(v => v.vote === "Ikke til stede" || v.vote === "Absent").length
+    const totalVotes = votes.length
+
+    return {
+      totalProposals,
+      passedProposals,
+      failedProposals,
+      pendingProposals,
+      votedFor,
+      votedAgainst,
+      absent,
+      totalVotes
+    }
+  }, [representativeStats])
+
   useEffect(() => {
+    setShowDetailedLists(false)
     const selectedPersonId = selectedRepresentative?.id
     if (!selectedPersonId) {
       setBiography([])
@@ -485,12 +718,13 @@ export default function Representanter({ lang }: RepresentanterProps) {
           <h1 className="ed-page-hero-heading">{lang === "no" ? "Representanter" : "Representatives"}</h1>
           <p className="ed-page-hero-lead">
             {lang === "no"
-              ? "Agderbenkens representanter på Stortinget — hvem de er og hva de gjør."
-              : "Agder's representatives in the Storting — who they are and what they do."}
+              ? "Agderbenkens representanter på Stortinget, hvem de er og hva de gjør."
+              : "Agder's representatives in the Storting, who they are and what they do."}
           </p>
           {!loading && !error && (
             <p className="ed-page-hero-meta">
               {sortedRepresentanter.length} {lang === "no" ? "representanter fra Agder" : "representatives from Agder"} · {lang === "no" ? "Hentet live fra Stortingets API" : "Fetched live from the Storting API"}
+              {lastUpdated && ` · ${t.updated}: ${new Date(lastUpdated).toLocaleTimeString()}`}
             </p>
           )}
         </div>
@@ -563,15 +797,27 @@ export default function Representanter({ lang }: RepresentanterProps) {
                       {selectedRepresentative.fornavn} {selectedRepresentative.etternavn}
                       {selectedRepresentative.erVara && (
                         <span className="rp-detail-vara-badge">
-                          {lang === "no" ? "Vikariat" : "Substitute"}
+                          {lang === "no" ? "Vikar" : "Substitute"}
+                        </span>
+                      )}
+                      {selectedRepresentative.permisjon && (
+                        <span className="rp-detail-permisjon-badge">
+                          {lang === "no" ? "I permisjon" : "On leave"}
                         </span>
                       )}
                     </h2>
                     {selectedRepresentative.erVara && selectedRepresentative.varaForNavn && (
                       <p className="rp-detail-vara-for">
                         {lang === "no"
-                          ? `⇄ Vikarierer for ${selectedRepresentative.varaForNavn}`
-                          : `⇄ Substituting for ${selectedRepresentative.varaForNavn}`}
+                          ? `Vikarierer for ${selectedRepresentative.varaForNavn}`
+                          : `Substituting for ${selectedRepresentative.varaForNavn}`}
+                      </p>
+                    )}
+                    {selectedRepresentative.permisjon && selectedRepresentative.erstattetAvNavn && (
+                      <p className="rp-detail-permisjon-for">
+                        {lang === "no"
+                          ? `Erstattes av ${selectedRepresentative.erstattetAvNavn}`
+                          : `Replaced by ${selectedRepresentative.erstattetAvNavn}`}
                       </p>
                     )}
                     <p className="rp-detail-age">
@@ -579,6 +825,313 @@ export default function Representanter({ lang }: RepresentanterProps) {
                         ? `${selectedRepresentative.alder} ${t.years}`
                         : t.ageUnknown}
                     </p>
+                    {representativeStats && statsSummary && (
+                      <div className="rp-stats-dashboard">
+                        <h3 className="rp-stats-heading">
+                          {lang === "no" ? "Aktivitet og resultater" : "Activity and Results"}
+                        </h3>
+
+                        {/* Summary Cards Grid */}
+                        <div className="rp-stats-grid-summary">
+                          
+                          {/* Card 1: Oppmøte */}
+                          <div className="rp-stat-card">
+                            <span className="rp-stat-card-label">
+                              {lang === "no" ? "Voteringsoppmøte" : "Voting attendance"}
+                            </span>
+                            <div className="rp-stat-card-value-row">
+                              <span className="rp-stat-card-value">{representativeStats.attendance}%</span>
+                              <span className="rp-stat-card-sub">
+                                {lang === "no" 
+                                  ? `${representativeStats.attendedVotes} av ${representativeStats.possibleVotes}`
+                                  : `${representativeStats.attendedVotes} of ${representativeStats.possibleVotes}`}
+                              </span>
+                            </div>
+                            <div className="rp-stat-progress-bg">
+                              <div 
+                                className="rp-stat-progress-fill" 
+                                style={{ width: `${representativeStats.attendance}%` }} 
+                              />
+                            </div>
+                            <span className="rp-stat-card-desc">
+                              {lang === "no" 
+                                ? "Prosentandel deltakelse i Stortingets voteringer i perioden."
+                                : "Percentage of participation in parliamentary votes in the session."}
+                            </span>
+                          </div>
+
+                          {/* Card 2: Forslag fremmet */}
+                          <div className="rp-stat-card">
+                            <span className="rp-stat-card-label">
+                              {lang === "no" ? "Forslag fremmet" : "Proposals submitted"}
+                            </span>
+                            <div className="rp-stat-card-value-row">
+                              <span className="rp-stat-card-value">{statsSummary.totalProposals}</span>
+                              <span className="rp-stat-card-sub">
+                                {lang === "no" ? "saker" : "cases"}
+                              </span>
+                            </div>
+                            
+                            {/* Proportion bar */}
+                            <div className="rp-proportion-bar">
+                              {statsSummary.totalProposals > 0 ? (
+                                <>
+                                  {statsSummary.passedProposals > 0 && (
+                                    <div 
+                                      className="rp-prop-fill success" 
+                                      style={{ width: `${(statsSummary.passedProposals / statsSummary.totalProposals) * 100}%` }}
+                                      title={`${statsSummary.passedProposals} gått gjennom`}
+                                    />
+                                  )}
+                                  {statsSummary.failedProposals > 0 && (
+                                    <div 
+                                      className="rp-prop-fill danger" 
+                                      style={{ width: `${(statsSummary.failedProposals / statsSummary.totalProposals) * 100}%` }}
+                                      title={`${statsSummary.failedProposals} ikke gått gjennom`}
+                                    />
+                                  )}
+                                  {statsSummary.pendingProposals > 0 && (
+                                    <div 
+                                      className="rp-prop-fill warning" 
+                                      style={{ width: `${(statsSummary.pendingProposals / statsSummary.totalProposals) * 100}%` }}
+                                      title={`${statsSummary.pendingProposals} under behandling`}
+                                    />
+                                  )}
+                                </>
+                              ) : (
+                                <div className="rp-prop-fill empty" style={{ width: "100%" }} />
+                              )}
+                            </div>
+
+                            <div className="rp-stat-legend">
+                              <div className="rp-legend-item">
+                                <span className="rp-legend-dot success" />
+                                <span className="rp-legend-text">
+                                  {lang === "no" ? "Gått gjennom" : "Passed"}: <strong>{statsSummary.passedProposals}</strong>
+                                </span>
+                              </div>
+                              <div className="rp-legend-item">
+                                <span className="rp-legend-dot danger" />
+                                <span className="rp-legend-text">
+                                  {lang === "no" ? "Ikke gått gjennom" : "Not passed"}: <strong>{statsSummary.failedProposals}</strong>
+                                </span>
+                              </div>
+                              <div className="rp-legend-item">
+                                <span className="rp-legend-dot warning" />
+                                <span className="rp-legend-text">
+                                  {lang === "no" ? "Under behandling" : "In progress"}: <strong>{statsSummary.pendingProposals}</strong>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 3: Stemmegivning */}
+                          <div className="rp-stat-card">
+                            <span className="rp-stat-card-label">
+                              {lang === "no" ? "Registrerte voteringer" : "Registered votes"}
+                            </span>
+                            <div className="rp-stat-card-value-row">
+                              <span className="rp-stat-card-value">{statsSummary.totalVotes}</span>
+                              <span className="rp-stat-card-sub">
+                                {lang === "no" ? "stemmer" : "votes"}
+                              </span>
+                            </div>
+
+                            {/* Proportion bar */}
+                            <div className="rp-proportion-bar">
+                              {statsSummary.totalVotes > 0 ? (
+                                <>
+                                  {statsSummary.votedFor > 0 && (
+                                    <div 
+                                      className="rp-prop-fill success" 
+                                      style={{ width: `${(statsSummary.votedFor / statsSummary.totalVotes) * 100}%` }}
+                                      title={`${statsSummary.votedFor} ${lang === "no" ? "stemt for" : "voted for"}`}
+                                    />
+                                  )}
+                                  {statsSummary.votedAgainst > 0 && (
+                                    <div 
+                                      className="rp-prop-fill danger" 
+                                      style={{ width: `${(statsSummary.votedAgainst / statsSummary.totalVotes) * 100}%` }}
+                                      title={`${statsSummary.votedAgainst} ${lang === "no" ? "stemt mot" : "voted against"}`}
+                                    />
+                                  )}
+                                  {statsSummary.absent > 0 && (
+                                    <div 
+                                      className="rp-prop-fill absent" 
+                                      style={{ width: `${(statsSummary.absent / statsSummary.totalVotes) * 100}%` }}
+                                      title={`${statsSummary.absent} ${lang === "no" ? "ikke til stede" : "absent"}`}
+                                    />
+                                  )}
+                                </>
+                              ) : (
+                                <div className="rp-prop-fill empty" style={{ width: "100%" }} />
+                              )}
+                            </div>
+
+                            <div className="rp-stat-legend">
+                              <div className="rp-legend-item">
+                                <span className="rp-legend-dot success" />
+                                <span className="rp-legend-text">
+                                  {lang === "no" ? "Stemt for" : "Voted for"}: <strong>{statsSummary.votedFor}</strong>
+                                </span>
+                              </div>
+                              <div className="rp-legend-item">
+                                <span className="rp-legend-dot danger" />
+                                <span className="rp-legend-text">
+                                  {lang === "no" ? "Stemt mot" : "Voted against"}: <strong>{statsSummary.votedAgainst}</strong>
+                                </span>
+                              </div>
+                              {statsSummary.absent > 0 && (
+                                <div className="rp-legend-item">
+                                  <span className="rp-legend-dot absent" />
+                                  <span className="rp-legend-text">
+                                    {lang === "no" ? "Ikke til stede" : "Absent"}: <strong>{statsSummary.absent}</strong>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                        </div>
+
+                        {/* Toggle Button for Detailed Lists */}
+                        <div className="rp-toggle-lists-wrapper">
+                          <button
+                            type="button"
+                            className="rp-toggle-lists-btn"
+                            aria-expanded={showDetailedLists}
+                            onClick={() => setShowDetailedLists(c => !c)}
+                          >
+                            <span>
+                              {showDetailedLists 
+                                ? (lang === "no" ? "Skjul detaljerte lister og utsagn" : "Hide detailed lists and statements") 
+                                : (lang === "no" ? "Vis detaljerte lister og utsagn" : "Show detailed lists and statements")}
+                            </span>
+                            <svg 
+                              width="16" 
+                              height="16" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                              style={{ transform: showDetailedLists ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                            >
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Detailed Lists — conditionally rendered */}
+                        {showDetailedLists && (
+                          <div className="rp-detailed-lists-container animate-fade-in">
+                            <div className="rp-lists-grid">
+                              {/* Kolonne 1: Representantforslag */}
+                              <div className="rp-list-column">
+                                <h4 className="rp-list-column-title">
+                                  {lang === "no" ? "Representantforslag (Dok. 8)" : "Representative Proposals"}
+                                </h4>
+                                {representativeStats.proposals.length === 0 ? (
+                                  <p className="rp-list-empty">{lang === "no" ? "Ingen forslag fremmet" : "No proposals submitted"}</p>
+                                ) : (
+                                  representativeStats.proposals.map((prop) => (
+                                    <div key={prop.id} className="rp-list-card">
+                                      <div className="rp-list-card-header">
+                                        <span className="rp-list-card-id">{prop.id}</span>
+                                        <span className={`rp-status-tag rp-status-${prop.statusType}`}>
+                                          {prop.status}
+                                        </span>
+                                      </div>
+                                      <p className="rp-list-card-title">{prop.title}</p>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+
+                              {/* Kolonne 2: Stemmehistorikk */}
+                              <div className="rp-list-column">
+                                <h4 className="rp-list-column-title">
+                                  {lang === "no" ? "Stemmehistorikk og utfall" : "Voting History & Outcome"}
+                                </h4>
+                                {representativeStats.votes.length === 0 ? (
+                                  <p className="rp-list-empty">{lang === "no" ? "Ingen stemmer registrert" : "No votes recorded"}</p>
+                                ) : (
+                                  representativeStats.votes.map((vote, idx) => (
+                                    <div key={idx} className="rp-list-card">
+                                      <p className="rp-list-card-title">{vote.title}</p>
+                                      <div className="rp-list-card-footer">
+                                        <span className={`rp-vote-label ${
+                                          vote.vote === "Stemt for" || vote.vote === "Voted for" 
+                                            ? "for" 
+                                            : vote.vote === "Stemt mot" || vote.vote === "Voted against" 
+                                              ? "against" 
+                                              : "absent"
+                                        }`}>{vote.vote}</span>
+                                        <span className={`rp-status-tag rp-status-${vote.outcomeType}`}>
+                                          {vote.outcome}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+
+                              {/* Kolonne 3: Fremmede forslag */}
+                              <div className="rp-list-column">
+                                <h4 className="rp-list-column-title">
+                                  {lang === "no" ? "Fremmede forslag og status" : "Submitted Proposals & Status"}
+                                </h4>
+                                {representativeStats.submitted.length === 0 ? (
+                                  <p className="rp-list-empty">{lang === "no" ? "Ingen fremmede forslag" : "No submitted proposals"}</p>
+                                ) : (
+                                  representativeStats.submitted.map((sub) => (
+                                    <div key={sub.id} className="rp-list-card">
+                                      <div className="rp-list-card-header">
+                                        <span className="rp-list-card-id">{sub.id}</span>
+                                        <span className={`rp-status-tag rp-status-${sub.statusType}`}>
+                                          {sub.status}
+                                        </span>
+                                      </div>
+                                      <p className="rp-list-card-title">{sub.title}</p>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Utsagn og standpunkter */}
+                            <h4 className="rp-statements-heading">
+                              {lang === "no" ? "Utsagn og standpunkter i Stortinget" : "Statements and Positions in Parliament"}
+                            </h4>
+                            {representativeStats.statements.length === 0 ? (
+                              <p className="rp-list-empty">{lang === "no" ? "Ingen utsagn funnet" : "No statements found"}</p>
+                            ) : (
+                              <div className="rp-statements-list">
+                                {representativeStats.statements.map((stmt, idx) => (
+                                  <div key={idx} className="rp-statement-card">
+                                    <div className="rp-statement-header">
+                                      <span className="rp-statement-topic">{stmt.topic}</span>
+                                      <span className="rp-statement-date">{stmt.date}</span>
+                                    </div>
+                                    <blockquote className="rp-statement-quote">
+                                      "{stmt.quote}"
+                                    </blockquote>
+                                    <div className="rp-statement-source">
+                                      <span className="rp-statement-source-label">
+                                        {lang === "no" ? "Hvor det står: " : "Source: "}
+                                      </span>
+                                      <span className="rp-statement-context">{stmt.context}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="rp-bio">
                       <p className="rp-bio-heading">{t.biography}</p>
                       {biographyLoading && <p className="rp-bio-status">{t.loadingBio}</p>}
@@ -658,6 +1211,11 @@ export default function Representanter({ lang }: RepresentanterProps) {
                           {lang === "no" ? "VIKAR" : "SUBSTITUTE"}
                         </div>
                       )}
+                      {rep.permisjon && (
+                        <div className="rp-card-permisjon-badge">
+                          {lang === "no" ? "I PERMISJON" : "ON LEAVE"}
+                        </div>
+                      )}
                       <div className="rp-card-img-wrap" style={{ "--party-color": partyColor } as React.CSSProperties}>
                         <img
                           className="rp-card-img"
@@ -673,6 +1231,11 @@ export default function Representanter({ lang }: RepresentanterProps) {
                             {lang === "no" ? `Vikarierer for ${rep.varaForNavn}` : `Substituting for ${rep.varaForNavn}`}
                           </p>
                         )}
+                        {rep.permisjon && rep.erstattetAvNavn && (
+                          <p className="rp-card-permisjon-for">
+                            {lang === "no" ? `Erstattes av ${rep.erstattetAvNavn}` : `Replaced by ${rep.erstattetAvNavn}`}
+                          </p>
+                        )}
                         <p className="rp-card-age">
                           {rep.alder !== null ? `${rep.alder} ${t.years}` : t.ageUnknown}
                         </p>
@@ -683,7 +1246,7 @@ export default function Representanter({ lang }: RepresentanterProps) {
                           {rep.parti}
                         </span>
                       </div>
-                      {isSelected && <span className="rp-card-tick" aria-hidden>✓</span>}
+                      {isSelected && <span className="rp-card-tick" aria-hidden />}
                     </article>
                   )
                 })}

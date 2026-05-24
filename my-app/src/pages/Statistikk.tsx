@@ -21,6 +21,7 @@
 
 import { useEffect, useState } from "react"
 import StatistikkDashboard from "./StatistikkDashboard"
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
 
 type StatistikkProps = {
   lang: "no" | "en"
@@ -41,6 +42,14 @@ function sesjonIdNå(): string {
 // ── Komponent ─────────────────────────────────────────────────────────────────
 
 export default function Statistikk({ lang }: StatistikkProps) {
+  const no = lang === "no"
+
+  useDocumentSEO(
+    no ? "Saker og statistikk | Sørblikket" : "Cases and Statistics | Sørblikket",
+    no
+      ? "Få oversikt over saker, statistikk, trender og komitéaktivitet for Agder-representantene på Stortinget."
+      : "Get an overview of cases, statistics, trends, and committee activity for Agder's representatives in the Storting."
+  )
 
   // Raske nøkkeltall som vises i hero-banneret
   const [totaltAntall, setTotaltAntall] = useState<number | null>(null)
@@ -90,9 +99,6 @@ export default function Statistikk({ lang }: StatistikkProps) {
     const intervall = setInterval(hentStatistikk, 5 * 60 * 1000)
     return () => clearInterval(intervall)
   }, [])
-
-  const no = lang === "no"
-
   return (
     <>
       {/* ── Hero-banner ──────────────────────────────────────────────────────── */}

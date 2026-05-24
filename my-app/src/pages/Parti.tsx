@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 import { supabase } from "../lib/supabase"
 import { AGDER_PARTIER } from "../config/partier"
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
 
 // Partidata importeres fra src/config/partier.ts — legg til/fjern partier der.
 
@@ -257,6 +258,15 @@ function scoreResult(result: ChatResultLofte, keywords: string[], query: string)
 type PartiProps = { lang: Lang }
 
 export default function Parti({ lang }: PartiProps) {
+  const no = lang === "no"
+
+  useDocumentSEO(
+    no ? "Partiprogrammer og valgløfter | Sørblikket" : "Party Programs and Pledges | Sørblikket",
+    no
+      ? "Søk i 5 500+ valgløfter fra alle partiprogrammer. Spør chatboten om hva partiene lover velgerne."
+      : "Search in 5,500+ party pledges from all programs. Ask the chatbot what the parties promise voters."
+  )
+
   const t =
     lang === "no"
       ? {
@@ -331,7 +341,10 @@ export default function Parti({ lang }: PartiProps) {
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ""}`,
+          },
           body: JSON.stringify({ query, lang }),
         }
       )
@@ -365,15 +378,19 @@ export default function Parti({ lang }: PartiProps) {
 
     let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
     if (parti) q = q.eq("parti", parti)
-    if (keywords.length > 0) {
-      const filter = keywords.map(k => `tekst.ilike.%${k}%`).join(",")
-      q = q.or(filter)
+    if (query) {
+      q = q.textSearch("tekst", query, {
+        type: "websearch",
+        config: "norwegian",
+      })
     }
     const { data, error: err } = await q
 
     const results = err ? [] : (data ?? [])
-      .map(r => ({ r: r as ChatResultLofte, score: scoreResult(r as ChatResultLofte, keywords, query) }))
-      .filter(({ score }) => score > 0)
+      .map(r => {
+        const score = scoreResult(r as ChatResultLofte, keywords, query)
+        return { r: r as ChatResultLofte, score: score > 0 ? score : 1 }
+      })
       .sort((a, b) => b.score - a.score)
       .map(({ r }) => r)
 

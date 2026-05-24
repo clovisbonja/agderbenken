@@ -64,12 +64,7 @@ export function hentElementer(
   forelder: Document | Element,
   tagnavn: string
 ): Element[] {
-  if ("getElementsByTagNameNS" in forelder) {
-    return Array.from(
-      (forelder as Document).getElementsByTagNameNS("*", tagnavn)
-    )
-  }
-  return Array.from(forelder.getElementsByTagName(tagnavn))
+  return Array.from(forelder.getElementsByTagNameNS("*", tagnavn))
 }
 
 /**

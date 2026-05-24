@@ -16,6 +16,7 @@
  */
 
 import { NavLink } from "react-router-dom"
+import { useDocumentSEO } from "../hooks/useDocumentSEO"
 
 type Lang = "no" | "en"
 type HjemProps = { lang: Lang }
@@ -90,6 +91,13 @@ const TEMAER = [
 
 export default function Hjem({ lang }: HjemProps) {
   const no = lang === "no"
+
+  useDocumentSEO(
+    no ? "Sørblikket | Agder-benken på Stortinget" : "Sørblikket | Agder's eye on Parliament",
+    no
+      ? "Sørblikket gir deg politisk innsyn i Agderbenkens representanter på Stortinget. Sjekk saker, stemmegivning, oppmøte og partiprogrammer."
+      : "Sørblikket gives you political insight into Agder's representatives in the Storting. Check cases, voting records, attendance, and party pledges."
+  )
 
   return (
     <main className="fp-page">

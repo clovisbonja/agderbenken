@@ -62,6 +62,7 @@ import { categorizeCases } from "../lib/categorizationEngine"
 import type { CaseItem } from "../types/sak"
 import type { TemaKey } from "../types/sak"
 import type { MånedsTrend } from "../types/sak"
+import sakerFallback from "../data/saker_fallback.xml?raw"
 
 // ── Typer for hook-utdata ─────────────────────────────────────────────────────
 
@@ -108,6 +109,38 @@ export function useStortingetData(): StortingetDataResultat {
 
   // ── Data-henting ────────────────────────────────────────────────────────────
 
+  // Hjelpefunksjon for å parse XML til CaseItem-array med sortering
+  const parseXmlCases = (xmlTekst: string): CaseItem[] => {
+    const doc = parseXml(xmlTekst)
+    const sakElementer = hentElementer(doc, "sak")
+    const unikeSaker = new Map<string, CaseItem>()
+    sakElementer.forEach((element) => {
+      const id = hentTekst(element, "id")
+      const tittel = hentTekst(element, "tittel")
+      if (!id || !tittel) return
+
+      const komiteElement = hentBarn(element, "komite")
+      unikeSaker.set(id, {
+        id,
+        title: tittel,
+        shortTitle: hentTekst(element, "korttittel") || tittel,
+        type: hentTekst(element, "type") || "ukjent",
+        status: hentTekst(element, "status") || "ukjent",
+        date: hentTekst(element, "dato") || hentTekst(element, "sist_oppdatert_dato"),
+        committee: hentTekst(komiteElement, "navn") || "Mangler komiténavn",
+      })
+    })
+
+    const sortert = Array.from(unikeSaker.values()).sort(
+      (a, b) => datoSorteringsverdi(b.date) - datoSorteringsverdi(a.date)
+    )
+
+    const kategorisert = categorizeCases(sortert)
+    return Object.values(kategorisert)
+      .flat()
+      .sort((a, b) => datoSorteringsverdi(b.date) - datoSorteringsverdi(a.date))
+  }
+
   useEffect(() => {
     async function hentSaker() {
       try {
@@ -120,45 +153,45 @@ export function useStortingetData(): StortingetDataResultat {
         }
 
         const xmlTekst = await respons.text()
-        const doc = parseXml(xmlTekst)
-        const sakElementer = hentElementer(doc, "sak")
+        const alleSaker = parseXmlCases(xmlTekst)
 
-        // Konverter XML-elementer til CaseItem-objekter
-        const unikeSaker = new Map<string, CaseItem>()
-        sakElementer.forEach((element) => {
-          const id = hentTekst(element, "id")
-          const tittel = hentTekst(element, "tittel")
-          if (!id || !tittel) return // Hopp over ufullstendige saker
-
-          const komiteElement = hentBarn(element, "komite")
-          unikeSaker.set(id, {
-            id,
-            title: tittel,
-            shortTitle: hentTekst(element, "korttittel") || tittel,
-            type: hentTekst(element, "type") || "ukjent",
-            status: hentTekst(element, "status") || "ukjent",
-            date: hentTekst(element, "dato") || hentTekst(element, "sist_oppdatert_dato"),
-            committee: hentTekst(komiteElement, "navn") || "Mangler komiténavn",
-          })
-        })
-
-        // Sorter nyeste saker først
-        const sortert = Array.from(unikeSaker.values()).sort(
-          (a, b) => datoSorteringsverdi(b.date) - datoSorteringsverdi(a.date)
-        )
-
-        // Kjør AI-kategorisering
-        const kategorisert = categorizeCases(sortert)
-        const alleSaker = Object.values(kategorisert)
-          .flat()
-          .sort((a, b) => datoSorteringsverdi(b.date) - datoSorteringsverdi(a.date))
+        // Lagre i localStorage
+        try {
+          localStorage.setItem(`stortinget-saker-cache-${sesjonId}`, xmlTekst)
+        } catch (e) {
+          console.warn("[useStortingetData] Klarte ikke skrive til cache:", e)
+        }
 
         setSaker(alleSaker)
         setOppdatering(new Date())
       } catch (error) {
         const melding = error instanceof Error ? error.message : "Ukjent feil"
-        console.error("[useStortingetData] Feil ved henting:", melding)
-        setFeil(melding)
+        console.error("[useStortingetData] Feil ved henting, prøver cache-fallback...", melding)
+
+        // 1. Forsøk localStorage-cache
+        try {
+          const cachedXml = localStorage.getItem(`stortinget-saker-cache-${sesjonId}`)
+          if (cachedXml) {
+            console.log("[useStortingetData] Bruker cached data fra localStorage")
+            const alleSaker = parseXmlCases(cachedXml)
+            setSaker(alleSaker)
+            setOppdatering(new Date())
+            return
+          }
+        } catch (cacheErr) {
+          console.error("[useStortingetData] Feil ved lesing av localStorage cache:", cacheErr)
+        }
+
+        // 2. Forsøk hardkodet fallback-fil
+        try {
+          console.log("[useStortingetData] Bruker hardkodet XML fallback-fil")
+          const alleSaker = parseXmlCases(sakerFallback)
+          setSaker(alleSaker)
+          setOppdatering(new Date())
+        } catch (fallbackErr) {
+          console.error("[useStortingetData] Feil ved parsing av hardkodet fallback:", fallbackErr)
+          setFeil(melding)
+        }
       } finally {
         setLaster(false)
       }

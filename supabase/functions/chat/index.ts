@@ -47,13 +47,22 @@ const PARTI_ALIAS: Record<string, string> = {
 
 // ── Stoppord ──────────────────────────────────────────────────────────────────
 const STOPPORD = new Set([
-  "hva", "hvem", "hvilke", "hvilken", "lover", "lovet", "loves",
-  "om", "for", "og", "er", "har", "de", "en", "et", "i", "til",
-  "fra", "med", "på", "av", "som", "ikke", "kan", "vil", "skal",
-  "bør", "må", "meg", "deg", "seg", "sin", "sitt", "sine", "den",
-  "det", "disse", "dem", "denne", "forskjell", "forskjellen",
-  "mellom", "forklare", "forklaring", "definer", "hjelp", "svar",
-  "fortell", "beskriv", "vis", "finn", "søk",
+  "hva", "hvem", "hvilke", "hvilken", "hvilkett", "hvis", "hvor", "hvordan", "hvorfor",
+  "sier", "sagt", "mener", "ment", "synes", "syntes", "tenker", "tenkt", "tror", "trodd",
+  "gjør", "gjøre", "gjort", "får", "få", "fått", "tar", "ta", "tatt", "gir", "gi", "gitt",
+  "lover", "lovet", "loves", "løfte", "løfter", "program", "partiprogram", "valgløfte", "valgløfter",
+  "om", "for", "og", "er", "har", "hadde", "de", "den", "det", "en", "et", "i", "til", "fra", "med",
+  "på", "av", "som", "ikke", "kan", "kunne", "vil", "ville", "skal", "skulle", "bør", "burde", "må", "måtte",
+  "meg", "deg", "seg", "sin", "sitt", "sine", "min", "mitt", "mine", "din", "ditt", "dine",
+  "vår", "vårt", "våre", "deres", "hans", "hennes",
+  "disse", "dem", "denne", "dette", "her", "der",
+  "forskjell", "forskjellen", "mellom", "forklare", "forklaring", "definer", "definerer",
+  "hjelp", "svar", "fortell", "beskriv", "vis", "finn", "søk", "søker", "spør", "spørsmål",
+  "politikk", "parti", "partiene", "partiet", "partier", "angående", "vedrørende", "omkring", "rundt",
+  "mer", "mest", "mindre", "minst", "bedre", "best", "dårligere", "dårligst", "god", "gode", "godt",
+  "større", "størst", "flere", "flest", "mye", "mange", "færre", "færrest",
+  "norge", "norsk", "norske", "land", "landet", "nasjonal", "nasjonalt",
+  "ny", "nye", "nytt", "særlig", "spesielt", "helt", "ganske", "veldig", "ekstra"
 ])
 
 // ── Politiske emneord ─────────────────────────────────────────────────────────
@@ -191,8 +200,9 @@ Deno.serve(async (req: Request) => {
     // 2. Databasesøk med Postgres Full-Text Search (norsk konfigurasjon)
     let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
     if (parti) q = q.eq("parti", parti)
-    if (query) {
-      q = q.textSearch("tekst", query, {
+    const sokeord = keywords.join(" ")
+    if (sokeord) {
+      q = q.textSearch("tekst", sokeord, {
         type: "websearch",
         config: "norwegian",
       })

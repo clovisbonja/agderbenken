@@ -1223,6 +1223,32 @@
 .vsl-detail-error { color: #dc2626; }
 .vsl-no-data { font-size: 14px; color: var(--muted); font-style: italic; }
 
+/* No-data forklaringskort */
+.vsl-no-data-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+}
+.vsl-no-data-card svg { opacity: 0.45; flex-shrink: 0; }
+.vsl-no-data-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+.vsl-no-data-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+
 /* Votering tabs */
 .vsl-vtabs-wrap {
   margin-bottom: 28px;

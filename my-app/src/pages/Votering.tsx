@@ -878,7 +878,7 @@ export default function Votering({ lang }: VoteringProps) {
                     <span className="vsl-item-date">{sak.dato ? sak.dato.slice(0, 10) : ""}</span>
                     <span className={`vsl-item-status-badge vsl-item-status-${sak.status}`}>
                       {sak.status === "behandlet"
-                        ? (lang === "no" ? "Votert" : "Voted")
+                        ? (lang === "no" ? "Behandlet" : "Processed")
                         : (lang === "no" ? "Venter" : "Pending")}
                     </span>
                   </span>
@@ -929,7 +929,20 @@ export default function Votering({ lang }: VoteringProps) {
             <div className="vsl-detail-status vsl-detail-error">{errorVoting}</div>
           )}
           {!loadingVoting && !errorVoting && voteringer.length === 0 && (
-            <p className="vsl-no-data">{t.noVoting}</p>
+            <div className="vsl-no-data-card">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4M12 16h.01"/>
+              </svg>
+              <p className="vsl-no-data-title">
+                {lang === "no" ? "Ingen voteringsdata registrert" : "No voting data recorded"}
+              </p>
+              <p className="vsl-no-data-body">
+                {lang === "no"
+                  ? "Saken ble behandlet av Stortinget, men uten formell votering — trolig vedtatt enstemmig (akklamasjon). Slike saker registreres ikke med individuelle stemmer i Stortingets åpne API."
+                  : "This case was processed by Parliament without a formal vote — likely passed unanimously by acclamation. Such cases are not recorded with individual votes in the Storting's open API."}
+              </p>
+            </div>
           )}
 
           {voteringer.length > 0 && (

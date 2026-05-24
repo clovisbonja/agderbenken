@@ -19,7 +19,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import Anthropic from "https://esm.sh/@anthropic-ai/sdk"
 
 // ── Klienter ──────────────────────────────────────────────────────────────────
-// Supabase injiserer SUPABASE_URL og SUPABASE_SERVICE_ROLE_KEY automatisk
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -62,8 +61,62 @@ const STOPPORD = new Set([
   "mer", "mest", "mindre", "minst", "bedre", "best", "dårligere", "dårligst", "god", "gode", "godt",
   "større", "størst", "flere", "flest", "mye", "mange", "færre", "færrest",
   "norge", "norsk", "norske", "land", "landet", "nasjonal", "nasjonalt",
-  "ny", "nye", "nytt", "særlig", "spesielt", "helt", "ganske", "veldig", "ekstra"
+  "ny", "nye", "nytt", "særlig", "spesielt", "helt", "ganske", "veldig", "ekstra",
 ])
+
+// ── Engelsk → Norsk nøkkelord-mapping ────────────────────────────────────────
+const EN_TO_NO: Record<string, string[]> = {
+  // Generelle politiske ord (filtreres bort)
+  what: [], does: [], do: [], promise: [], promises: [], pledge: [], pledges: [],
+  parties: [], party: [], about: [], say: [], want: [], plan: [], plans: [],
+  // Politiske emner
+  tax: ["skatt", "avgift"], taxes: ["skatt", "avgifter"],
+  health: ["helse", "sykehus"], healthcare: ["helse", "sykehus", "fastlege"],
+  climate: ["klima", "miljø"], environment: ["miljø", "natur", "klima"],
+  school: ["skole", "utdanning"], education: ["utdanning", "skole"],
+  housing: ["bolig", "husleie"], rent: ["husleie", "leie"],
+  welfare: ["velferd", "trygd"], pension: ["pensjon", "alderspensjon"],
+  immigration: ["innvandring", "asyl", "flyktning"],
+  asylum: ["asyl", "flyktning"], refugee: ["flyktning"],
+  defense: ["forsvar", "militær", "nato"], military: ["militær", "forsvar"],
+  nato: ["nato"], security: ["beredskap", "forsvar"],
+  energy: ["energi", "strøm", "fornybar"], electricity: ["strøm", "energi"],
+  renewable: ["fornybar", "energi"],
+  work: ["arbeid", "jobb"], jobs: ["arbeid", "arbeidsplasser"],
+  unemployment: ["nav", "permittering"], economy: ["økonomi", "budsjett"],
+  traffic: ["samferdsel", "vei", "jernbane"], transport: ["samferdsel", "tog", "buss"],
+  train: ["tog", "jernbane"], road: ["vei", "samferdsel"],
+  children: ["barn", "familie"], elderly: ["eldre", "pensjon"],
+  youth: ["ungdom"], family: ["familie", "barn"],
+  digital: ["digitalisering", "teknologi"], technology: ["teknologi", "innovasjon"],
+  police: ["politi", "kriminalitet"], crime: ["kriminalitet", "justis"],
+  agriculture: ["landbruk"], farming: ["landbruk"],
+  fishing: ["fisk"], fish: ["fisk"],
+  oil: ["olje", "gass"], gas: ["gass", "olje"],
+  nature: ["natur", "miljø"], forest: ["natur"],
+  poverty: ["fattigdom", "sosial"],
+  democracy: ["demokrati"],
+  innovation: ["innovasjon", "gründer"],
+  district: ["distrikt", "kommune"],
+  municipality: ["kommune", "distrikt"],
+}
+
+// Oversett engelske nøkkelord til norsk for DB-søk
+function translateKeywords(keywords: string[], lang: string): string[] {
+  if (lang !== "en") return keywords
+  const result = new Set<string>()
+  for (const k of keywords) {
+    const lower = k.toLowerCase()
+    if (Object.prototype.hasOwnProperty.call(EN_TO_NO, lower)) {
+      // Kjent engelsk ord: bruk norske oversettelser (tomt array = filtrer bort)
+      EN_TO_NO[lower].forEach(t => result.add(t))
+    } else {
+      // Ukjent ord: behold (kan være norsk, egennavn, osv.)
+      result.add(k)
+    }
+  }
+  return [...result]
+}
 
 // ── Politiske emneord ─────────────────────────────────────────────────────────
 const POLITISKE_ORD = new Set([
@@ -84,6 +137,13 @@ const POLITISKE_ORD = new Set([
   "distrikt", "sentralisering", "kommune",
   "familie", "barn", "ungdom", "eldre", "sosial", "fattigdom",
   "demokrati", "digitalisering", "teknologi", "innovasjon",
+  // Engelske emneord (for engelske spørsmål)
+  "tax", "taxes", "health", "healthcare", "climate", "environment",
+  "school", "education", "housing", "welfare", "pension", "immigration",
+  "defense", "energy", "economy", "work", "jobs", "police", "crime",
+  "agriculture", "fishing", "oil", "nature", "democracy", "digital",
+  "technology", "transport", "train", "road", "children", "elderly",
+  "family", "youth", "poverty", "security", "military", "nato",
 ])
 
 // ── Query-parsing ─────────────────────────────────────────────────────────────
@@ -197,30 +257,62 @@ Deno.serve(async (req: Request) => {
       return Response.json({ response: svar, results: [] }, { headers: CORS })
     }
 
-    // 2. Databasesøk med Postgres Full-Text Search (norsk konfigurasjon)
-    let q = supabase.from("valgløfte").select("lofte_id, tekst, kategori, parti")
-    if (parti) q = q.eq("parti", parti)
-    const sokeord = keywords.join(" ")
-    if (sokeord) {
-      q = q.textSearch("tekst", sokeord, {
-        type: "websearch",
-        config: "norwegian",
-      })
-    }
-    const { data, error: dbErr } = await q
+    // 2. Databasesøk
+    // Strategi A: Parti oppgitt → hent alle løfter fra dette partiet (la Claude+scoring finne emnet)
+    // Strategi B: Ingen parti → tekstsøk med norske nøkkelord
+    let rawData: { lofte_id: number; tekst: string; kategori: string | null; parti: string }[] = []
 
-    if (dbErr) {
-      console.error("DB:", dbErr.message)
-      const feil = lang === "en" ? "Database error, try again." : "Databasefeil, prøv igjen."
-      return Response.json({ response: feil, results: [] }, { status: 500, headers: CORS })
+    if (parti) {
+      // Hent alle løfter fra partiet – Claude+scoring siler ut det relevante
+      const { data, error: dbErr } = await supabase
+        .from("valgløfte")
+        .select("lofte_id, tekst, kategori, parti")
+        .eq("parti", parti)
+        .limit(300)
+
+      if (dbErr) {
+        console.error("DB (parti):", dbErr.message)
+        const feil = lang === "en" ? "Database error, try again." : "Databasefeil, prøv igjen."
+        return Response.json({ response: feil, results: [] }, { status: 500, headers: CORS })
+      }
+      rawData = data ?? []
+    } else {
+      // Oversett engelske nøkkelord til norsk, fjern ukjente engelske ord
+      const dbKeywords = translateKeywords(keywords, lang)
+
+      if (dbKeywords.length === 0) {
+        // Ingen brukbare søkeord etter oversettelse
+        const svar = lang === "en"
+          ? `Couldn't find relevant pledges for "${query}". Try specifying a party or topic — e.g. "What does H promise on school?"`
+          : `Fant ingen relevante løfter for "${query}". Prøv å spesifisere parti eller tema — f.eks. "Hva lover Høyre om skole?"`
+        return Response.json({ response: svar, results: [] }, { headers: CORS })
+      }
+
+      // Full-tekst-søk med norsk konfigurasjon
+      const sokeord = dbKeywords.join(" | ")
+      const { data, error: dbErr } = await supabase
+        .from("valgløfte")
+        .select("lofte_id, tekst, kategori, parti")
+        .textSearch("tekst", sokeord, { type: "websearch", config: "norwegian" })
+
+      if (dbErr) {
+        console.error("DB (søk):", dbErr.message)
+        const feil = lang === "en" ? "Database error, try again." : "Databasefeil, prøv igjen."
+        return Response.json({ response: feil, results: [] }, { status: 500, headers: CORS })
+      }
+      rawData = data ?? []
     }
 
-    // 3. Ranger og filtrer nulltreff
-    const results = (data ?? [])
+    // 3. Ranger resultater med scoring
+    // Bygg norske søkeord for scoring (oversett om engelske)
+    const scoreKeywords = translateKeywords(keywords, lang)
+
+    const results = rawData
       .map(r => {
-        const score = scoreResult(r.tekst, r.kategori, keywords, query)
-        return { ...r, _s: score > 0 ? score : 1 }
+        const score = scoreResult(r.tekst, r.kategori, scoreKeywords, query)
+        return { ...r, _s: parti ? Math.max(score, 1) : score }
       })
+      .filter(r => r._s > 0)
       .sort((a, b) => b._s - a._s)
       .map(({ _s: _, ...rest }) => rest)
 

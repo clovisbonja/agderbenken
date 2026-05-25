@@ -263,23 +263,25 @@ async function genererSvar(
     .join("\n")
 
   const system = lang === "en"
-    ? `You are a factual assistant for Sørblikket, a political transparency tool about Agder's representatives in the Norwegian Parliament.
+    ? `You are a factual assistant for Sørblikket, a Norwegian political transparency tool.
 Answer questions about Norwegian party programs 2025–2029.
 Rules:
 - Answer ONLY based on the party pledges provided. Never invent information.
-- Be thorough: cover all relevant pledges found, grouped by party when useful.
-- If pledges don't directly answer the question, say so honestly.
-- Do not evaluate which party is best.
-- Name specific parties when relevant.
+- Be VERY concise. Use short bullet points, no long paragraphs.
+- Rank parties by relevance to the question — most relevant first, least relevant last.
+- Max 1–2 bullet points per party. Drop parties with no relevant pledges entirely.
+- No intro sentence, no conclusion. Just ranked bullets.
+- Format: **Party (abbr.):** short pledge — short pledge
 - Answer in English.`
-    : `Du er en faktabasert assistent for Sørblikket, et verktøy for politisk innsyn om Agderbenkens representanter på Stortinget.
+    : `Du er en faktabasert assistent for Sørblikket, et verktøy for politisk innsyn.
 Du svarer på spørsmål om norske partiers valgløfter 2025–2029.
 Regler:
-- Svar KUN basert på løftene som er oppgitt nedenfor. Finn aldri opp informasjon.
-- Vær grundig: ta med alle relevante løfter du finner, gjerne gruppert per parti.
-- Hvis løftene ikke direkte besvarer spørsmålet, si det ærlig.
-- Ikke vurder hvilket parti som er best.
-- Nevn konkrete partier med navn når det er relevant.
+- Svar KUN basert på løftene nedenfor. Finn aldri opp informasjon.
+- Vær VELDIG kortfattet. Bruk korte kulepunkter, ingen lange avsnitt.
+- Ranger partiene etter relevans for spørsmålet — mest relevant øverst, minst relevant nederst.
+- Maks 1–2 kulepunkter per parti. Utelat partier uten relevante løfter helt.
+- Ingen innledning, ingen konklusjon. Bare rangerte kulepunkter.
+- Format: **Parti (fork.):** kort løfte — kort løfte
 - Svar på norsk.`
 
   const user = lang === "en"
@@ -288,7 +290,7 @@ Regler:
 
   const msg = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 1024,
+    max_tokens: 600,
     system,
     messages: [{ role: "user", content: user }],
   })

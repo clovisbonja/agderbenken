@@ -549,7 +549,9 @@ export default function Parti({ lang }: PartiProps) {
                       <span className="chat-typing"><span/><span/><span/></span>
                     ) : (
                       <>
-                        <p className="chat-bubble-text">{msg.text}</p>
+                        {(!msg.results || msg.results.length === 0) && (
+                          <p className="chat-bubble-text">{msg.text}</p>
+                        )}
                         {msg.results && msg.results.length > 0 && (
                           <div className="chat-results">
                             {(() => {

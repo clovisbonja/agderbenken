@@ -295,7 +295,7 @@ Regler:
     : `Brukerens spørsmål: "${query}"\n\nRelevante valgløfter:\n${ctx}`
 
   const msg = await anthropic.messages.create({
-    model: "claude-3-5-haiku-20241022",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 512,
     system,
     messages: [{ role: "user", content: user }],

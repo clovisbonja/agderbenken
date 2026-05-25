@@ -288,19 +288,51 @@ Deno.serve(async (req: Request) => {
         return Response.json({ response: svar, results: [] }, { headers: CORS })
       }
 
-      // Full-tekst-søk med norsk konfigurasjon
+      // Primærstrategi: indeksert full-tekst søk (rask, god for enkeltord)
       const sokeord = dbKeywords.join(" | ")
-      const { data, error: dbErr } = await supabase
+      const { data: tsData, error: tsErr } = await supabase
         .from("valgløfte")
         .select("lofte_id, tekst, kategori, parti")
         .textSearch("tekst", sokeord, { type: "websearch", config: "norwegian" })
 
-      if (dbErr) {
-        console.error("DB (søk):", dbErr.message)
-        const feil = lang === "en" ? "Database error, try again." : "Databasefeil, prøv igjen."
-        return Response.json({ response: feil, results: [] }, { status: 500, headers: CORS })
+      if (tsErr) {
+        console.error("DB (textSearch):", tsErr.message)
       }
-      rawData = data ?? []
+
+      rawData = tsData ?? []
+
+      // Fallback: ilike-søk fanger sammensatte norske ord som "skattelette", "klimamål" o.l.
+      // Kjøres alltid parallelt og slås sammen med textSearch-treffene.
+      const ilikeFilter = dbKeywords
+        .flatMap(kw => [`tekst.ilike.%${kw}%`, `kategori.ilike.%${kw}%`])
+        .join(",")
+
+      const { data: ilikeData } = await supabase
+        .from("valgløfte")
+        .select("lofte_id, tekst, kategori, parti")
+        .or(ilikeFilter)
+        .limit(200)
+
+      // Slå sammen og dedupliser på lofte_id
+      if (ilikeData && ilikeData.length > 0) {
+        const seen = new Set(rawData.map(r => r.lofte_id))
+        for (const r of ilikeData) {
+          if (!seen.has(r.lofte_id)) {
+            rawData.push(r)
+            seen.add(r.lofte_id)
+          }
+        }
+      }
+
+      // Siste utvei: ingen treff verken via textSearch eller ilike
+      if (rawData.length === 0) {
+        // Hent et bredt utvalg og la scoring finne det beste
+        const { data: broadData } = await supabase
+          .from("valgløfte")
+          .select("lofte_id, tekst, kategori, parti")
+          .limit(300)
+        rawData = broadData ?? []
+      }
     }
 
     // 3. Ranger resultater med scoring

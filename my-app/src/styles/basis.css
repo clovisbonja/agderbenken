@@ -3817,10 +3817,15 @@ input[type="text"], input[type="search"] {
   border-radius: 20px;
   overflow: hidden;
   margin-top: 0;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
 }
 .rp-detail-inner {
   display: flex;
   gap: 0;
+  flex: 1;
+  min-height: 0;
 }
 .rp-detail-photo-col {
   width: 200px;
@@ -3830,6 +3835,9 @@ input[type="text"], input[type="search"] {
   justify-content: flex-start;
   background: transparent;
   padding: 24px 0 24px 24px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
 }
 .rp-detail-photo {
   width: 100%;
@@ -3844,6 +3852,10 @@ input[type="text"], input[type="search"] {
   flex: 1;
   padding: 28px 32px;
   min-width: 0;
+  overflow-y: auto;
+  /* Skjuler scrollbar visuelt men lar den fungere */
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 .rp-detail-meta {
   display: flex;
@@ -3942,8 +3954,10 @@ input[type="text"], input[type="search"] {
   .rp-hero-stat { text-align: left; }
   .rp-body { padding: 20px 16px 60px; }
   .rp-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-  .rp-detail-inner { flex-direction: column; }
-  .rp-detail-photo-col { width: 100%; height: auto; padding: 20px 20px 0 20px; }
+  .rp-detail { max-height: 85vh; }
+  .rp-detail-inner { flex-direction: column; overflow-y: auto; }
+  .rp-detail-info-col { overflow-y: visible; }
+  .rp-detail-photo-col { width: 100%; height: auto; padding: 20px 20px 0 20px; position: static; align-self: auto; }
   .rp-detail-photo { width: 100%; height: 220px; }
   .rp-detail-info-col { padding: 20px 20px; }
   .rp-detail-name { font-size: 22px; }

@@ -32,8 +32,10 @@ const CORS = {
 }
 
 // ── Partinavn → databasenøkkel ────────────────────────────────────────────────
+// Nøklene er lowercase (fra query-parsing). Verdiene matcher NØYAKTIG hva
+// extract-promises.mjs lagret i DB-kolonnen parti (forkortelse-feltet).
 const PARTI_ALIAS: Record<string, string> = {
-  ap: "AP", arbeiderpartiet: "AP", arbeider: "AP",
+  ap: "Ap", arbeiderpartiet: "Ap", arbeider: "Ap",
   h: "H", høyre: "H", hoyre: "H",
   frp: "FrP", fremskrittspartiet: "FrP", fremskritt: "FrP",
   sp: "Sp", senterpartiet: "Sp", senter: "Sp",
@@ -267,7 +269,7 @@ Deno.serve(async (req: Request) => {
       const { data, error: dbErr } = await supabase
         .from("valgløfte")
         .select("lofte_id, tekst, kategori, parti")
-        .eq("parti", parti)
+        .ilike("parti", parti)   // case-insensitiv, robust mot ulike store/små bokstaver i DB
         .limit(300)
 
       if (dbErr) {

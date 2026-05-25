@@ -32,18 +32,57 @@ const CORS = {
 }
 
 // ── Partinavn → databasenøkkel ────────────────────────────────────────────────
-// Nøklene er lowercase (fra query-parsing). Verdiene matcher NØYAKTIG hva
-// extract-promises.mjs lagret i DB-kolonnen parti (forkortelse-feltet).
+// ── Partinavn-gjenkjenning ────────────────────────────────────────────────────
+// Alle nøkler er lowercase. Verdiene er forkortelsene lagret i DB.
+// DB-verdier bekreftet fra extract-promises.mjs: Ap, H, FrP, Sp, SV, V, KrF, R, MDG
 const PARTI_ALIAS: Record<string, string> = {
-  ap: "Ap", arbeiderpartiet: "Ap", arbeider: "Ap",
-  h: "H", høyre: "H", hoyre: "H",
-  frp: "FrP", fremskrittspartiet: "FrP", fremskritt: "FrP",
+  // Arbeiderpartiet
+  ap: "Ap", "a-p": "Ap", arbeiderpartiet: "Ap", arbeiderp: "Ap",
+  arbeider: "Ap", arbeiderne: "Ap", arbp: "Ap", apb: "Ap",
+  arbeidspartiet: "Ap",  // vanlig feilstaving
+  sosialdemokratene: "Ap", "den røde tråden": "Ap",
+
+  // Høyre
+  h: "H", høyre: "H", hoyre: "H", høyere: "H",
+  hoyer: "H", hyre: "H", hoyere: "H", høy: "H",
+  konservative: "H",
+
+  // Fremskrittspartiet
+  frp: "FrP", "frp.": "FrP", fremskrittspartiet: "FrP",
+  fremskritt: "FrP", fremskritts: "FrP", fremskrittspart: "FrP",
+  "fr.p": "FrP", frps: "FrP",
+  populistene: "FrP", progress: "FrP",
+
+  // Senterpartiet
   sp: "Sp", senterpartiet: "Sp", senter: "Sp",
-  sv: "SV", sosialistisk: "SV",
-  v: "V", venstre: "V",
-  krf: "KrF", kristelig: "KrF",
-  r: "R", rødt: "R", rodt: "R",
-  mdg: "MDG", grønne: "MDG", grone: "MDG",
+  senterp: "Sp", "s.p": "Sp", sps: "Sp",
+  bondelaget: "Sp", distrikt: "Sp",
+
+  // Sosialistisk Venstreparti
+  sv: "SV", sosialistisk: "SV", sosialistiskvenstreparti: "SV",
+  venstreparti: "SV", venstresiden: "SV", svp: "SV",
+  sosialister: "SV",
+
+  // Venstre
+  v: "V", venstre: "V", venst: "V", venstres: "V",
+  liberale: "V", liberalerne: "V",
+
+  // Kristelig Folkeparti
+  krf: "KrF", "kr.f": "KrF", kristelig: "KrF",
+  kristeligfolkeparti: "KrF", krfs: "KrF",
+  kristendemokratene: "KrF", kd: "KrF",
+  folkeparti: "KrF",
+
+  // Rødt
+  r: "R", rødt: "R", rodt: "R", rød: "R",
+  "rødt!": "R", rødes: "R", radikale: "R",
+  kommunister: "R", revolusjonære: "R",
+
+  // Miljøpartiet De Grønne
+  mdg: "MDG", grønne: "MDG", grone: "MDG", gronn: "MDG",
+  grønn: "MDG", miljøpartiet: "MDG", miljopartiet: "MDG",
+  "de grønne": "MDG", miljø: "MDG", miljo: "MDG",
+  mdgs: "MDG", grønnes: "MDG",
 }
 
 // ── Stoppord ──────────────────────────────────────────────────────────────────
@@ -188,13 +227,45 @@ function scoreResult(tekst: string, kategori: string | null, keywords: string[],
   return s
 }
 
+// ── Fallback-svar uten AI ─────────────────────────────────────────────────────
+// Brukes når Claude-API-kreditter er tomme eller et annet API-problem oppstår.
+function fallbackSvar(
+  query: string,
+  lang: string,
+  løfter: { tekst: string; kategori: string | null; parti: string }[]
+): string {
+  const top = løfter.slice(0, 8)
+  if (top.length === 0) {
+    return lang === "en"
+      ? `No pledges found for "${query}".`
+      : `Ingen løfter funnet for «${query}».`
+  }
+
+  // Grupper etter parti
+  const byParti: Record<string, string[]> = {}
+  for (const l of top) {
+    if (!byParti[l.parti]) byParti[l.parti] = []
+    byParti[l.parti].push(l.tekst.length > 160 ? l.tekst.slice(0, 157) + "…" : l.tekst)
+  }
+
+  const intro = lang === "en"
+    ? `Here are the most relevant party pledges found for your query:`
+    : `Her er de mest relevante valgløftene funnet for spørsmålet ditt:`
+
+  const body = Object.entries(byParti)
+    .map(([parti, tekster]) => `**${parti}:** ${tekster[0]}`)
+    .join("\n\n")
+
+  return `${intro}\n\n${body}`
+}
+
 // ── Claude-svar ───────────────────────────────────────────────────────────────
 async function genererSvar(
   query: string,
   lang: string,
   løfter: { tekst: string; kategori: string | null; parti: string }[]
 ): Promise<string> {
-  const top = løfter.slice(0, 12)
+  const top = løfter.slice(0, 14)
   const ctx = top
     .map(l => `[${l.parti}${l.kategori ? ` – ${l.kategori}` : ""}] "${l.tekst}"`)
     .join("\n")
@@ -204,7 +275,7 @@ async function genererSvar(
 Answer questions about Norwegian party programs 2025–2029.
 Rules:
 - Answer ONLY based on the party pledges provided. Never invent information.
-- Be concise: max 3 sentences.
+- Be concise: max 3–4 sentences.
 - If pledges don't directly answer the question, say so honestly.
 - Do not evaluate which party is best.
 - Name specific parties when relevant.
@@ -213,7 +284,7 @@ Rules:
 Du svarer på spørsmål om norske partiers valgløfter 2025–2029.
 Regler:
 - Svar KUN basert på løftene som er oppgitt nedenfor. Finn aldri opp informasjon.
-- Vær konsis: maks 3 setninger.
+- Vær konsis: maks 3–4 setninger.
 - Hvis løftene ikke direkte besvarer spørsmålet, si det ærlig.
 - Ikke vurder hvilket parti som er best.
 - Nevn konkrete partier med navn når det er relevant.
@@ -304,9 +375,9 @@ Deno.serve(async (req: Request) => {
       rawData = tsData ?? []
 
       // Fallback: ilike-søk fanger sammensatte norske ord som "skattelette", "klimamål" o.l.
-      // Kjøres alltid parallelt og slås sammen med textSearch-treffene.
+      // NB: PostgREST .or()-filterstrenger bruker * som jokertegn, ikke %
       const ilikeFilter = dbKeywords
-        .flatMap(kw => [`tekst.ilike.%${kw}%`, `kategori.ilike.%${kw}%`])
+        .flatMap(kw => [`tekst.ilike.*${kw}*`, `kategori.ilike.*${kw}*`])
         .join(",")
 
       const { data: ilikeData } = await supabase
@@ -358,14 +429,23 @@ Deno.serve(async (req: Request) => {
       return Response.json({ response: svar, results: [] }, { headers: CORS })
     }
 
-    // 5. Claude genererer naturlig svar
-    const claudeSvar = await genererSvar(query, lang, results)
+    // 5. Claude genererer naturlig svar — med fallback hvis API-kreditter er tomme
+    let claudeSvar: string
+    try {
+      claudeSvar = await genererSvar(query, lang, results)
+    } catch (aiErr: any) {
+      console.error("Claude API:", aiErr?.message ?? aiErr)
+      // Fallback: returner strukturert svar uten AI
+      claudeSvar = fallbackSvar(query, lang, results)
+    }
 
     return Response.json({ response: claudeSvar, results }, { headers: CORS })
 
-  } catch (err) {
-    console.error("Edge function:", err)
-    const feil = "Noe gikk galt. Prøv igjen."
+  } catch (err: any) {
+    console.error("Edge function crash:", err?.message ?? err)
+    const feil = lang === "no"
+      ? "Noe gikk galt på serveren. Prøv igjen om litt."
+      : "Server error. Please try again shortly."
     return Response.json({ response: feil, results: [] }, { status: 500, headers: CORS })
   }
 })

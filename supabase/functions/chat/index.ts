@@ -225,7 +225,7 @@ function fallbackSvar(
   lang: string,
   løfter: { tekst: string; kategori: string | null; parti: string }[]
 ): string {
-  const top = løfter.slice(0, 8)
+  const top = løfter.slice(0, 50)
   if (top.length === 0) {
     return lang === "en"
       ? `No pledges found for "${query}".`
@@ -256,7 +256,8 @@ async function genererSvar(
   lang: string,
   løfter: { tekst: string; kategori: string | null; parti: string }[]
 ): Promise<string> {
-  const top = løfter.slice(0, 14)
+  // Send så mange løfter som mulig til Claude (begrenset av kontekstvinduet)
+  const top = løfter.slice(0, 300)
   const ctx = top
     .map(l => `[${l.parti}${l.kategori ? ` – ${l.kategori}` : ""}] "${l.tekst}"`)
     .join("\n")
@@ -266,7 +267,7 @@ async function genererSvar(
 Answer questions about Norwegian party programs 2025–2029.
 Rules:
 - Answer ONLY based on the party pledges provided. Never invent information.
-- Be concise: max 3–4 sentences.
+- Be thorough: cover all relevant pledges found, grouped by party when useful.
 - If pledges don't directly answer the question, say so honestly.
 - Do not evaluate which party is best.
 - Name specific parties when relevant.
@@ -275,7 +276,7 @@ Rules:
 Du svarer på spørsmål om norske partiers valgløfter 2025–2029.
 Regler:
 - Svar KUN basert på løftene som er oppgitt nedenfor. Finn aldri opp informasjon.
-- Vær konsis: maks 3–4 setninger.
+- Vær grundig: ta med alle relevante løfter du finner, gjerne gruppert per parti.
 - Hvis løftene ikke direkte besvarer spørsmålet, si det ærlig.
 - Ikke vurder hvilket parti som er best.
 - Nevn konkrete partier med navn når det er relevant.
@@ -287,7 +288,7 @@ Regler:
 
   const msg = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 512,
+    max_tokens: 1024,
     system,
     messages: [{ role: "user", content: user }],
   })
@@ -327,12 +328,12 @@ Deno.serve(async (req: Request) => {
     let rawData: { lofte_id: number; tekst: string; kategori: string | null; parti: string }[] = []
 
     if (parti) {
-      // Hent alle løfter fra partiet – Claude+scoring siler ut det relevante
+      // Hent ALLE løfter fra partiet — ingen grense (maks ~759 per parti)
       const { data, error: dbErr } = await supabase
         .from("valgløfte")
         .select("lofte_id, tekst, kategori, parti")
-        .ilike("parti", parti)   // case-insensitiv, robust mot ulike store/små bokstaver i DB
-        .limit(300)
+        .ilike("parti", parti)
+        .limit(10000)
 
       if (dbErr) {
         console.error("DB (parti):", dbErr.message)
@@ -341,23 +342,22 @@ Deno.serve(async (req: Request) => {
       }
       rawData = data ?? []
     } else {
-      // Oversett engelske nøkkelord til norsk, fjern ukjente engelske ord
       const dbKeywords = translateKeywords(keywords, lang)
 
       if (dbKeywords.length === 0) {
-        // Ingen brukbare søkeord etter oversettelse
         const svar = lang === "en"
           ? `Couldn't find relevant pledges for "${query}". Try specifying a party or topic — e.g. "What does H promise on school?"`
           : `Fant ingen relevante løfter for "${query}". Prøv å spesifisere parti eller tema — f.eks. "Hva lover Høyre om skole?"`
         return Response.json({ response: svar, results: [] }, { headers: CORS })
       }
 
-      // Primærstrategi: indeksert full-tekst søk (rask, god for enkeltord)
+      // Primærstrategi: full-tekst søk (ingen limit — hent alt som matcher)
       const sokeord = dbKeywords.join(" | ")
       const { data: tsData, error: tsErr } = await supabase
         .from("valgløfte")
         .select("lofte_id, tekst, kategori, parti")
         .textSearch("tekst", sokeord, { type: "websearch", config: "norwegian" })
+        .limit(10000)
 
       if (tsErr) {
         console.error("DB (textSearch):", tsErr.message)
@@ -365,8 +365,7 @@ Deno.serve(async (req: Request) => {
 
       rawData = tsData ?? []
 
-      // Fallback: ilike-søk fanger sammensatte norske ord som "skattelette", "klimamål" o.l.
-      // NB: PostgREST .or()-filterstrenger bruker * som jokertegn, ikke %
+      // Supplerende ilike-søk — fanger sammensatte ord som "skattelette", "klimamål" o.l.
       const ilikeFilter = dbKeywords
         .flatMap(kw => [`tekst.ilike.*${kw}*`, `kategori.ilike.*${kw}*`])
         .join(",")
@@ -375,7 +374,7 @@ Deno.serve(async (req: Request) => {
         .from("valgløfte")
         .select("lofte_id, tekst, kategori, parti")
         .or(ilikeFilter)
-        .limit(200)
+        .limit(10000)
 
       // Slå sammen og dedupliser på lofte_id
       if (ilikeData && ilikeData.length > 0) {
@@ -388,13 +387,12 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      // Siste utvei: ingen treff verken via textSearch eller ilike
+      // Siste utvei: ingenting funnet — søk bredt i hele databasen
       if (rawData.length === 0) {
-        // Hent et bredt utvalg og la scoring finne det beste
         const { data: broadData } = await supabase
           .from("valgløfte")
           .select("lofte_id, tekst, kategori, parti")
-          .limit(300)
+          .limit(10000)
         rawData = broadData ?? []
       }
     }

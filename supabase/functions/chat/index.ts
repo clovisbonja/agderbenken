@@ -159,32 +159,16 @@ function translateKeywords(keywords: string[], lang: string): string[] {
   return [...result]
 }
 
-// ── Politiske emneord ─────────────────────────────────────────────────────────
-const POLITISKE_ORD = new Set([
-  "løfte", "løfter", "politikk", "valg", "program", "partiprogram",
-  "partiene", "partiet", "stortinget", "regjering", "storting",
-  "skatt", "skatter", "avgift", "avgifter", "bompenge", "bompenger", "moms",
-  "økonomi", "budsjett", "bevilge", "subsidie", "støtte",
-  "helse", "sykehus", "lege", "fastlege", "psykisk", "rus", "rusreform",
-  "utdanning", "skole", "barnehage", "universitet", "studiestøtte", "lærling",
-  "bolig", "boliger", "leie", "husleie", "studentbolig",
-  "arbeid", "jobb", "lønn", "arbeidsplasser", "permittering", "nav",
-  "pensjon", "trygd", "uføre", "alderspensjon", "velferd",
-  "innvandring", "asyl", "flyktning", "integrering",
-  "forsvar", "militær", "nato", "beredskap", "politi", "kriminalitet", "justis",
-  "næring", "industri", "gründer", "olje", "gass", "landbruk", "fisk",
-  "klima", "miljø", "natur", "energi", "strøm", "fornybar",
-  "samferdsel", "vei", "jernbane", "tog", "buss",
-  "distrikt", "sentralisering", "kommune",
-  "familie", "barn", "ungdom", "eldre", "sosial", "fattigdom",
-  "demokrati", "digitalisering", "teknologi", "innovasjon",
-  // Engelske emneord (for engelske spørsmål)
-  "tax", "taxes", "health", "healthcare", "climate", "environment",
-  "school", "education", "housing", "welfare", "pension", "immigration",
-  "defense", "energy", "economy", "work", "jobs", "police", "crime",
-  "agriculture", "fishing", "oil", "nature", "democracy", "digital",
-  "technology", "transport", "train", "road", "children", "elderly",
-  "family", "youth", "poverty", "security", "military", "nato",
+// ── Åpenbart ikke-politiske mønstre ──────────────────────────────────────────
+// Kun brukt til å fange spørsmål som åpenbart ikke handler om partiprogrammer.
+// Listen skal være KORT og PRESIS — tvilstilfeller skal slippe gjennom.
+const IKKE_POLITISK = new Set([
+  "vær", "været", "temperatur", "regn", "sol", "vind", "snø",
+  "fotball", "sport", "kamp", "film", "musikk", "sang", "oppskrift",
+  "matoppskrift", "middag", "frokost", "lunsj",
+  "hei", "heisann", "hallo", "god", "morgen", "kveld",
+  "vits", "spøk", "humor", "joke",
+  "hva", "hvem", "hvordan", "hvorfor",  // bare disse alene, filtreres av stoppord anyway
 ])
 
 // ── Query-parsing ─────────────────────────────────────────────────────────────
@@ -201,9 +185,16 @@ function parseQuery(query: string): { parti: string | null; keywords: string[] }
   return { parti, keywords }
 }
 
+// Ny logikk: tillat ALT med minst ett meningsbærende ord.
+// "Friluftsbåter", "elsparkesykkel", "barnetrygd" — alt er lov å søke på.
+// La databasen avgjøre om det finnes treff. Bare avvis helt tomme spørsmål
+// eller de som åpenbart ikke handler om politikk (vær, mat, sport...).
 function erPolitisk(keywords: string[], parti: string | null): boolean {
   if (parti) return true
-  return keywords.some(k => POLITISKE_ORD.has(k))
+  if (keywords.length === 0) return false
+  // Avvis bare hvis ALLE meningsbærende ord er åpenbart upolitiske
+  const alleUpolitisk = keywords.every(k => IKKE_POLITISK.has(k))
+  return !alleUpolitisk
 }
 
 // ── Relevansrangering ─────────────────────────────────────────────────────────
@@ -322,11 +313,11 @@ Deno.serve(async (req: Request) => {
 
     const { parti, keywords } = parseQuery(query)
 
-    // 1. Politisk intentsjekk
+    // 1. Sjekk at spørsmålet har meningsbærende innhold
     if (!erPolitisk(keywords, parti)) {
       const svar = lang === "en"
-        ? `"${query}" doesn't look like a question about party programs.\n\nThe chatbot searches pledges from all nine parties' programs for 2025–2029. Try:\n• "What does FrP promise on taxes?"\n• "Climate pledges from SV"\n• "What do parties promise on health?"`
-        : `"${query}" ser ikke ut som et spørsmål om partiprogrammer.\n\nChatboten søker i valgløfter fra alle ni partienes programmer for 2025–2029. Prøv for eksempel:\n• "Hva lover FrP om skatter?"\n• "Klima-løfter fra SV"\n• "Hva lover partiene om helse?"`
+        ? `Try asking about a specific topic — for example:\n• "What does FrP promise on taxes?"\n• "Climate pledges from SV"\n• "What do parties promise on leisure boats?"\n• "What does Høyre say about schools?"`
+        : `Prøv å spørre om et konkret tema — for eksempel:\n• "Hva lover FrP om skatter?"\n• "Klima-løfter fra SV"\n• "Hva sier partiene om friluftsbåter?"\n• "Hva lover Høyre om skole?"`
       return Response.json({ response: svar, results: [] }, { headers: CORS })
     }
 

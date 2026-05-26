@@ -64,6 +64,32 @@ import type { TemaKey } from "../types/sak"
 import type { MånedsTrend } from "../types/sak"
 import sakerFallback from "../data/saker_fallback.xml?raw"
 
+// ── Cache-konfigurasjon ───────────────────────────────────────────────────────
+/** Maks alder på localStorage-cache før den regnes som utdatert (24 timer) */
+const CACHE_MAKS_ALDER_MS = 24 * 60 * 60 * 1000
+
+/** Henter cache fra localStorage og returnerer xml + alder i ms, eller null */
+function hentCache(nøkkel: string): { xml: string; alderMs: number } | null {
+  try {
+    const xml = localStorage.getItem(nøkkel)
+    const tidsstempel = localStorage.getItem(`${nøkkel}-tidsstempel`)
+    if (!xml || !tidsstempel) return null
+    return { xml, alderMs: Date.now() - parseInt(tidsstempel, 10) }
+  } catch {
+    return null
+  }
+}
+
+/** Lagrer xml og tidsstempel i localStorage */
+function lagreCache(nøkkel: string, xml: string): void {
+  try {
+    localStorage.setItem(nøkkel, xml)
+    localStorage.setItem(`${nøkkel}-tidsstempel`, Date.now().toString())
+  } catch (e) {
+    console.warn("[useStortingetData] Klarte ikke skrive til cache:", e)
+  }
+}
+
 // ── Typer for hook-utdata ─────────────────────────────────────────────────────
 
 export type StortingetDataResultat = {
@@ -85,10 +111,12 @@ export type StortingetDataResultat = {
   månedsTrend: MånedsTrend[]
   /** Tidspunkt for siste vellykket henting */
   sisteOppdatering: Date | null
-  /** True mens data hentes */
+  /** True mens data hentes første gang (ikke ved bakgrunnsoppdatering) */
   laster: boolean
   /** Feilmelding, eller null hvis ingen feil */
   feil: string | null
+  /** Kilde for dataene som vises */
+  dataKilde: "api" | "cache" | "fallback"
 }
 
 // ── Selve hooken ──────────────────────────────────────────────────────────────
@@ -106,6 +134,7 @@ export function useStortingetData(): StortingetDataResultat {
   const [sisteOppdatering, setOppdatering] = useState<Date | null>(null)
   const [laster, setLaster] = useState(true)
   const [feil, setFeil] = useState<string | null>(null)
+  const [dataKilde, setDataKilde] = useState<"api" | "cache" | "fallback">("api")
 
   // ── Data-henting ────────────────────────────────────────────────────────────
 
@@ -143,54 +172,60 @@ export function useStortingetData(): StortingetDataResultat {
 
   useEffect(() => {
     async function hentSaker() {
+      const cacheNøkkel = `stortinget-saker-cache-${sesjonId}`
+      const cache = hentCache(cacheNøkkel)
+
+      // ── Stale-while-revalidate ───────────────────────────────────────────
+      // Vis cache umiddelbart (uansett alder) — brukeren ser data med én gang.
+      // Så henter vi oppdatert data i bakgrunnen hvis cachen er utdatert.
+      if (cache) {
+        const alleSaker = parseXmlCases(cache.xml)
+        setSaker(alleSaker)
+        setDataKilde("cache")
+        setOppdatering(new Date(Date.now() - cache.alderMs))
+        setLaster(false)
+
+        const timerGammel = Math.round(cache.alderMs / 3600000)
+        if (cache.alderMs < CACHE_MAKS_ALDER_MS) {
+          console.log(`[useStortingetData] Cache fersk (${timerGammel}t) — hopper over API-kall`)
+          return  // Cache er fersk nok, ikke hent på nytt
+        }
+        console.log(`[useStortingetData] Cache er ${timerGammel}t gammel — henter oppdatering i bakgrunnen`)
+      }
+
+      // ── Hent fra API ─────────────────────────────────────────────────────
       try {
         setFeil(null)
         const url = sakerApiUrl(sesjonId)
         const respons = await fetch(url)
-
-        if (!respons.ok) {
-          throw new Error(`HTTP ${respons.status}: ${respons.statusText}`)
-        }
+        if (!respons.ok) throw new Error(`HTTP ${respons.status}: ${respons.statusText}`)
 
         const xmlTekst = await respons.text()
         const alleSaker = parseXmlCases(xmlTekst)
 
-        // Lagre i localStorage
-        try {
-          localStorage.setItem(`stortinget-saker-cache-${sesjonId}`, xmlTekst)
-        } catch (e) {
-          console.warn("[useStortingetData] Klarte ikke skrive til cache:", e)
-        }
-
+        lagreCache(cacheNøkkel, xmlTekst)
         setSaker(alleSaker)
+        setDataKilde("api")
         setOppdatering(new Date())
       } catch (error) {
         const melding = error instanceof Error ? error.message : "Ukjent feil"
-        console.error("[useStortingetData] Feil ved henting, prøver cache-fallback...", melding)
+        console.error("[useStortingetData] Feil ved henting:", melding)
 
-        // 1. Forsøk localStorage-cache
-        try {
-          const cachedXml = localStorage.getItem(`stortinget-saker-cache-${sesjonId}`)
-          if (cachedXml) {
-            console.log("[useStortingetData] Bruker cached data fra localStorage")
-            const alleSaker = parseXmlCases(cachedXml)
+        if (cache) {
+          // Viser allerede cache — si ingenting til brukeren, data er der
+          console.warn("[useStortingetData] API-feil, fortsetter med cache-data")
+        } else {
+          // Ingen cache — prøv hardkodet fallback-fil som siste utvei
+          try {
+            console.log("[useStortingetData] Bruker hardkodet XML fallback-fil")
+            const alleSaker = parseXmlCases(sakerFallback)
             setSaker(alleSaker)
+            setDataKilde("fallback")
             setOppdatering(new Date())
-            return
+          } catch (fallbackErr) {
+            console.error("[useStortingetData] Feil ved parsing av hardkodet fallback:", fallbackErr)
+            setFeil(melding)
           }
-        } catch (cacheErr) {
-          console.error("[useStortingetData] Feil ved lesing av localStorage cache:", cacheErr)
-        }
-
-        // 2. Forsøk hardkodet fallback-fil
-        try {
-          console.log("[useStortingetData] Bruker hardkodet XML fallback-fil")
-          const alleSaker = parseXmlCases(sakerFallback)
-          setSaker(alleSaker)
-          setOppdatering(new Date())
-        } catch (fallbackErr) {
-          console.error("[useStortingetData] Feil ved parsing av hardkodet fallback:", fallbackErr)
-          setFeil(melding)
         }
       } finally {
         setLaster(false)
@@ -243,5 +278,6 @@ export function useStortingetData(): StortingetDataResultat {
     sisteOppdatering,
     laster,
     feil,
+    dataKilde,
   }
 }

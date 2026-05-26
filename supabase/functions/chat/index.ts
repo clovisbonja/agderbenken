@@ -403,6 +403,9 @@ Deno.serve(async (req: Request) => {
     // Bygg norske søkeord for scoring (oversett om engelske)
     const scoreKeywords = translateKeywords(keywords, lang)
 
+    // Maks antall resultater returnert til frontend
+    const MAX_RESULTATER = parti ? 30 : 20
+
     const results = rawData
       .map(r => {
         const score = scoreResult(r.tekst, r.kategori, scoreKeywords, query)
@@ -410,6 +413,7 @@ Deno.serve(async (req: Request) => {
       })
       .filter(r => r._s > 0)
       .sort((a, b) => b._s - a._s)
+      .slice(0, MAX_RESULTATER)        // kun de mest relevante
       .map(({ _s: _, ...rest }) => rest)
 
     // 4. Ingen relevante treff
